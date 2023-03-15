@@ -1,0 +1,10 @@
+[workspace]
+
+members = [
+    "axum-proxy",
+    "warp-proxy-v1",
+    "warp-proxy-v2",
+    "too_many_servers/response_ok_to_everything",
+    "too_many_servers/warp_postgres_dummy_server",
+    "common"
+]
