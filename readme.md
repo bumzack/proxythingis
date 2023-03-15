@@ -9,7 +9,15 @@ wrk -t12 -c400 -d30s http://127.0.0.1:3031/hallo
 ```
 
 ```
+curl -H "Authorization: Bearer with some JWT Token" http://localhost:3031/post_json?parameter1=has_aa_value&param2=val2 
+```
+
+```
 curl -d '{"ksdsdsdsdey1":"vsdsdsdadsadaadlue1", "kasdadadey2":"vasdadadasdasdalue2"}' -H "Content-Type: application/json" -X POST http://localhost:3031/post_json?parameter1=has_aa_value&param2=val2 | jq
+```
+
+```
+curl -d '{"ksdsdsdsdey1":"vsdsdsdadsadaadlue1", "kasdadadey2":"vasdadadasdasdalue2"}' -H "Authorization: Bearer with some JWT Token" -H "Content-Type: application/json" -X POST http://localhost:3031/post_json\?parameter1\=has_aa_value\&param2\=val2 | jq
 ```
 
 ```

@@ -1,8 +1,10 @@
 pub mod warp_request_filter {
+    use std::string::FromUtf8Error;
+
     use warp::Filter;
     use warp::http::HeaderMap;
-    use warp::hyper::Method as RequestMethod;
     use warp::hyper::body::Bytes;
+    use warp::hyper::Method as RequestMethod;
     use warp::path::FullPath;
 
     pub type ProxyQueryParameters = Option<String>;
@@ -32,23 +34,22 @@ pub mod warp_request_filter {
             .and(query_params_filter())
             .and(warp::method())
             .and(warp::header::headers_cloned())
-            .and(string_filter(10000))
+            .and(string_filter())
     }
 
     // https://github.com/seanmonstar/warp/issues/248
 
     /// Extracts the body of a request as string
-    pub fn string_filter(
-        limit: u64,
-    ) -> impl Filter<Extract=(String, ), Error=warp::Rejection> + Clone {
-        warp::body::content_length_limit(limit)
-            .and(warp::filters::body::bytes())
+    pub fn string_filter() -> impl Filter<Extract=(String, ), Error=warp::Rejection> + Clone {
+        warp::filters::body::bytes()
             .and_then(convert_to_string)
     }
 
     async fn convert_to_string(bytes: Bytes) -> Result<String, warp::Rejection> {
-        String::from_utf8(bytes.to_vec())
-            .map_err(|_| warp::reject())
+        match String::from_utf8(bytes.to_vec()) {
+            Ok(b) => Ok(b),
+            Err(_) => Ok(String::default()),
+        }
     }
 }
 

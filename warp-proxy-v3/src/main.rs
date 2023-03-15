@@ -1,16 +1,17 @@
-#[macro_use]
 extern crate lazy_static;
 
 use std::convert::Infallible;
 use std::env;
+use std::future::Future;
 
+use tokio::time::Instant;
 use tracing_subscriber::fmt::format::FmtSpan;
-use warp::{Filter, hyper};
+use warp::{Filter, hyper, Rejection, Reply};
 use warp::http::{Request, StatusCode};
 use warp::hyper::{Body, Uri};
 use warp::hyper::body::Bytes;
 
-use common::warp_request_filter::{extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri, string_filter};
+use common::warp_request_filter::{extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
 
 use crate::hyper::Client;
 use crate::hyper::client::HttpConnector;
@@ -41,65 +42,74 @@ async fn main() {
         .with_span_events(FmtSpan::CLOSE)
         .init();
 
-
     let routes = warp::any()
         .and(extract_request_data_filter())
         .map(|uri: ProxyUri, params: ProxyQueryParameters, proxy_method: ProxyMethod, headers: ProxyHeaders, body: Bytes| {
-            println!("uri  {:?}", &uri);
-            match &params {
-                Some(p) => println!("params  {:?}", p),
-                None => println!("no params provided"),
-            }
-            println!("params  {:?}", &params);
-            println!("proxy_method  {:?}", &proxy_method);
-            println!("headers  {:?}", &headers);
-
-            let method = hyper::http::Method::POST;
-            let path = "full_path_ahead";
-
-            let full_path = match &params {
-                Some(p) => format!("/{}?{}", path, p),
-                None => path.to_string(),
-            };
-
-            println!("final path {:?}", &full_path);
-
-            let mut hyper_request = hyper::http::Request::builder()
-                .method(method)
-                .uri(full_path)
-                .body(hyper::body::Body::from(body))
-                .expect("Request::builder() failed");
-            {
-                *hyper_request.headers_mut() = headers;
-            }
-
-            return hyper_request;
+            compose_forward_request(&uri, &params, &proxy_method, &headers, body)
         })
         .and_then(|hyper_request: Request<Body>| {
-            // handler signature: async fn handler(mut request: Request<Body>) -> Result<Response<Body>>
-            let result = handler(hyper_request);
-
-            async move {
-                let res = match result.await {
-                    Ok(response) => Ok(response),
-                    Err(e) => {
-                        println!("error from client {}", e);
-                        Err(warp::reject::not_found())
-                    }
-                };
-                res
-            }
-        })
-        .with(warp::trace(|info| {
-            // Construct our own custom span for this route.
-            tracing::info_span!("goodbye", req.path = ?info.path())
-        }))
-        .with(warp::trace::named("hello"))
-        .with(warp::trace::request());
+            execute_forward_request(hyper_request)
+        });
+    // .with(warp::trace(|info| {
+    //     // Construct our own custom span for this route.
+    //     tracing::info_span!("goodbye", req.path = ?info.path())
+    // }))
+    // .with(warp::trace::named("hello"))
+    // .with(warp::trace::request());
 
     warp::serve(routes)
         .run(([127, 0, 0, 1], 3031))
         .await;
+}
+
+fn execute_forward_request(hyper_request: Request<Body>) -> impl Future<Output=Result<impl Reply + Sized, Rejection>> {
+    let result = handler(hyper_request);
+
+    async move {
+        let res = match result.await {
+            Ok(response) => Ok(response),
+            Err(e) => {
+                println!("error from client {}", e);
+                Err(warp::reject::not_found())
+            }
+        };
+        res
+    }
+}
+
+fn compose_forward_request(uri: &ProxyUri, params: &ProxyQueryParameters, proxy_method: &ProxyMethod, headers: &ProxyHeaders, body: Bytes) -> Request<Body> {
+    println!("uri  {:?}", &uri);
+    match &params {
+        Some(p) => println!("params  {:?}", p),
+        None => println!("no params provided"),
+    }
+    println!("params  {:?}", &params);
+    println!("proxy_method  {:?}", &proxy_method);
+    println!("headers  {:?}", &headers);
+
+    let method = hyper::http::Method::POST;
+    let path = "full_path_ahead";
+
+    let full_path = match &params {
+        Some(p) => format!("/{}?{}", path, p),
+        None => path.to_string(),
+    };
+
+    println!("final path {:?}", &full_path);
+    println!("body empty {:?}", &body.is_empty());
+
+
+    let mut hyper_request = hyper::http::Request::builder()
+        .method(method)
+        .uri(full_path)
+        .body(hyper::body::Body::from(body))
+        // .body(hyper::body::Body::empty())
+        .expect("Request::builder() failed");
+    {
+        *hyper_request.headers_mut() = headers.clone();
+    }
+
+    hyper_request
 }
 
 async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infallible> {
@@ -135,7 +145,10 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     // let http_connector = hyper::client::HttpConnector::new();
     // let client = hyper::Client::builder().build(http_connector);
     println!("redirecting to proxyUrl {}", proxy_url);
-    let response = CLIENT.request(request).await.expect("Request failed");
 
+    let start = Instant::now();
+    let response = CLIENT.request(request).await.expect("Request failed");
+    let duration = start.elapsed();
+    println!("duration {} ms,{} µs  {} ns ", duration.as_millis(), duration.as_micros(), duration.as_nanos());
     return Ok(response);
 }

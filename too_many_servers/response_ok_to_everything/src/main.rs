@@ -1,13 +1,13 @@
 use std::env;
 
+use serde::Deserialize;
+use serde::Serialize;
 use warp::Filter;
 use warp::http::HeaderName;
 use warp::hyper::{Method as RequestMethod, Uri};
 use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{extract_request_data_filter_body_as_string, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
-use serde::Deserialize;
-use serde::Serialize;
 
 #[derive(Serialize, Deserialize)]
 struct ResponseSummary {
