@@ -32,7 +32,6 @@ async fn main() {
             println!("params  {:?}", &params);
             println!("proxy_method  {:?}", &proxy_method);
             println!("headers  {:?}", &headers);
-            // println!("body  {:?}", &body.to_string());
             println!("body as string {:?}", &body_string);
 
             let headers: Vec<String> = headers.into_iter()
