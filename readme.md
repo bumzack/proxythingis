@@ -8,30 +8,36 @@ Reverse Proxy API GateWay Load Balancer - a laymans implementiona attempt using 
 wrk -t12 -c400 -d30s http://127.0.0.1:3031/hallo
 ```
 
+```
+curl -d '{"ksdsdsdsdey1":"vsdsdsdadsadaadlue1", "kasdadadey2":"vasdadadasdasdalue2"}' -H "Content-Type: application/json" -X POST http://localhost:3031/post_json?parameter1=has_aa_value&param2=val2 | jq
+```
 
+```
 CREATE DATABASE dummy;
 
 \l
 
 \c dummy; 
+```
 
-
-
+```
 CREATE TABLE IF NOT EXISTS person (
      id serial PRIMARY KEY,
     firstname VARCHAR ( 50 ) UNIQUE NOT NULL,
     lastname VARCHAR ( 50 ) NOT NULL,
 created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+```
 
-
+```
 \d person;
+```
 
-
+```
 INSERT INTO person (firstname, lastname) VALUES ('max', 'mustermann');
+```
 
-
-
+```
 INSERT INTO person (firstname, lastname) VALUES ('Matilde', 'Bernhard');
 INSERT INTO person (firstname, lastname) VALUES ('Cruz', 'Stiedemann');
 INSERT INTO person (firstname, lastname) VALUES ('Cade', 'Collier');
@@ -132,3 +138,4 @@ INSERT INTO person (firstname, lastname) VALUES ('Flo', 'Wilderman');
 INSERT INTO person (firstname, lastname) VALUES ('Esteban', 'Monahan');
 INSERT INTO person (firstname, lastname) VALUES ('Cleve', 'Hilll');
 INSERT INTO person (firstname, lastname) VALUES ('Celine', 'Beier');
+```

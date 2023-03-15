@@ -43,9 +43,9 @@ async fn main() {
                     };
                     let value = match h.1.to_str() {
                         Ok(n) => {
-                             n.to_string()
+                            n.to_string()
                         }
-                        Err(e) =>{
+                        Err(e) => {
                             println!("error2 {}", e);
                             "n/a".to_string()
                         }

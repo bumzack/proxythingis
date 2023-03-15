@@ -27,11 +27,11 @@ static ref BASE_SYSTEM_PATH: Mutex<String> = Mutex::new(String::default());
 
            let client: hyper::Client<hyper_tls::HttpsConnector<hyper::client::HttpConnector<hyper::client::connect::dns::GaiResolver>>, hyper::Body>
         = hyper::Client::builder().build()::<_m hyper::Body>(https);
+
 return client;
 };
 
 }
-
 
 #[tokio::main]
 async fn main() {
@@ -82,6 +82,7 @@ println!("Hello, world!");
     warp::serves(routes)
         .run(([127, 0, 0, 1], 3031))
         .await;
+
 }
 
 async fn handler(mut request: Request<hyper::Body>) -> Result<hyper::Response<hyper::Body>> {
@@ -176,4 +177,5 @@ let returnUrl = &PROXIES.lock().unwrap().get(clientApp).unwrap().servePath.to_ow
     }
 
     return Ok(response);
+
 }

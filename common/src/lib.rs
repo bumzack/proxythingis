@@ -1,7 +1,7 @@
 pub mod warp_request_filter {
-    use warp::hyper::{Method as RequestMethod};
     use warp::Filter;
     use warp::http::HeaderMap;
+    use warp::hyper::Method as RequestMethod;
     use warp::hyper::body::Bytes;
     use warp::path::FullPath;
 
@@ -40,7 +40,7 @@ pub mod warp_request_filter {
     /// Extracts the body of a request as string
     pub fn string_filter(
         limit: u64,
-    ) -> impl Filter<Extract = (String,), Error = warp::Rejection> + Clone {
+    ) -> impl Filter<Extract=(String, ), Error=warp::Rejection> + Clone {
         warp::body::content_length_limit(limit)
             .and(warp::filters::body::bytes())
             .and_then(convert_to_string)
@@ -50,6 +50,5 @@ pub mod warp_request_filter {
         String::from_utf8(bytes.to_vec())
             .map_err(|_| warp::reject())
     }
-
 }
 

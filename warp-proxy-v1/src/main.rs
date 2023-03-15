@@ -4,7 +4,7 @@ use std::convert::Infallible;
 use std::env;
 
 use warp::{Filter, hyper};
-use warp::http::{Request};
+use warp::http::Request;
 use warp::hyper::{Body, Uri};
 
 use crate::hyper::Client;
@@ -32,7 +32,7 @@ async fn main() {
         .map(|| {
             let method = hyper::http::Method::GET;
             let full_path = "full_path_ahead";
-            let   hyper_request = hyper::http::Request::builder()
+            let hyper_request = hyper::http::Request::builder()
                 .method(method)
                 .uri(full_path)
                 .body(Body::empty())
@@ -67,12 +67,12 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     let host = "localhost";
     let port = "3040";
     let path = "fromloadbalancer";
-    let   proxy_url = format!("{}://{}:{}/{}{}",
-                                schema,
-                                host,
-                                port,
-                                path,
-                                request.uri().to_string()
+    let proxy_url = format!("{}://{}:{}/{}{}",
+                            schema,
+                            host,
+                            port,
+                            path,
+                            request.uri().to_string()
     );
 
     // let proxyUriForLogging = proxyUrl.clone();

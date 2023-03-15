@@ -1,4 +1,3 @@
-
 struct BodyStream {
 body: Body,
 }
@@ -33,6 +32,7 @@ type Item = Result<Bytes, ProxyError>;
             }
         }
     }
+
 }
 
 // https://github.com/seanmonstar/warp/issues/448
@@ -43,23 +43,23 @@ type Item = Result<Bytes, ProxyError>;
 
 // https://github.com/seanmonstar/warp/issues/139
 // fn extract_request() -> impl Filter<Extract=(http::Request<BodyStream>, ), Error=warp::Rejection> + Copy {
-//     warp::method()
-//         .and(warp::path::full())
-//         .and(warp::header::headers_cloned())
-//         .and(warp::body::stream())
-//         .map(|method: http::Method, path: warp::path::FullPath, headers: http::HeaderMap, body: BodyStream| {
-//             let mut req = http::Request::builder()
-//                 .method(method.clone())
-//                 .uri(path.as_str())
-//                 .body(body)
-//                 .expect("request builder");
-//             {
+// warp::method()
+// .and(warp::path::full())
+// .and(warp::header::headers_cloned())
+// .and(warp::body::stream())
+// .map(|method: http::Method, path: warp::path::FullPath, headers: http::HeaderMap, body: BodyStream| {
+// let mut req = http::Request::builder()
+// .method(method.clone())
+// .uri(path.as_str())
+// .body(body)
+// .expect("request builder");
+// {
 //                 *req.headers_mut() = headers;
-//             }
+// }
 //
 //
-//             req
-//         })
+// req
+// })
 // }
 
 

@@ -44,18 +44,33 @@ async fn main() {
 
     let routes = warp::any()
         .and(extract_request_data_filter())
-        .map(|uri: ProxyUri, params: ProxyQueryParameters, proxy_method: ProxyMethod, headers: ProxyHeaders, body: Bytes | {
+        .map(|uri: ProxyUri, params: ProxyQueryParameters, proxy_method: ProxyMethod, headers: ProxyHeaders, body: Bytes| {
             println!("uri  {:?}", &uri);
+            match &params {
+                Some(p) => println!("params  {:?}", p),
+                None => println!("no params provided"),
+            }
             println!("params  {:?}", &params);
             println!("proxy_method  {:?}", &proxy_method);
             println!("headers  {:?}", &headers);
 
             let method = hyper::http::Method::POST;
-            let full_path = "full_path_ahead";
+            let path = "full_path_ahead";
+
+            let full_path = match &params {
+                Some(p) => format!("/{}?{}", path, p),
+                None => path.to_string(),
+            };
+
+            println!("final path {:?}", &full_path);
+
             let mut hyper_request = hyper::http::Request::builder()
                 .method(method)
                 .uri(full_path)
+
+
                 .body(hyper::body::Body::from(body))
+
                 // .body(hyper::body::Body::empty())
                 .expect("Request::builder() failed");
             {
@@ -91,7 +106,7 @@ async fn main() {
         .await;
 }
 
-async fn handler(mut request: Request<hyper::Body>) -> Result<impl warp::Reply, Infallible> {
+async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infallible> {
     let request_uri = request.uri().to_string();
 
     if request_uri == "/" {

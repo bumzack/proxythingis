@@ -4,8 +4,8 @@ use std::{env, fs};
 use std::convert::Infallible;
 use std::str::FromStr;
 use std::time::Duration;
-use chrono::{DateTime, Utc};
 
+use chrono::{DateTime, Utc};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use tokio_postgres::{Config, Connection, NoTls, Row};
@@ -122,7 +122,6 @@ async fn main() -> Result<()> {
             eprintln!("connection error: {}", e);
         }
     });
-
 
 
     persons = vec![];
