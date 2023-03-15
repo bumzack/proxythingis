@@ -1,0 +1,23 @@
+[package]
+name = "response_ok_to_everything"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+warp = "0.3.3"
+tokio = { version = "1.0", features = ["fs", "sync", "time"] }
+tokio-postgres = "0.7.7"
+futures = { version = "0.3.27" }
+futures-util = { version = "0.3.27" }
+common = { path = "../../common" }
+serde = { version = "1.0.156", features = ["derive"] }
+serde_json = "1.0.94"
+serde_urlencoded = "0.7.1"
+serde_derive = "1.0.156"
+
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+futures-util = { version = "0.3.27", default-features = true }
