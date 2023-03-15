@@ -3,11 +3,12 @@ extern crate lazy_static;
 use std::convert::Infallible;
 use std::env;
 use std::future::Future;
+use std::time::Duration;
 
 use tokio::time::Instant;
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{Filter, hyper, Rejection, Reply};
-use warp::http::{Request, StatusCode};
+use warp::http::{HeaderValue, Request, StatusCode};
 use warp::hyper::{Body, Uri};
 use warp::hyper::body::Bytes;
 
@@ -113,14 +114,6 @@ fn compose_forward_request(uri: &ProxyUri, params: &ProxyQueryParameters, proxy_
 }
 
 async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infallible> {
-    let request_uri = request.uri().to_string();
-
-    if request_uri == "/" {
-        return Ok(hyper::Response::builder()
-            .status(StatusCode::PERMANENT_REDIRECT)
-            .header(hyper::header::LOCATION, format!("/am/client/index.html"))
-            .body(hyper::Body::empty()).unwrap());
-    }
     let schema = "http";
     let host = "localhost";
     let port = "3040";
@@ -147,8 +140,10 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     println!("redirecting to proxyUrl {}", proxy_url);
 
     let start = Instant::now();
-    let response = CLIENT.request(request).await.expect("Request failed");
+    let mut response = CLIENT.request(request).await.expect("Request failed");
     let duration = start.elapsed();
-    println!("duration {} ms,{} µs  {} ns ", duration.as_millis(), duration.as_micros(), duration.as_nanos());
-    return Ok(response);
+    let d = format!("duration {} ms,{} µs  {} ns ", duration.as_millis(), duration.as_micros(), duration.as_nanos());
+    println!("{} ", &d);
+    response.headers_mut().insert("x-duration", HeaderValue::from_str(&d).unwrap());
+    Ok(response)
 }
