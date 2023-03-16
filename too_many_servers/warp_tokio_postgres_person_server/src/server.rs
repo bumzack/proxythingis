@@ -1,16 +1,12 @@
 // https://morioh.com/p/47f04c30ffd7
 
-use std::{env, fs};
-use std::convert::Infallible;
+ use std::convert::Infallible;
 
 use deadpool_postgres::Pool;
-use serde::Serialize;
-use tokio_postgres::NoTls;
 use warp::{reject, Rejection, Reply};
 use warp::http::StatusCode;
 use warp::reply::json;
 
-use crate::db;
 use crate::db::{create_person, list_person};
 use crate::models::{DivideByZero, ErrorResponse, MyError, PersonRequest, PersonResponse};
 use crate::models::MyError::DBQueryError;
@@ -45,7 +41,7 @@ pub async fn list_person_handler(pool: Pool, limit: u32) -> Result<impl Reply> {
 
 
 pub async fn health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejection> {
-    let mut client = pool.get().await.unwrap();
+    let   client = pool.get().await.unwrap();
 
     println!("hello from healthhandler");
     client
@@ -74,11 +70,11 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
                 code = StatusCode::BAD_REQUEST;
                 message = "Could not Execute request";
             }
-            _ => {
-                eprintln!("unhandled application error: {:?}", err);
-                code = StatusCode::INTERNAL_SERVER_ERROR;
-                message = "Internal Server Error";
-            }
+            // _ => {
+            //     eprintln!("unhandled application error: {:?}", err);
+            //     code = StatusCode::INTERNAL_SERVER_ERROR;
+            //     message = "Internal Server Error";
+            // }
         }
     } else if let Some(_) = err.find::<warp::reject::MethodNotAllowed>() {
         code = StatusCode::METHOD_NOT_ALLOWED;

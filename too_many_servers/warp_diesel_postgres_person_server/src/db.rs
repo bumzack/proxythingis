@@ -1,99 +1,93 @@
-// // https://morioh.com/p/47f04c30ffd7
-//
-// use std::{env, fs};
-// use std::convert::Infallible;
-// use std::str::FromStr;
-// use std::time::Duration;
-//
-// use chrono::{DateTime, Utc};
-// use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
-// use dotenvy::dotenv;
-// use serde_derive::Deserialize;
-// use serde_derive::Serialize;
-// use thiserror::Error;
-// use tokio_postgres::{Client, Config, Connection, NoTls, Row};
-// use warp::{reject, Rejection, Reply};
-// use warp::Filter;
-// use warp::http::StatusCode;
-// use warp::reply::json;
-//
-// use crate::models::{Person, PersonRequest};
-// use crate::models::MyError::DBQueryError;
-//
-// type Result<T> = std::result::Result<T, Rejection>;
-//
-// pub fn create_pool() -> Pool {
-//     dotenv().ok();
-//     let mut pg_config = tokio_postgres::Config::new();
-//
-//     pg_config.user(env::var("DBUSER").unwrap().as_str());
-//     pg_config.password(env::var("DBPASSWORD").unwrap().as_str());
-//     pg_config.host(env::var("DBHOSTNAME").unwrap().as_str());
-//     pg_config.dbname(env::var("DBNAME").unwrap().as_str());
-//     let mgr_config = ManagerConfig {
-//         recycling_method: RecyclingMethod::Fast
-//     };
-//     let mgr = Manager::from_config(pg_config, NoTls, mgr_config);
-//     let pool = Pool::builder(mgr).max_size(16).build().unwrap();
-//     pool
-// }
-//
-// pub fn with_db(pool: Pool) -> impl Filter<Extract=(Pool, ), Error=Infallible> + Clone {
-//     warp::any().map(move || pool.clone())
-// }
-//
-// const TABLE: &str = "person";
-//
-// pub async fn create_person(pool: Pool, body: PersonRequest) -> Result<Person> {
-//     let mut client = pool.get().await.unwrap();
-//     let query = format!("INSERT INTO {} (firstname, lastname) VALUES ($1, $2) RETURNING *", TABLE);
-//     println!("person {:?}", &body);
-//     println!("query   {}", &query);
-//     let row = client
-//         .query_one(query.as_str(), &[&body.firstname, &body.lastname])
-//         .await
-//         .map_err(DBQueryError)?;
-//     let p = Person::from(row);
-//
-//     Ok(p)
-// }
-//
-//
-// pub async fn list_person(pool: Pool, limit:u32) -> Result<Vec<Person>> {
-//    let mut persons = vec![];
-//     let mut client = pool.get().await.unwrap();
-//     let query = format!("SELECT id, firstname, lastname, created FROM {} ORDER BY lastname DESC LIMIT {}", TABLE, limit);
-//     println!("query   {}", &query);
-//     let data = client.query(&query, &[]).await.unwrap();
-//     for row in data {
-//         let id: i32 = row.get(0);
-//         let firstname: &str = row.get(1);
-//         let lastname: &str = row.get(2);
-//         let created: DateTime<Utc> = row.get(3);
-//
-//         println!("found person: {} {} {} {:?}", id, firstname, lastname, created);
-//         let p = Person {
-//             id,
-//             firstname: firstname.to_string(),
-//             lastname: lastname.to_string(),
-//             created,
-//         };
-//         persons.push(p);
-//     }
-//     Ok(persons)
-// }
-//
-// impl From<Row> for Person {
-//     fn from(row: Row) -> Self {
-//         let id: i32 = row.get(0);
-//         let firstname: String = row.get(1);
-//         let lastname: String = row.get(2);
-//         let created: chrono::DateTime<chrono::offset::Utc> = row.get(3);
-//         Self {
-//             id,
-//             firstname,
-//             lastname,
-//             created,
-//         }
-//     }
-// }
+use std::convert::Infallible;
+use std::env;
+
+use diesel::{PgConnection, RunQueryDsl};
+use diesel::r2d2::ConnectionManager;
+use r2d2::Pool;
+use warp::Filter;
+use warp::http::StatusCode;
+
+use crate::models::{ErrorMessage, NewPerson, Person};
+
+pub fn read_persons(pool: Pool<ConnectionManager<PgConnection>>) -> Vec<Person> {
+    use crate::schema::person::dsl::*;
+
+    let connection = &mut pool.get().unwrap();
+
+    let results = person
+        .load::<Person>(connection)
+        .expect("Error loading persons");
+
+    println!("Displaying {} persons", results.len());
+    for p in &results {
+        println!("id {}:  {} {}, created at {}", p.id, p.firstname, p.lastname, p.created);
+    }
+    results
+}
+
+pub fn create_person(pool: Pool<ConnectionManager<PgConnection>>, firstname: &str, lastname: &str) -> Result<impl warp::Reply, Infallible> {
+    use crate::schema::person;
+    let connection = &mut pool.get().unwrap();
+
+    let new_person = NewPerson {
+        firstname,
+        lastname,
+    };
+
+    let res = diesel::insert_into(person::table)
+        .values(&new_person)
+        .execute(connection);
+
+    match res {
+        Ok(new_id) => {
+            let message = format!("created with id {}", new_id);
+            let code = StatusCode::CREATED;
+            let json = warp::reply::json(&ErrorMessage {
+                code: code.as_u16(),
+                message: message.into(),
+            });
+            Ok(warp::reply::with_status(json, code))
+        }
+        Err(e) => {
+            let message = format!("an error occurred inserting a new person which we are ignoring '{}'", e);
+            let code = StatusCode::INTERNAL_SERVER_ERROR;
+
+            let json = warp::reply::json(&ErrorMessage {
+                code: code.as_u16(),
+                message: message.into(),
+            });
+
+            Ok(warp::reply::with_status(json, code))
+        }
+    }
+}
+
+
+fn database_url_for_env() -> String {
+    // TODO
+    // WTF why why ...
+    let result = dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/too_many_servers/warp_diesel_postgres_person_server/.env");
+    match &result {
+        Ok(p) => println!("path to .env {:?}", &p),
+        Err(e) => println!("error {:?}", e),
+    }
+
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    println!("DATABASE URL {}", database_url);
+    database_url
+}
+
+pub fn get_connection_pool() -> Pool<ConnectionManager<PgConnection>> {
+    let url = database_url_for_env();
+    let manager = ConnectionManager::<PgConnection>::new(url);
+    // Refer to the `r2d2` documentation for more methods to use
+    // when building a connection pool
+    Pool::builder()
+        .test_on_check_out(true)
+        .build(manager)
+        .expect("Could not build connection pool")
+}
+
+pub fn with_db(db: Pool<ConnectionManager<PgConnection>>) -> impl Filter<Extract=(Pool<ConnectionManager<PgConnection>>, ), Error=std::convert::Infallible> + Clone {
+    warp::any().map(move || db.clone())
+}

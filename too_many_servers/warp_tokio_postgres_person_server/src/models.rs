@@ -1,14 +1,12 @@
 // https://morioh.com/p/47f04c30ffd7
 
-use std::str::FromStr;
-
 use chrono::{DateTime, Utc};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
-use warp::reject;
 use thiserror::Error;
+use warp::reject;
 
-#[derive(Deserialize,Clone)]
+#[derive(Deserialize, Clone)]
 pub struct Person {
     pub id: i32,
     pub firstname: String,
@@ -50,10 +48,10 @@ pub struct ErrorResponse {
 pub enum MyError {
     #[error("error executing DB query: {0}")]
     DBQueryError(#[from] tokio_postgres::Error),
-    #[error("error creating table: {0}")]
-    DBInitError(tokio_postgres::Error),
-    #[error("error reading file: {0}")]
-    ReadFileError(#[from] std::io::Error),
+    // #[error("error creating table: {0}")]
+    // DBInitError(tokio_postgres::Error),
+    // #[error("error reading file: {0}")]
+    // ReadFileError(#[from] std::io::Error),
 }
 
 impl warp::reject::Reject for MyError {}
@@ -63,3 +61,6 @@ impl warp::reject::Reject for MyError {}
 pub struct DivideByZero;
 
 impl reject::Reject for DivideByZero {}
+
+
+
