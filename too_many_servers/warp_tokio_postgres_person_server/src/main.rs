@@ -2,7 +2,7 @@
 
 use std::env;
 
-use deadpool_postgres::{ Pool};
+use deadpool_postgres::Pool;
 use warp::Filter;
 
 use crate::db::{create_pool, with_db};

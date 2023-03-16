@@ -1,6 +1,6 @@
 // https://morioh.com/p/47f04c30ffd7
 
- use std::convert::Infallible;
+use std::convert::Infallible;
 
 use deadpool_postgres::Pool;
 use warp::{reject, Rejection, Reply};
@@ -41,7 +41,7 @@ pub async fn list_person_handler(pool: Pool, limit: u32) -> Result<impl Reply> {
 
 
 pub async fn health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejection> {
-    let   client = pool.get().await.unwrap();
+    let client = pool.get().await.unwrap();
 
     println!("hello from healthhandler");
     client
