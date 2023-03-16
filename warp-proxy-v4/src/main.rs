@@ -177,7 +177,7 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     let start = Instant::now();
     let mut response = CLIENT.request(request).await.expect("Request failed");
     let duration = start.elapsed();
-    let d = format!("duration {} ms,{} µs  {} ns ", duration.as_millis(), duration.as_micros(), duration.as_nanos());
+    let d = format!("duration {} ms, {} µs, {} ns ", duration.as_millis(), duration.as_micros(), duration.as_nanos());
     println!("{} ", &d);
     response.headers_mut().insert("x-duration", HeaderValue::from_str(&d).unwrap());
     Ok(response)

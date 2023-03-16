@@ -1,4 +1,4 @@
-# rpagwlb
+# ProxyThingis
 
 Reverse Proxy API GateWay Load Balancer - a laymans implemention attempt using rust
 
