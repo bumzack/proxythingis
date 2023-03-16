@@ -9,3 +9,5 @@
 curl -vvv  http://localhost:3050/person
 ```
 
+
+brew install postgresql@15 libpq

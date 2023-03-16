@@ -27,7 +27,7 @@ mod models;
 async fn main() {
 
     // WTF why why ...
-    let result = dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/too_many_servers/warp_postgres_dummy_server/.env");
+    let result = dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/too_many_servers/warp_tokio_postgres_person_server/.env");
     match &result {
         Ok(p) => println!("path to .env {:?}", &p),
         Err(e) => println!("error {:?}", e),

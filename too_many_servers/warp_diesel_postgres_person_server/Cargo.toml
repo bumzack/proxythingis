@@ -1,5 +1,5 @@
 [package]
-name = "warp_postgres_dummy_server"
+name = "warp_diesel_postgres_person_server"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,15 +8,15 @@ edition = "2021"
 [dependencies]
 warp = "0.3.3"
 tokio = { version = "1.0", features = ["fs", "sync", "time"] }
-tokio-postgres = { version = "0.7.7", features = ["with-serde_json-1", "with-chrono-0_4"] }
+diesel = { version = "2.0.3", features = ["`postgres`", "r2d2"] }
+dotenvy = "0.15"
+diesel_migrations = "2.0.0"
+r2d2 = "0.8.2"
 serde = { version = "1.0.156", features = ["derive"] }
 serde_json = "1.0.94"
 serde_urlencoded = "0.7.1"
 serde_derive = "1.0.156"
 chrono = { version = "0.4.24", features = ["serde"] }
-deadpool-postgres = "0.10.5"
-thiserror = "1.0.39"
-dotenvy = "0.15.6"
 
 
 [dev-dependencies]
