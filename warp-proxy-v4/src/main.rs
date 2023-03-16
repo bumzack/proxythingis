@@ -3,19 +3,25 @@ extern crate lazy_static;
 use std::convert::Infallible;
 use std::env;
 use std::future::Future;
-use std::time::Duration;
 
 use tokio::time::Instant;
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{Filter, hyper, Rejection, Reply};
-use warp::http::{HeaderValue, Request, StatusCode};
+use warp::http::{HeaderValue, Request};
 use warp::hyper::{Body, Uri};
 use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
 
+use crate::db::{create_pool, with_db};
 use crate::hyper::Client;
 use crate::hyper::client::HttpConnector;
+use crate::server::{create_source_handler, create_target_handler, list_servers_handler};
+
+mod db;
+mod models;
+mod server;
+
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
@@ -28,11 +34,15 @@ lazy_static::lazy_static! {
 
 #[tokio::main]
 async fn main() {
+    let result = dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/warp-proxy-v4/.env");
+
     if env::var_os("RUST_LOG").is_none() {
         // Set `RUST_LOG=todos=debug` to see debug logs,
         // this only shows access logs.
         env::set_var("RUST_LOG", "todos=info");
     }
+    let pool = create_pool();
+
     //pretty_env_logger::init();
     let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "tracing=info,warp=debug".to_owned());
     tracing_subscriber::fmt()
@@ -43,7 +53,31 @@ async fn main() {
         .with_span_events(FmtSpan::CLOSE)
         .init();
 
-    let routes = warp::any()
+    let server_source = warp::path!("server" / "source");
+    let server_source_create = server_source
+        .and(warp::post())
+        .and(warp::body::json())
+        .and(with_db(pool.clone()))
+        .and_then(create_source_handler);
+
+    let server_target = warp::path!("server" / "target");
+    let server_target_create = server_target
+        .and(warp::post())
+        .and(warp::body::json())
+        .and(with_db(pool.clone()))
+        .and_then(create_target_handler);
+
+    let server = warp::path("server");
+    let server_list = server
+        .and(warp::get())
+        .and(with_db(pool.clone()))
+        .and_then(list_servers_handler);
+
+    let server_routes = server_source_create
+        .or(server_target_create)
+        .or(server_list);
+
+    let routes_proxy = warp::any()
         .and(extract_request_data_filter())
         .map(|uri: ProxyUri, params: ProxyQueryParameters, proxy_method: ProxyMethod, headers: ProxyHeaders, body: Bytes| {
             compose_forward_request(&uri, &params, &proxy_method, &headers, body)
@@ -58,8 +92,9 @@ async fn main() {
     // .with(warp::trace::named("hello"))
     // .with(warp::trace::request());
 
+    let routes = server_routes.or(routes_proxy);
     warp::serve(routes)
-        .run(([127, 0, 0, 1], 3033))
+        .run(([127, 0, 0, 1], 3034))
         .await;
 }
 

@@ -1,6 +1,4 @@
 pub mod warp_request_filter {
-    use std::string::FromUtf8Error;
-
     use warp::Filter;
     use warp::http::HeaderMap;
     use warp::hyper::body::Bytes;

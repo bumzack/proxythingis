@@ -1,8 +1,8 @@
 # rpagwlb
 
-Reverse Proxy API GateWay Load Balancer - a laymans implementiona attempt using rust
+Reverse Proxy API GateWay Load Balancer - a laymans implemention attempt using rust
 
-## postgre
+## postgresql
 
 add path to .zshrc
 
@@ -23,6 +23,28 @@ curl -d '{"ksdsdsdsdey1":"vsdsdsdadsadaadlue1", "kasdadadey2":"vasdadadasdasdalu
 ```
 curl -d '{"ksdsdsdsdey1":"vsdsdsdadsadaadlue1", "kasdadadey2":"vasdadadasdasdalue2"}' -H "Authorization: Bearer with some JWT Token" -H "Content-Type: application/json" -X POST http://localhost:3031/post_json\?parameter1\=has_aa_value\&param2\=val2 | jq
 ```
+
+## warp-proxy-v4
+
+### add new source server
+
+```
+curl -d '{"description":"new server", "path_starts_with":"/api/person", "method": "GET"}'   -H "Content-Type: application/json" -X POST http://localhost:3034/server/source | jq
+```
+
+### add new target server
+
+```
+curl -d '{"description":"new target for new server", "schema":"http", "host": "localhost", "port": 1234, "path": "/api/person", "method": "GET", "active": true, "source": 4}'   -H "Content-Type: application/json" -X POST http://localhost:3034/server/target | jq
+```
+
+### list servers
+
+```
+curl http://localhost:3034/server | jq
+```
+
+## Database stuff
 
 ```
 CREATE DATABASE bumzack;
