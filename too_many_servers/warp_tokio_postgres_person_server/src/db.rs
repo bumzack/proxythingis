@@ -6,9 +6,9 @@ use std::env;
 use chrono::{DateTime, Utc};
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use dotenvy::dotenv;
-use tokio_postgres::{  NoTls, Row};
-use warp::{  Rejection};
+use tokio_postgres::{NoTls, Row};
 use warp::Filter;
+use warp::Rejection;
 
 use crate::models::{Person, PersonRequest};
 use crate::models::MyError::DBQueryError;
@@ -38,7 +38,7 @@ pub fn with_db(pool: Pool) -> impl Filter<Extract=(Pool, ), Error=Infallible> + 
 const TABLE: &str = "person";
 
 pub async fn create_person(pool: Pool, body: PersonRequest) -> Result<Person> {
-    let   client = pool.get().await.unwrap();
+    let client = pool.get().await.unwrap();
     let query = format!("INSERT INTO {} (firstname, lastname) VALUES ($1, $2) RETURNING *", TABLE);
     println!("person {:?}", &body);
     println!("query   {}", &query);
@@ -54,7 +54,7 @@ pub async fn create_person(pool: Pool, body: PersonRequest) -> Result<Person> {
 
 pub async fn list_person(pool: Pool, limit: u32) -> Result<Vec<Person>> {
     let mut persons = vec![];
-    let   client = pool.get().await.unwrap();
+    let client = pool.get().await.unwrap();
     let query = format!("SELECT id, firstname, lastname, created FROM {} ORDER BY lastname DESC LIMIT {}", TABLE, limit);
     println!("query   {}", &query);
     let data = client.query(&query, &[]).await.unwrap();

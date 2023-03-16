@@ -1,7 +1,6 @@
-#    
+#     
 
 ## Install PostGres on Mac M1
-
 
 ## cURL Warp Tokio PostgreSQL (tokio-postgresql is non blocking aka async)
 
