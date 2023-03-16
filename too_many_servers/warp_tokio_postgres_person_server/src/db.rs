@@ -1,21 +1,14 @@
 // https://morioh.com/p/47f04c30ffd7
 
-use std::{env, fs};
 use std::convert::Infallible;
-use std::str::FromStr;
-use std::time::Duration;
+use std::env;
 
 use chrono::{DateTime, Utc};
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use dotenvy::dotenv;
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
-use thiserror::Error;
-use tokio_postgres::{Client, Config, Connection, NoTls, Row};
-use warp::{reject, Rejection, Reply};
+use tokio_postgres::{  NoTls, Row};
+use warp::{  Rejection};
 use warp::Filter;
-use warp::http::StatusCode;
-use warp::reply::json;
 
 use crate::models::{Person, PersonRequest};
 use crate::models::MyError::DBQueryError;
@@ -45,7 +38,7 @@ pub fn with_db(pool: Pool) -> impl Filter<Extract=(Pool, ), Error=Infallible> + 
 const TABLE: &str = "person";
 
 pub async fn create_person(pool: Pool, body: PersonRequest) -> Result<Person> {
-    let mut client = pool.get().await.unwrap();
+    let   client = pool.get().await.unwrap();
     let query = format!("INSERT INTO {} (firstname, lastname) VALUES ($1, $2) RETURNING *", TABLE);
     println!("person {:?}", &body);
     println!("query   {}", &query);
@@ -59,9 +52,9 @@ pub async fn create_person(pool: Pool, body: PersonRequest) -> Result<Person> {
 }
 
 
-pub async fn list_person(pool: Pool, limit:u32) -> Result<Vec<Person>> {
-   let mut persons = vec![];
-    let mut client = pool.get().await.unwrap();
+pub async fn list_person(pool: Pool, limit: u32) -> Result<Vec<Person>> {
+    let mut persons = vec![];
+    let   client = pool.get().await.unwrap();
     let query = format!("SELECT id, firstname, lastname, created FROM {} ORDER BY lastname DESC LIMIT {}", TABLE, limit);
     println!("query   {}", &query);
     let data = client.query(&query, &[]).await.unwrap();

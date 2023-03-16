@@ -1,19 +1,9 @@
 // https://morioh.com/p/47f04c30ffd7
 
-use std::convert::Infallible;
 use std::env;
-use std::str::FromStr;
 
-use chrono::{DateTime, Utc};
-use deadpool_postgres::{Manager, ManagerConfig, Object, Pool, RecyclingMethod, Runtime};
-use dotenvy::dotenv;
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
-use tokio_postgres::{Client, config, Connection, NoTls, Row};
-use warp::{reject, Rejection, Reply};
+use deadpool_postgres::{ Pool};
 use warp::Filter;
-use warp::http::StatusCode;
-use warp::reply::json;
 
 use crate::db::{create_pool, with_db};
 use crate::server::{create_person_handler, handle_rejection, health_handler, list_person_handler};
@@ -26,7 +16,7 @@ mod models;
 #[tokio::main]
 async fn main() {
 
-    // WTF why why ...
+    // TODO WTF why why ...
     let result = dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/too_many_servers/warp_tokio_postgres_person_server/.env");
     match &result {
         Ok(p) => println!("path to .env {:?}", &p),
@@ -55,7 +45,7 @@ async fn main() {
     let person_list = person
         .and(warp::get())
         .and(with_db(pool.clone()))
-        .and_then(move |pool: Pool | list_person_handler(pool, limit));
+        .and_then(move |pool: Pool| list_person_handler(pool, limit));
 
     let person_routes = person_create
         .or(person_list);

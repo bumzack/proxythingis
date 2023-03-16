@@ -1,21 +1,29 @@
-#  
+#    
+
+## Install PostGres on Mac M1
+
+
+## cURL Warp Tokio PostgreSQL (tokio-postgresql is non blocking aka async)
+
+Port: 3050
 
 ```
- curl -vvv -X POST -d '{ "firstname" : "Max", "lastname": "Musterhabara" }' -H "Content-Type: application/json" http://localhost:3050/person
+curl -vvv -X POST -d '{ "firstname" : "Max", "lastname": "Musterhabara" }' -H "Content-Type: application/json" http://localhost:3050/person
 ```
-
 
 ```
 curl -vvv  http://localhost:3050/person
 ```
 
+## cURL Warp Diesel PostgreSQL (Diesel is blocking)
 
-
-https://stackoverflow.com/questions/70637566/cannot-link-libpq-on-mac-m1
-
-Add to     ~/.cargo/config.toml
+Port: 3060
 
 ```
-[target.aarch64-apple-darwin]
-rustflags = '-L /opt/homebrew/opt/libpq/lib -L /opt/homebrew/lib'
+curl -vvv -X POST -d '{ "firstname" : "Max", "lastname": "Musterhabara" }' -H "Content-Type: application/json" http://localhost:3060/person
 ```
+
+```
+curl -vvv  http://localhost:3060/person
+```
+

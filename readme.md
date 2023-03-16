@@ -2,6 +2,10 @@
 
 Reverse Proxy API GateWay Load Balancer - a laymans implementiona attempt using rust
 
+## postgre
+
+add path to .zshrc
+
 ## simple "testing"
 
 ```
@@ -21,11 +25,11 @@ curl -d '{"ksdsdsdsdey1":"vsdsdsdadsadaadlue1", "kasdadadey2":"vasdadadasdasdalu
 ```
 
 ```
-CREATE DATABASE dummy;
+CREATE DATABASE bumzack;
 
 \l
 
-\c dummy; 
+\c bumzack; 
 ```
 
 ```
