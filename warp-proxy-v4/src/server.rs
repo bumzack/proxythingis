@@ -36,7 +36,8 @@ pub fn with_db(pool: Pool) -> impl Filter<Extract=(Pool, ), Error=Infallible> + 
 }
 
 async fn send_config(pool: Pool, manager_sender: UnboundedSender<ManagerCommand>) {
-    let server = list_server(pool).await.unwrap();
+    let server = list_server(pool, true).await.unwrap();
+
     let config = ProxyConfig {
         server_sources: server,
     };
@@ -58,7 +59,7 @@ pub async fn create_target_handler(pool: Pool, body: NewServerTargetPost, manage
 }
 
 pub async fn list_servers_handler(pool: Pool) -> Result<impl Reply> {
-    let data = list_server(pool)
+    let data = list_server(pool, false)
         .await
         // TODO fix CustomError
         .map_err(|e| {

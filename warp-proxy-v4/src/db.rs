@@ -81,7 +81,7 @@ pub async fn create_source2target(pool: Pool, source_id: i32, target_id: i32) ->
     Ok(server_source)
 }
 
-pub async fn list_server(pool: Pool) -> Result<Vec<ServerSource>> {
+pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSource>> {
     let client = pool.get().await.unwrap();
     // source server
 
@@ -145,12 +145,12 @@ pub async fn list_server(pool: Pool) -> Result<Vec<ServerSource>> {
             created: target_created,
         };
 
-        if map.contains_key(&server_source.id) {
-            let s = map.get_mut(&server_source.id).unwrap();
-            s.targets.push(server_target);
+        if active_only {
+            if server_target.active {
+                add_to_map(&mut map, &mut server_source, server_target);
+            }
         } else {
-            server_source.targets.push(server_target);
-            map.insert(server_source.id, server_source);
+            add_to_map(&mut map, &mut server_source, server_target);
         }
     }
 
@@ -159,4 +159,15 @@ pub async fn list_server(pool: Pool) -> Result<Vec<ServerSource>> {
         .collect();
 
     Ok(sources)
+}
+
+fn add_to_map(map: &mut HashMap<i32, ServerSource>, server_source: &ServerSource, server_target: ServerTarget) {
+    if map.contains_key(&server_source.id) {
+        let s = map.get_mut(&server_source.id).unwrap();
+        s.targets.push(server_target);
+    } else {
+        let mut server_source = server_source.clone();
+        server_source.targets.push(server_target);
+        map.insert(server_source.id, server_source);
+    }
 }
