@@ -20,7 +20,7 @@ pub struct ServerSource {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct ServerSourceStats {
-    pub hits: i32,
+    pub hits: u128,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -39,10 +39,10 @@ pub struct ServerTarget {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct ServerTargetStats {
-    pub hits: i32,
-    pub avg_ns: f32,
-    pub max_ns: f32,
-    pub min_ns: f32,
+    pub hits: u128,
+    pub avg_ns: u128,
+    pub max_ns: u128,
+    pub min_ns: u128,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -136,9 +136,9 @@ impl Default for ServerTargetStats {
     fn default() -> Self {
         ServerTargetStats {
             hits: 0,
-            avg_ns: 0.0,
-            max_ns: 0.0,
-            min_ns: 0.0,
+            avg_ns: 0,
+            max_ns: 0,
+            min_ns: 99999999,
         }
     }
 }
