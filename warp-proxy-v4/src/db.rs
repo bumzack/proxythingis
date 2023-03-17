@@ -1,6 +1,5 @@
 // https://morioh.com/p/47f04c30ffd7
 
-use std::convert::Infallible;
 use std::env;
 use std::ops::Add;
 
@@ -8,11 +7,14 @@ use chrono::{DateTime, Utc};
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use dotenvy::dotenv;
 use tokio_postgres::NoTls;
-use warp::Filter;
 use warp::Rejection;
 
 use crate::models::{NewServerSourcePost, NewServerTargetPost, Server2Target, ServerSource, ServerTarget};
 use crate::models::MyError::DBQueryError;
+
+const TABLE_SOURCE: &str = "source";
+const TABLE_TARGET: &str = "target";
+const TABLE_SOURCE2TARGET: &str = "source2target";
 
 type Result<T> = std::result::Result<T, Rejection>;
 
@@ -32,13 +34,6 @@ pub fn create_pool() -> Pool {
     pool
 }
 
-pub fn with_db(pool: Pool) -> impl Filter<Extract=(Pool, ), Error=Infallible> + Clone {
-    warp::any().map(move || pool.clone())
-}
-
-const TABLE_SOURCE: &str = "source";
-const TABLE_TARGET: &str = "target";
-const TABLE_SOURCE2TARGET: &str = "source2target";
 
 pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<ServerSource> {
     let client = pool.get().await.unwrap();

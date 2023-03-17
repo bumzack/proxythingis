@@ -2,8 +2,9 @@ extern crate lazy_static;
 
 use std::convert::Infallible;
 use std::env;
-use std::future::Future;
 
+use tokio::sync::{mpsc, oneshot};
+use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{Filter, hyper, Rejection, Reply};
@@ -13,15 +14,16 @@ use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
 
-use crate::db::{create_pool, with_db};
+use crate::config_manager::{GetConfigData, ManagerCommand, ProxyConfig, start_config_manager, UpdateSourceStatsData, UpdateTargetStatsData};
+use crate::db::{create_pool, list_server};
 use crate::hyper::Client;
 use crate::hyper::client::HttpConnector;
-use crate::server::{create_source_handler, create_target_handler, list_servers_handler};
+use crate::server::{create_source_handler, create_target_handler, list_servers_handler, stats_read_handler, stats_reset_handler, stats_store_handler, with_db, with_sender};
 
 mod db;
 mod models;
 mod server;
-
+mod config_manager;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
@@ -32,9 +34,10 @@ lazy_static::lazy_static! {
     };
 }
 
+
 #[tokio::main]
 async fn main() {
-    let result = dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/warp-proxy-v4/.env");
+    let _result = dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/warp-proxy-v4/.env");
 
     if env::var_os("RUST_LOG").is_none() {
         // Set `RUST_LOG=todos=debug` to see debug logs,
@@ -42,6 +45,17 @@ async fn main() {
         env::set_var("RUST_LOG", "todos=info");
     }
     let pool = create_pool();
+
+
+    let servers = list_server(pool.clone()).await.expect("loading the servers config should work");
+    let proxy_config = ProxyConfig {
+        server_sources: servers
+    };
+
+    let (manager_sender, manager_receiver) = mpsc::unbounded_channel();
+
+    let _handle_config_manager = start_config_manager(proxy_config, manager_receiver);
+
 
     //pretty_env_logger::init();
     let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "tracing=info,warp=debug".to_owned());
@@ -53,21 +67,54 @@ async fn main() {
         .with_span_events(FmtSpan::CLOSE)
         .init();
 
-    let server_source = warp::path!("server" / "source");
+    let stats = warp::path!("proxythingi" / "stats");
+    let stats_read = stats
+        .and(warp::get())
+        .and(with_sender(manager_sender.clone()))
+        .and_then(|sender| {
+            stats_read_handler(sender)
+        });
+
+    let stats_store = stats
+        .and(warp::post())
+        .and(with_db(pool.clone()))
+        .and(with_sender(manager_sender.clone()))
+        .and_then(|pool, sender| {
+            stats_store_handler(pool, sender)
+        });
+
+    let stats_reset = stats
+        .and(warp::delete())
+        .and(with_sender(manager_sender.clone()))
+        .and_then(|sender| {
+            stats_reset_handler(sender)
+        });
+
+    let stats_routes = stats_read
+        .or(stats_store)
+        .or(stats_reset);
+
+    let server_source = warp::path!("proxythingi"  / "server" / "source");
     let server_source_create = server_source
         .and(warp::post())
         .and(warp::body::json())
         .and(with_db(pool.clone()))
-        .and_then(create_source_handler);
+        .and(with_sender(manager_sender.clone()))
+        .and_then(|body, pool, sender| {
+            create_source_handler(pool, body, sender)
+        });
 
-    let server_target = warp::path!("server" / "target");
+    let server_target = warp::path!("proxythingi" / "server" / "target");
     let server_target_create = server_target
         .and(warp::post())
         .and(warp::body::json())
         .and(with_db(pool.clone()))
-        .and_then(create_target_handler);
+        .and(with_sender(manager_sender.clone()))
+        .and_then(|body, pool, sender| {
+            create_target_handler(pool, body, sender)
+        });
 
-    let server = warp::path("server");
+    let server = warp::path!("proxythingi" / "server");
     let server_list = server
         .and(warp::get())
         .and(with_db(pool.clone()))
@@ -75,53 +122,45 @@ async fn main() {
 
     let server_routes = server_source_create
         .or(server_target_create)
-        .or(server_list);
+        .or(server_list)
+        .or(stats_routes);
 
     let routes_proxy = warp::any()
         .and(extract_request_data_filter())
-        .map(|uri: ProxyUri, params: ProxyQueryParameters, proxy_method: ProxyMethod, headers: ProxyHeaders, body: Bytes| {
-            compose_forward_request(&uri, &params, &proxy_method, &headers, body)
-        })
-        .and_then(|hyper_request: Request<Body>| {
-            execute_forward_request(hyper_request)
+        .and(with_sender(manager_sender.clone()))
+        .and_then(|uri: ProxyUri, params: ProxyQueryParameters, proxy_method: ProxyMethod, headers: ProxyHeaders, body: Bytes, sender: UnboundedSender<ManagerCommand>| {
+            execute_forward_request(uri, params, proxy_method, headers, body, sender)
         });
-    // .with(warp::trace(|info| {
-    //     // Construct our own custom span for this route.
-    //     tracing::info_span!("goodbye", req.path = ?info.path())
-    // }))
-    // .with(warp::trace::named("hello"))
-    // .with(warp::trace::request());
 
-    let routes = server_routes.or(routes_proxy);
+    let routes = server_routes
+        .or(routes_proxy);
+
     warp::serve(routes)
         .run(([127, 0, 0, 1], 3034))
         .await;
 }
 
-fn execute_forward_request(hyper_request: Request<Body>) -> impl Future<Output=Result<impl Reply + Sized, Rejection>> {
-    let result = handler(hyper_request);
+async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters, proxy_method: ProxyMethod, headers: ProxyHeaders, body: Bytes, sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply, Rejection> {
+    let (tx, rx) = oneshot::channel();
+    let get_config_data = GetConfigData {
+        sender: tx,
+    };
+    let cmd = ManagerCommand::GetConfig(get_config_data);
+    sender.send(cmd).expect("execute_forward_request expected send successful");
+    let proxy_config = rx.await.expect("execute_forward_request expected a valid proxy config");
+    println!("got a config!!!! {:?}", proxy_config);
 
-    async move {
-        let res = match result.await {
-            Ok(response) => Ok(response),
-            Err(e) => {
-                println!("error from client {}", e);
-                Err(warp::reject::not_found())
-            }
-        };
-        res
-    }
-}
 
-fn compose_forward_request(uri: &ProxyUri, params: &ProxyQueryParameters, proxy_method: &ProxyMethod, headers: &ProxyHeaders, body: Bytes) -> Request<Body> {
-    println!("uri  {:?}", &uri);
+
+
+    // println!("uri  {:?}", &uri);
     match &params {
         Some(p) => println!("params  {:?}", p),
         None => println!("no params provided"),
     }
-    println!("params  {:?}", &params);
-    println!("proxy_method  {:?}", &proxy_method);
-    println!("headers  {:?}", &headers);
+    // println!("params  {:?}", &params);
+    // println!("proxy_method  {:?}", &proxy_method);
+    // println!("headers  {:?}", &headers);
 
     let method = hyper::http::Method::POST;
     let path = "full_path_ahead";
@@ -131,8 +170,8 @@ fn compose_forward_request(uri: &ProxyUri, params: &ProxyQueryParameters, proxy_
         None => path.to_string(),
     };
 
-    println!("final path {:?}", &full_path);
-    println!("body empty {:?}", &body.is_empty());
+    // println!("final path {:?}", &full_path);
+    // println!("body empty {:?}", &body.is_empty());
 
 
     let mut hyper_request = hyper::http::Request::builder()
@@ -145,10 +184,26 @@ fn compose_forward_request(uri: &ProxyUri, params: &ProxyQueryParameters, proxy_
         *hyper_request.headers_mut() = headers.clone();
     }
 
-    hyper_request
+    let update_source_stats_data = UpdateSourceStatsData {
+        id: 1,
+    };
+    let cmd = ManagerCommand::UpdateSourceStats(update_source_stats_data);
+    sender.send(cmd).expect("expect the send with command UpdateSourceStats to work");
+
+
+    let result = handler(hyper_request, sender);
+
+    let res = match result.await {
+        Ok(response) => Ok(response),
+        Err(e) => {
+            println!("error from client {}", e);
+            Err(warp::reject::not_found())
+        }
+    };
+    res
 }
 
-async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infallible> {
+async fn handler(mut request: Request<Body>, sender: UnboundedSender<ManagerCommand>) -> Result<impl warp::Reply, Infallible> {
     let schema = "http";
     let host = "localhost";
     let port = "3040";
@@ -172,13 +227,21 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     //
     // let http_connector = hyper::client::HttpConnector::new();
     // let client = hyper::Client::builder().build(http_connector);
-    println!("redirecting to proxyUrl {}", proxy_url);
+    // println!("redirecting to proxyUrl {}", proxy_url);
 
     let start = Instant::now();
     let mut response = CLIENT.request(request).await.expect("Request failed");
     let duration = start.elapsed();
     let d = format!("duration {} ms, {} µs, {} ns ", duration.as_millis(), duration.as_micros(), duration.as_nanos());
-    println!("{} ", &d);
+    // println!("{} ", &d);
     response.headers_mut().insert("x-duration", HeaderValue::from_str(&d).unwrap());
+
+    let update_target_stats_data = UpdateTargetStatsData {
+        id: 1,
+        duration_nanos: duration.as_nanos(),
+    };
+    let cmd = ManagerCommand::UpdateTargetStats(update_target_stats_data);
+    sender.send(cmd).expect("expect the send with command UpdateTargetStats to work");
+
     Ok(response)
 }
