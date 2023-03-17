@@ -1,6 +1,8 @@
 // https://morioh.com/p/47f04c30ffd7
 
+use std::collections::HashMap;
 use std::env;
+use std::iter::Map;
 use std::ops::Add;
 
 use chrono::{DateTime, Utc};
@@ -38,8 +40,8 @@ pub fn create_pool() -> Pool {
 pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<ServerSource> {
     let client = pool.get().await.unwrap();
     let query = format!("INSERT INTO {} (description, path_starts_with, method) VALUES ($1, $2, $3) RETURNING *", TABLE_SOURCE);
-    println!("new server source {:?}", &body);
-    println!("query   {}", &query);
+    // println!("new server source {:?}", &body);
+    // println!("query   {}", &query);
     let row = client
         .query_one(query.as_str(), &[&body.description, &body.path_starts_with, &body.method])
         .await
@@ -51,8 +53,8 @@ pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<Serv
 pub async fn create_target(pool: Pool, body: NewServerTargetPost) -> Result<ServerTarget> {
     let client = pool.get().await.unwrap();
     let query = format!("INSERT INTO {} (description, schema, host, port, path, method, active) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", TABLE_TARGET);
-    println!("new server target {:?}", &body);
-    println!("query   {}", &query);
+    // println!("new server target {:?}", &body);
+    // println!("query   {}", &query);
     let row = client
         .query_one(query.as_str(), &[&body.description, &body.schema, &body.host, &body.port, &body.path, &body.method, &body.active])
         .await
@@ -61,7 +63,7 @@ pub async fn create_target(pool: Pool, body: NewServerTargetPost) -> Result<Serv
 
     // add cross table entry
     let source_2_target = create_source2target(pool.clone(), body.source, server_target.id).await.unwrap();
-    println!("source_2_target   {:?}", &source_2_target);
+    // println!("source_2_target   {:?}", &source_2_target);
 
     Ok(server_target)
 }
@@ -69,8 +71,8 @@ pub async fn create_target(pool: Pool, body: NewServerTargetPost) -> Result<Serv
 pub async fn create_source2target(pool: Pool, source_id: i32, target_id: i32) -> Result<Server2Target> {
     let client = pool.get().await.unwrap();
     let query = format!("INSERT INTO {} (source_id, target_id) VALUES ($1, $2) RETURNING *", TABLE_SOURCE2TARGET);
-    println!("new source -> target  {:?} -> {:?}", source_id, target_id);
-    println!("query   {}", &query);
+    // println!("new source -> target  {:?} -> {:?}", source_id, target_id);
+    // println!("query   {}", &query);
     let row = client
         .query_one(query.as_str(), &[&source_id, &target_id])
         .await
@@ -88,16 +90,15 @@ pub async fn list_server(pool: Pool) -> Result<Vec<ServerSource>> {
     let query3 = format!(" LEFT JOIN {} ON ({}.source_id = {}.id) ", TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_SOURCE);
     let query4 = format!(" LEFT JOIN {} ON ({}.target_id = {}.id) ", TABLE_TARGET, TABLE_SOURCE2TARGET, TABLE_TARGET);
 
-    println!("query1 {}", &query1);
-    println!("query2 {}", &query2);
-    println!("query3 {}", &query3);
-    println!("query4 {}", &query4);
+    // println!("query1 {}", &query1);
+    // println!("query2 {}", &query2);
+    // println!("query3 {}", &query3);
+    // println!("query4 {}", &query4);
 
-    let mut sources = vec![];
-
+    let mut map: HashMap<i32, ServerSource> = HashMap::new();
 
     let query_full = query1.add(&query2).add(&query3).add(&query4);
-    println!("query   {}", &query_full);
+    // println!("query   {}", &query_full);
     let data = client.query(&query_full, &[]).await.unwrap();
     for row in data {
         let source_id: i32 = row.get("source_id");
@@ -117,11 +118,11 @@ pub async fn list_server(pool: Pool) -> Result<Vec<ServerSource>> {
         let target_created: DateTime<Utc> = row.get("target_created");
 
 
-        println!("found server source: {} {} {} {:?}", source_id, source_description, source_method, source_path_starts_with);
-        println!("\tfound server target: {} {} {} {:?} {} {} {:?}", target_id, target_description, target_schema, target_port, target_path, target_method, target_active);
+        // println!("found server source: {} {} {} {:?}", source_id, source_description, source_method, source_path_starts_with);
+        // println!("\tfound server target: {} {} {} {:?} {} {} {:?}", target_id, target_description, target_schema, target_port, target_path, target_method, target_active);
 
 
-        let server_source = ServerSource {
+        let mut server_source = ServerSource {
             id: source_id,
             description: source_description.to_string(),
             path_starts_with: source_path_starts_with.to_string(),
@@ -130,12 +131,8 @@ pub async fn list_server(pool: Pool) -> Result<Vec<ServerSource>> {
             targets: vec![],
             stats: Default::default(),
         };
-        sources.push(server_source);
 
-        // TODO
-        // do some grouping magic with HashMap<i32, ServerSource> and key =source_id
-
-        let _server_target = ServerTarget {
+        let server_target = ServerTarget {
             id: target_id,
             description: target_description.to_string(),
             schema: target_schema.to_string(),
@@ -147,6 +144,19 @@ pub async fn list_server(pool: Pool) -> Result<Vec<ServerSource>> {
             stats: Default::default(),
             created: target_created,
         };
+
+        if map.contains_key(&server_source.id) {
+            let s = map.get_mut(&server_source.id).unwrap();
+            s.targets.push(server_target);
+        } else {
+            server_source.targets.push(server_target);
+            map.insert(server_source.id, server_source);
+        }
     }
+
+    let sources: Vec<ServerSource> = map.values()
+        .cloned()
+        .collect();
+
     Ok(sources)
 }

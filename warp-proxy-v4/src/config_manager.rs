@@ -43,11 +43,11 @@ pub fn start_config_manager(mut proxy_config: ProxyConfig, mut manager_receiver:
         while let Some(cmd) = manager_receiver.recv().await {
             match cmd {
                 ManagerCommand::GetConfig(c) => {
-                    println!("sending config");
+                    // println!("sending config");
                     c.sender.send(proxy_config.clone()).expect("start_config_manager  ManagerCommand::GetConfig should succeed");
                 }
                 ManagerCommand::UpdateSourceStats(source_stats) => {
-                    println!("updating stats for source server {}", source_stats.id);
+                    // println!("updating stats for source server {}", source_stats.id);
                     for s in proxy_config.server_sources.iter_mut() {
                         if s.id == source_stats.id {
                             s.stats.hits += 1;
@@ -55,7 +55,7 @@ pub fn start_config_manager(mut proxy_config: ProxyConfig, mut manager_receiver:
                     }
                 }
                 ManagerCommand::UpdateTargetStats(target_stats) => {
-                    println!("updating stats for target server {}", target_stats.id);
+                    // println!("updating stats for target server {}", target_stats.id);
                     for s in proxy_config.server_sources.iter_mut() {
                         for t in s.targets.iter_mut() {
                             if t.id == target_stats.id {
@@ -77,11 +77,11 @@ pub fn start_config_manager(mut proxy_config: ProxyConfig, mut manager_receiver:
                     }
                 }
                 ManagerCommand::UpdateConfig(new_config) => {
-                    println!("got a new config");
+                    // println!("got a new config");
                     proxy_config = new_config;
                 }
                 ManagerCommand::ResetStats => {
-                    println!("reset config. stats_started was {}", stats_started);
+                    // println!("reset config. stats_started was {}", stats_started);
                     for s in proxy_config.server_sources.iter_mut() {
                         s.stats.hits = 0;
                         for t in s.targets.iter_mut() {

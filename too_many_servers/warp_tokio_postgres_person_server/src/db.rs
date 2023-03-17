@@ -15,6 +15,8 @@ use crate::models::MyError::DBQueryError;
 
 type Result<T> = std::result::Result<T, Rejection>;
 
+const TABLE: &str = "person";
+
 pub fn create_pool() -> Pool {
     dotenv().ok();
     let mut pg_config = tokio_postgres::Config::new();
@@ -35,13 +37,12 @@ pub fn with_db(pool: Pool) -> impl Filter<Extract=(Pool, ), Error=Infallible> + 
     warp::any().map(move || pool.clone())
 }
 
-const TABLE: &str = "person";
 
 pub async fn create_person(pool: Pool, body: PersonRequest) -> Result<Person> {
     let client = pool.get().await.unwrap();
     let query = format!("INSERT INTO {} (firstname, lastname) VALUES ($1, $2) RETURNING *", TABLE);
-    println!("person {:?}", &body);
-    println!("query   {}", &query);
+    // println!("person {:?}", &body);
+    // println!("query   {}", &query);
     let row = client
         .query_one(query.as_str(), &[&body.firstname, &body.lastname])
         .await
@@ -56,7 +57,7 @@ pub async fn list_person(pool: Pool, limit: u32) -> Result<Vec<Person>> {
     let mut persons = vec![];
     let client = pool.get().await.unwrap();
     let query = format!("SELECT id, firstname, lastname, created FROM {} ORDER BY lastname DESC LIMIT {}", TABLE, limit);
-    println!("query   {}", &query);
+    // println!("query   {}", &query);
     let data = client.query(&query, &[]).await.unwrap();
     for row in data {
         let id: i32 = row.get(0);
@@ -64,7 +65,7 @@ pub async fn list_person(pool: Pool, limit: u32) -> Result<Vec<Person>> {
         let lastname: &str = row.get(2);
         let created: DateTime<Utc> = row.get(3);
 
-        println!("found person: {} {} {} {:?}", id, firstname, lastname, created);
+        // println!("found person: {} {} {} {:?}", id, firstname, lastname, created);
         let p = Person {
             id,
             firstname: firstname.to_string(),

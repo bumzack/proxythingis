@@ -128,7 +128,7 @@ pub async fn stats_read_handler(manager_sender: UnboundedSender<ManagerCommand>)
     let cmd = ManagerCommand::GetConfig(get_config_data);
     manager_sender.send(cmd).expect("stats_read_handler expected send successful");
     let proxy_config = rx.await.expect("stats_read_handler expected a valid proxy config");
-    println!("got proxyconfig = {:?}", proxy_config);
+    // println!("got proxyconfig = {:?}", proxy_config);
 
     let res = json(&proxy_config);
 
@@ -143,7 +143,7 @@ pub async fn stats_store_handler(_pool: Pool, manager_sender: UnboundedSender<Ma
     let cmd = ManagerCommand::GetConfig(get_config_data);
     manager_sender.send(cmd).expect("stats_store_handler expected send successful");
     let proxy_config = rx.await.expect("stats_store_handler expected a valid proxy config");
-    println!("got proxyconfig = {:?}", proxy_config);
+    // println!("got proxyconfig = {:?}", proxy_config);
     //  TODO impl write to DB".to_string();
     let res = json(&proxy_config);
 
