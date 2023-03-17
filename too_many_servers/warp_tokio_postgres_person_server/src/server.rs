@@ -55,8 +55,8 @@ type Result<T> = std::result::Result<T, Rejection>;
 
 
 pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply, Infallible> {
-    let code;
-    let message;
+    let mut code = Default::default();
+    let mut message = "ok";
 
     if err.is_not_found() {
         code = StatusCode::NOT_FOUND;
@@ -75,6 +75,7 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
             //     code = StatusCode::INTERNAL_SERVER_ERROR;
             //     message = "Internal Server Error";
             // }
+            _ => {}
         }
     } else if let Some(_) = err.find::<warp::reject::MethodNotAllowed>() {
         code = StatusCode::METHOD_NOT_ALLOWED;

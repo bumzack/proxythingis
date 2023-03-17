@@ -44,26 +44,25 @@ curl -d '{"description":"new target for new server", "schema":"http", "host": "l
 curl http://localhost:3034/proxythingi/server | jq
 ```
 
-
 ## Stats
 
 ### get stats (currently whole server config)
+
 ```
 curl http://localhost:3034/proxythingi/stats | jq
 ```
 
 ### store stats in DB
+
 ```
 curl -X POST http://localhost:3034/proxythingi/stats | jq
 ```
 
-
 ### reset stats in memory
+
 ```
 curl -X DELETE http://localhost:3034/proxythingi/stats | jq
 ```
-
-
 
 ## Database stuff
 

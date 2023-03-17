@@ -22,7 +22,7 @@ pub async fn list_person_handler(pool: Pool<ConnectionManager<PgConnection>>) ->
 pub async fn health_handler(pool: Pool<ConnectionManager<PgConnection>>) -> std::result::Result<impl Reply, Rejection> {
     let _client = pool.get().unwrap();
 
-    println!("hello from healthhandler");
+    // println!("hello from healthhandler");
 
     // TODO
     // client

@@ -18,10 +18,10 @@ pub fn read_persons(pool: Pool<ConnectionManager<PgConnection>>) -> Vec<Person> 
         .load::<Person>(connection)
         .expect("Error loading persons");
 
-    println!("Displaying {} persons", results.len());
-    for p in &results {
-        println!("id {}:  {} {}, created at {}", p.id, p.firstname, p.lastname, p.created);
-    }
+    // println!("Displaying {} persons", results.len());
+    // for p in &results {
+    //     println!("id {}:  {} {}, created at {}", p.id, p.firstname, p.lastname, p.created);
+    // }
     results
 }
 

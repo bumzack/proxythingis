@@ -35,7 +35,7 @@ async fn main() {
         .and(with_db(pool.clone()))
         .and_then(health_handler);
 
-    let person = warp::path("person");
+    let person = warp::path!("api" / "person");
     let person_create = person
         .and(warp::post())
         .and(warp::body::json())
