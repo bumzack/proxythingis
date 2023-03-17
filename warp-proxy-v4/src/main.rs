@@ -38,6 +38,7 @@ lazy_static::lazy_static! {
 }
 
 
+// #[tokio::main(worker_threads = 2)]
 #[tokio::main]
 async fn main() {
     let _result = dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/warp-proxy-v4/.env");
@@ -50,7 +51,7 @@ async fn main() {
     let pool = create_pool();
 
 
-    let servers = list_server(pool.clone()).await.expect("loading the servers config should work");
+    let servers = list_server(pool.clone(), true).await.expect("loading the servers config should work");
     let proxy_config = ProxyConfig {
         server_sources: servers
     };
@@ -282,7 +283,7 @@ async fn handler(mut request: Request<Body>, sender: UnboundedSender<ManagerComm
     // let client = hyper::Client::builder().build(http_connector);
 
     let start = Instant::now();
-    // println!("request uri {}", request.uri().to_string());
+    println!("request uri {}", request.uri().to_string());
     let mut response = CLIENT.request(request).await.expect("Request failed");
     let duration = start.elapsed();
     let d = format!("duration {} ms, {} µs, {} ns ", duration.as_millis(), duration.as_micros(), duration.as_nanos());

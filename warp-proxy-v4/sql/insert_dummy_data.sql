@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS source2target
 
 
 INSERT INTO source (description, path_starts_with, method)
-VALUES ('return a list of persons', 'api/person', 'GET');
+VALUES ('return a list of persons', '/api', 'GET');
 
 INSERT INTO target (description, schema, host, port, path, method, active)
 VALUES ('simplest server. always returns 200 and no persons at all', 'http', 'localhost', 3040, 'api/person', 'GET',
@@ -40,10 +40,10 @@ VALUES ('simplest server. always returns 200 and no persons at all', 'http', 'lo
 
 
 INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Warp & Diesel (blocking)', 'http', 'localhost', 3050, 'api/person', 'GET', true);
+VALUES ('Warp & Diesel (blocking)', 'http', 'localhost', 3050, '/api', 'GET', true);
 
 INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Warp & Tokio-PostgreSQL (async)', 'http', 'localhost', 3060, 'api/person', 'GET', true);
+VALUES ('Warp & Tokio-PostgreSQL (async)', 'http', 'localhost', 3060, '/api', 'GET', true);
 
 
 INSERT INTO source2target (source_id, target_id)
