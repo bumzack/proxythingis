@@ -171,3 +171,27 @@ fn add_to_map(map: &mut HashMap<i32, ServerSource>, server_source: &ServerSource
         map.insert(server_source.id, server_source);
     }
 }
+
+pub async fn activate_server(pool: Pool, id: i32) -> Result<()> {
+    println!("activating server {}", id);
+    let client = pool.get().await.unwrap();
+    let query = format!("UPDATE  {}  SET active=true WHERE  id = $1 RETURNING *", TABLE_TARGET);
+
+    let row = client
+        .query_one(query.as_str(), &[&id])
+        .await
+        .map_err(DBQueryError)?;
+    Ok(())
+}
+
+pub async fn deactivate_server(pool: Pool, id: i32) -> Result<()> {
+    println!("deactivating server {}", id);
+    let client = pool.get().await.unwrap();
+    let query = format!("UPDATE  {}  SET active=false   WHERE  id = $1 RETURNING *", TABLE_TARGET);
+
+    let row = client
+        .query_one(query.as_str(), &[&id])
+        .await
+        .map_err(DBQueryError)?;
+    Ok(())
+}
