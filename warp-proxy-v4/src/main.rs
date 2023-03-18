@@ -21,7 +21,7 @@ use crate::db::{create_pool, list_server};
 use crate::hyper::Client;
 use crate::hyper::client::HttpConnector;
 use crate::models::{ServerSource, ServerTarget};
-use crate::server::{create_source_handler, create_target_handler, list_servers_handler, stats_read_handler, stats_reset_handler, stats_store_handler, with_db, with_sender};
+use crate::server::{activate_server_handler, create_source_handler, create_target_handler, deactivate_server_handler, list_servers_handler, stats_read_handler, stats_reset_handler, stats_store_handler, with_db, with_sender};
 
 mod db;
 mod models;
@@ -30,7 +30,7 @@ mod config_manager;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
-    static ref  CLIENT: Client<HttpConnector> = {
+    static ref CLIENT: Client<HttpConnector> = {
          let http_connector = hyper::client::HttpConnector::new();
          let client = hyper::Client::builder().build(http_connector);
          return client;
@@ -124,9 +124,23 @@ async fn main() {
         .and(with_db(pool.clone()))
         .and_then(list_servers_handler);
 
+    let server = warp::path!("proxythingi" / "server" / "activate" / i32 );
+    let server_activate = server
+        .and(warp::get())
+        .and(with_db(pool.clone()))
+        .and_then(|id, pool| activate_server_handler(pool, id));
+
+    let server = warp::path!("proxythingi" / "server" / "deactivate" / i32 );
+    let server_deactivate = server
+        .and(warp::get())
+        .and(with_db(pool.clone()))
+        .and_then(|id, pool| deactivate_server_handler(pool, id));
+
     let server_routes = server_source_create
         .or(server_target_create)
         .or(server_list)
+        .or(server_activate)
+        .or(server_deactivate)
         .or(stats_routes);
 
     let routes_proxy = warp::any()
@@ -283,7 +297,7 @@ async fn handler(mut request: Request<Body>, sender: UnboundedSender<ManagerComm
     // let client = hyper::Client::builder().build(http_connector);
 
     let start = Instant::now();
-    println!("request uri {}", request.uri().to_string());
+    //println!("request uri {}", request.uri().to_string());
     let mut response = CLIENT.request(request).await.expect("Request failed");
     let duration = start.elapsed();
     let d = format!("duration {} ms, {} µs, {} ns ", duration.as_millis(), duration.as_micros(), duration.as_nanos());

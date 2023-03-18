@@ -44,6 +44,22 @@ curl -d '{"description":"new target for new server", "schema":"http", "host": "l
 curl http://localhost:3034/proxythingi/server | jq
 ```
 
+### Activate target server
+
+```
+curl http://localhost:3034/proxythingi/server/activate/2 | jq
+
+curl http://localhost:3034/proxythingi/server/activate/3 | jq
+```
+
+### Activate target server
+
+```
+curl http://localhost:3034/proxythingi/server/deactivate/2 | jq
+
+curl http://localhost:3034/proxythingi/server/deactivate/3 | jq
+```
+
 ## Stats
 
 ### get stats (currently whole server config)

@@ -8,7 +8,7 @@ use warp::http::StatusCode;
 use warp::reply::json;
 
 use crate::config_manager::{GetConfigData, ManagerCommand, ProxyConfig};
-use crate::db::{create_source, create_target, list_server};
+use crate::db::{activate_server, create_source, create_target, deactivate_server, list_server};
 use crate::models::{DivideByZero, ErrorResponse, MyError, NewServerSourcePost, NewServerTargetPost};
 use crate::models::MyError::DBQueryError;
 
@@ -67,6 +67,28 @@ pub async fn list_servers_handler(pool: Pool) -> Result<impl Reply> {
             reject::custom(DivideByZero)
         })?;
     Ok(json(&data))
+}
+
+pub async fn activate_server_handler(pool: Pool, id: i32) -> Result<impl Reply> {
+    let _ = activate_server(pool, id)
+        .await
+        // TODO fix CustomError
+        .map_err(|e| {
+            println!("error rejection {:?}", e);
+            reject::custom(DivideByZero)
+        })?;
+    Ok("server activated")
+}
+
+pub async fn deactivate_server_handler(pool: Pool, id: i32) -> Result<impl Reply> {
+    let _ = deactivate_server(pool, id)
+        .await
+        // TODO fix CustomError
+        .map_err(|e| {
+            println!("error rejection {:?}", e);
+            reject::custom(DivideByZero)
+        })?;
+    Ok("server deactivated")
 }
 
 // pub async fn health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejection> {
