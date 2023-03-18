@@ -2,7 +2,6 @@
 
 use std::collections::HashMap;
 use std::env;
-use std::iter::Map;
 use std::ops::Add;
 
 use chrono::{DateTime, Utc};
@@ -11,12 +10,14 @@ use dotenvy::dotenv;
 use tokio_postgres::NoTls;
 use warp::Rejection;
 
-use crate::models::{NewServerSourcePost, NewServerTargetPost, Server2Target, ServerSource, ServerTarget};
+use crate::models::{NewServerSourcePost, NewServerTargetPost, Server2Target, ServerSource, ServerSourceStats, ServerTarget};
 use crate::models::MyError::DBQueryError;
 
 const TABLE_SOURCE: &str = "source";
 const TABLE_TARGET: &str = "target";
 const TABLE_SOURCE2TARGET: &str = "source2target";
+const TABLE_SOURCE_STATS: &str = "source_stats";
+const TABLE_TARGET_STATS: &str = "target_stats";
 
 type Result<T> = std::result::Result<T, Rejection>;
 
@@ -35,7 +36,6 @@ pub fn create_pool() -> Pool {
     let pool = Pool::builder(mgr).max_size(16).build().unwrap();
     pool
 }
-
 
 pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<ServerSource> {
     let client = pool.get().await.unwrap();
@@ -62,7 +62,7 @@ pub async fn create_target(pool: Pool, body: NewServerTargetPost) -> Result<Serv
     let server_target = ServerTarget::from(row);
 
     // add cross table entry
-    let source_2_target = create_source2target(pool.clone(), body.source, server_target.id).await.unwrap();
+    let _source_2_target = create_source2target(pool.clone(), body.source, server_target.id).await.unwrap();
     // println!("source_2_target   {:?}", &source_2_target);
 
     Ok(server_target)
@@ -173,25 +173,45 @@ fn add_to_map(map: &mut HashMap<i32, ServerSource>, server_source: &ServerSource
 }
 
 pub async fn activate_server(pool: Pool, id: i32) -> Result<()> {
-    println!("activating server {}", id);
-    let client = pool.get().await.unwrap();
-    let query = format!("UPDATE  {}  SET active=true WHERE  id = $1 RETURNING *", TABLE_TARGET);
+    change_activate_server(pool, id, true).await
+}
 
-    let row = client
+pub async fn deactivate_server(pool: Pool, id: i32) -> Result<()> {
+    change_activate_server(pool, id, false).await
+}
+
+pub async fn change_activate_server(pool: Pool, id: i32, val: bool) -> Result<()> {
+    println!("(de-)activating server {}. val {}", id,val);
+    let client = pool.get().await.unwrap();
+    let query = format!("UPDATE  {}  SET active= {} WHERE  id = $1 RETURNING *", TABLE_TARGET, val);
+
+    let _row = client
         .query_one(query.as_str(), &[&id])
         .await
         .map_err(DBQueryError)?;
     Ok(())
 }
 
-pub async fn deactivate_server(pool: Pool, id: i32) -> Result<()> {
-    println!("deactivating server {}", id);
+pub async fn create_source_stats(pool: Pool, source_id: i32, hits: u32, start: DateTime<Utc>, stop: DateTime<Utc>) -> Result<ServerSourceStats> {
     let client = pool.get().await.unwrap();
-    let query = format!("UPDATE  {}  SET active=false   WHERE  id = $1 RETURNING *", TABLE_TARGET);
-
+    let query = format!("INSERT INTO {} (hits, source_id, start, stop) VALUES ($1, $2, $3, $4) RETURNING *", TABLE_SOURCE_STATS);
     let row = client
-        .query_one(query.as_str(), &[&id])
+        .query_one(query.as_str(), &[&hits, &source_id, &start, &stop])
         .await
         .map_err(DBQueryError)?;
-    Ok(())
+    let server_source_stats = ServerSourceStats::from(row);
+
+    Ok(server_source_stats)
+}
+
+pub async fn create_target_stats(pool: Pool, target_id: i32, hits: u32, min_ns: u32, max_ns: u32, avg_ns: u32, start: DateTime<Utc>, stop: DateTime<Utc>) -> Result<ServerSourceStats> {
+    let client = pool.get().await.unwrap();
+    let query = format!("INSERT INTO {} (hits, target_id, start, stop, min_ns, max_ns, avg_ns) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", TABLE_TARGET_STATS);
+    let row = client
+        .query_one(query.as_str(), &[&hits, &target_id, &start, &stop, &min_ns, &max_ns, &avg_ns])
+        .await
+        .map_err(DBQueryError)?;
+    let server_source_stats = ServerSourceStats::from(row);
+
+    Ok(server_source_stats)
 }

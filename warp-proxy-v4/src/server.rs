@@ -1,16 +1,15 @@
 use std::convert::Infallible;
 
+use chrono::Utc;
 use deadpool_postgres::Pool;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
 use warp::{Filter, reject, Rejection, Reply};
-use warp::http::StatusCode;
 use warp::reply::json;
 
-use crate::config_manager::{GetConfigData, ManagerCommand, ProxyConfig};
-use crate::db::{activate_server, create_source, create_target, deactivate_server, list_server};
-use crate::models::{DivideByZero, ErrorResponse, MyError, NewServerSourcePost, NewServerTargetPost};
-use crate::models::MyError::DBQueryError;
+use crate::config_manager::{GetConfigData, ManagerCommand, UpdateServerConfigData};
+use crate::db::{activate_server, create_source, create_source_stats, create_target, create_target_stats, deactivate_server, list_server};
+use crate::models::{DivideByZero, NewServerSourcePost, NewServerTargetPost};
 
 pub async fn create_source_handler(pool: Pool, body: NewServerSourcePost, manager_sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply> {
     let res = json(&create_source(pool.clone(), body)
@@ -38,10 +37,10 @@ pub fn with_db(pool: Pool) -> impl Filter<Extract=(Pool, ), Error=Infallible> + 
 async fn send_config(pool: Pool, manager_sender: UnboundedSender<ManagerCommand>) {
     let server = list_server(pool, true).await.unwrap();
 
-    let config = ProxyConfig {
+    let config = UpdateServerConfigData {
         server_sources: server,
     };
-    let cmd = ManagerCommand::UpdateConfig(config);
+    let cmd = ManagerCommand::UpdateServerConfig(config);
     manager_sender.send(cmd).unwrap();
 }
 
@@ -150,6 +149,7 @@ pub async fn stats_read_handler(manager_sender: UnboundedSender<ManagerCommand>)
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
+        reset_start: false,
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     manager_sender.send(cmd).expect("stats_read_handler expected send successful");
@@ -161,16 +161,29 @@ pub async fn stats_read_handler(manager_sender: UnboundedSender<ManagerCommand>)
     Ok(res)
 }
 
-pub async fn stats_store_handler(_pool: Pool, manager_sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply> {
+pub async fn stats_store_handler(pool: Pool, manager_sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply> {
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
+        reset_start:true,
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     manager_sender.send(cmd).expect("stats_store_handler expected send successful");
-    let proxy_config = rx.await.expect("stats_store_handler expected a valid proxy config");
-    // println!("got proxyconfig = {:?}", proxy_config);
-    //  TODO impl write to DB".to_string();
+    let mut proxy_config = rx.await.expect("stats_store_handler expected a valid proxy config");
+    proxy_config.stop = Utc::now();
+
+    for source in &proxy_config.server_sources {
+        create_source_stats(pool.clone(), source.id, source.stats.hits, source.stats.start, source.stats.stop).await.expect("stats_store_handler expects to be able to write the source stats");
+        for target in &source.targets {
+            create_target_stats(pool.clone(), target.id, target.stats.hits, target.stats.min_ns, target.stats.max_ns, target.stats.avg_ns, source.stats.start, source.stats.stop).await.expect("stats_store_handler expects to be able to write the target stats");
+        }
+    }
+
+    // proxy_config.server_sources.iter().for_each(async |source| {
+    //     source.targets.iter().for_each(async |target| {
+    //         create_target_stats(pool.clone(), target.id, target.stats.hits, target.stats.min_ns, target.stats.max_ns, target.stats.avg_ns, source.stats.start, source.stats.stop).await.expect("stats_store_handler expects to be able to write the target stats");
+    //     })
+    // });
     let res = json(&proxy_config);
 
     Ok(res)
