@@ -128,13 +128,15 @@ async fn main() {
     let server_activate = server
         .and(warp::get())
         .and(with_db(pool.clone()))
-        .and_then(|id, pool| activate_server_handler(pool, id));
+        .and(with_sender(manager_sender.clone()))
+        .and_then(|id, pool, sender| activate_server_handler(pool, id, sender));
 
     let server = warp::path!("proxythingi" / "server" / "deactivate" / i32 );
     let server_deactivate = server
         .and(warp::get())
         .and(with_db(pool.clone()))
-        .and_then(|id, pool| deactivate_server_handler(pool, id));
+        .and(with_sender(manager_sender.clone()))
+        .and_then(|id, pool, sender| deactivate_server_handler(pool, id, sender));
 
     let server_routes = server_source_create
         .or(server_target_create)

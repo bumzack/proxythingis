@@ -69,25 +69,28 @@ pub async fn list_servers_handler(pool: Pool) -> Result<impl Reply> {
     Ok(json(&data))
 }
 
-pub async fn activate_server_handler(pool: Pool, id: i32) -> Result<impl Reply> {
-    let _ = activate_server(pool, id)
+pub async fn activate_server_handler(pool: Pool, id: i32, manager_sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply> {
+    let _ = activate_server(pool.clone(), id)
         .await
         // TODO fix CustomError
         .map_err(|e| {
             println!("error rejection {:?}", e);
             reject::custom(DivideByZero)
         })?;
+    send_config(pool, manager_sender).await;
+
     Ok("server activated")
 }
 
-pub async fn deactivate_server_handler(pool: Pool, id: i32) -> Result<impl Reply> {
-    let _ = deactivate_server(pool, id)
+pub async fn deactivate_server_handler(pool: Pool, id: i32, manager_sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply> {
+    let _ = deactivate_server(pool.clone(), id)
         .await
         // TODO fix CustomError
         .map_err(|e| {
             println!("error rejection {:?}", e);
             reject::custom(DivideByZero)
         })?;
+    send_config(pool, manager_sender).await;
     Ok("server deactivated")
 }
 
