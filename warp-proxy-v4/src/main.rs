@@ -9,7 +9,7 @@ use tokio::sync::{mpsc, oneshot};
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
 use tracing_subscriber::fmt::format::FmtSpan;
-use warp::{Filter, hyper, method, Rejection, Reply};
+use warp::{Filter, hyper, Rejection, Reply};
 use warp::http::{HeaderValue, Method, Request};
 use warp::hyper::{Body, Uri};
 use warp::hyper::body::Bytes;
@@ -53,7 +53,9 @@ async fn main() {
 
     let servers = list_server(pool.clone(), true).await.expect("loading the servers config should work");
     let proxy_config = ProxyConfig {
-        server_sources: servers
+        server_sources: servers,
+        start: chrono::Utc::now(),
+        stop: chrono::Utc::now(),
     };
 
     let (manager_sender, manager_receiver) = mpsc::unbounded_channel();
@@ -164,9 +166,15 @@ async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters, pr
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
+        reset_start: false,
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
-    sender.send(cmd).expect("execute_forward_request expected send successful");
+    match sender.send(cmd) {
+        Ok(_) => println!("send ok"),
+        Err(e) => println!("error sending cmd::GetConfig to manager {}", e)
+    };
+
+    // sender.send(cmd).expect("execute_forward_request expected send successful");
     let proxy_config = rx.await.expect("execute_forward_request expected a valid proxy config");
     // println!("got a config!!!! {:?}", proxy_config);
 
@@ -188,10 +196,10 @@ async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters, pr
             if targets.len() > 0 {
                 let mut rng = rand::thread_rng();
                 let i = rng.gen_range(0..targets.len());
-                if i < 0 || i > 2 {
+                if i > targets.len() {
                     println!("random number WRONG between {} and {}: {}", 0, targets.len(), i);
                 }
-                let t: &ServerTarget = targets.get(i as usize).expect("cant unwrap target server");
+                let t = targets.get(i as usize).expect("cant unwrap target server");
                 Some(t)
             } else {
                 None
@@ -252,7 +260,7 @@ async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters, pr
 
     let res = match result.await {
         Ok(response) => Ok(response),
-        Err(e) => {
+        Err(_e) => {
             // println!("error from client {}", e);
             Err(warp::reject::not_found())
         }
@@ -308,7 +316,7 @@ async fn handler(mut request: Request<Body>, sender: UnboundedSender<ManagerComm
 
     let update_target_stats_data = UpdateTargetStatsData {
         id: server_target_idx,
-        duration_nanos: duration.as_nanos(),
+        duration_nanos: duration.as_nanos() as u32,
     };
     let cmd = ManagerCommand::UpdateTargetStats(update_target_stats_data);
     sender.send(cmd).expect("expect the send with command UpdateTargetStats to work");
