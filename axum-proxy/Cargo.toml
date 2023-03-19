@@ -6,4 +6,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = "0.6.1"
+axum = "0.6.11"
+tokio = { version = "1.26.0", features = ["fs", "sync", "time"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing = "0.1"
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tower-http = { version = "0.4.0", features = ["trace"] }
+
+
+[dev-dependencies]
+tokio = { version = "1.26.0", features = ["macros", "rt-multi-thread"] }
