@@ -1,18 +1,17 @@
 use std::net::SocketAddr;
 use std::time::Duration;
-use axum::http::{HeaderMap, Request, StatusCode};
+
 use axum::{Json, Router};
 use axum::body::Bytes;
+use axum::http::{HeaderMap, Request, StatusCode};
 use axum::response::Response;
 use axum::routing::get;
 use axum::routing::post;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use  serde::Deserialize;
+use serde::Deserialize;
+use serde::Serialize;
 use tower_http::{classify::ServerErrorsFailureClass, trace::TraceLayer};
-
-use  serde::Serialize;
 use tracing::Span;
-
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
 async fn main() {
@@ -35,7 +34,7 @@ async fn main() {
         .layer(
             TraceLayer::new_for_http()
                 .on_request(|_request: &Request<_>, _span: &Span| {
-                   println!("on_request");
+                    println!("on_request");
                 })
                 .on_response(|_response: &Response, _latency: Duration, _span: &Span| {
                     println!("on_response");

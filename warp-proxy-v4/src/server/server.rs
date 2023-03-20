@@ -1,6 +1,7 @@
 use deadpool_postgres::Pool;
 use warp::{reject, Rejection, Reply};
 use warp::http::StatusCode;
+
 use crate::server::models::{DivideByZero, MyError};
 use crate::server::models::MyError::DBQueryError;
 

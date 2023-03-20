@@ -5,8 +5,8 @@ use std::time::Instant;
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::http::{HeaderValue, Method, Request, Uri};
 use warp::{hyper, Rejection, Reply};
+use warp::http::{HeaderValue, Method, Request, Uri};
 use warp::hyper::Body;
 use warp::hyper::body::Bytes;
 
@@ -122,7 +122,6 @@ pub async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters
     res
 }
 
-
 async fn handler(mut request: Request<Body>, sender: UnboundedSender<ManagerCommand>, server_target_idx: i32, target_port: &i32, target_host: &String, full_path: String, target_schema: &String, target_description: &String) -> Result<impl warp::Reply, Infallible> {
     // println!("full_path                         {:?}", &full_path);
     // println!("target_host                       {:?}", &target_host);
@@ -130,7 +129,6 @@ async fn handler(mut request: Request<Body>, sender: UnboundedSender<ManagerComm
     // println!("target_method                     {:?}", &target_method);
     // println!("target_schema                     {:?}", &target_schema);
     // println!("request.uri().to_string()         {:?}", &request.uri().to_string());
-
 
     let proxy_url = format!("{}://{}:{}{}",
                             target_schema,

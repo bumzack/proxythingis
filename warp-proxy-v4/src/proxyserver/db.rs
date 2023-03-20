@@ -1,12 +1,14 @@
 use std::collections::HashMap;
 use std::ops::Add;
+
 use chrono::{DateTime, Utc};
 use deadpool_postgres::Pool;
 use tokio_postgres::Row;
+
 use crate::db::db::{TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_TARGET};
 use crate::proxyserver::models::{NewServerSourcePost, NewServerTargetPost, Server2Target, ServerSource, ServerSourceStats, ServerTarget, ServerTargetStats};
 use crate::server::models::MyError::DBQueryError;
-use crate::server::server:: Result;
+use crate::server::server::Result;
 
 impl From<Row> for ServerSource {
     fn from(value: Row) -> Self {
@@ -48,8 +50,6 @@ impl From<Row> for Server2Target {
         }
     }
 }
-
-
 
 
 pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<ServerSource> {
@@ -196,7 +196,7 @@ pub async fn deactivate_server(pool: Pool, id: i32) -> Result<()> {
 }
 
 pub async fn change_activate_server(pool: Pool, id: i32, val: bool) -> Result<()> {
-    println!("(de-)activating server {}. val {}", id,val);
+    println!("(de-)activating server {}. val {}", id, val);
     let client = pool.get().await.unwrap();
     let query = format!("UPDATE  {}  SET active= {} WHERE  id = $1 RETURNING *", TABLE_TARGET, val);
 

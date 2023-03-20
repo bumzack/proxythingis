@@ -1,5 +1,5 @@
 pub mod warp_request_filter {
-    use warp::Filter;
+    use warp::{Buf, Filter, Stream};
     use warp::http::HeaderMap;
     use warp::hyper::body::Bytes;
     use warp::hyper::Method as RequestMethod;
@@ -25,6 +25,14 @@ pub mod warp_request_filter {
             .and(warp::method())
             .and(warp::header::headers_cloned())
             .and(warp::body::bytes())
+    }
+
+    pub fn extract_request_data_filter_body_stream() -> impl Filter<Extract=(ProxyUri, ProxyQueryParameters, ProxyMethod, ProxyHeaders, impl Stream<Item=Result<impl Buf, warp::Error>> + Send + 'static), Error=warp::Rejection> + Clone {
+        warp::path::full()
+            .and(query_params_filter())
+            .and(warp::method())
+            .and(warp::header::headers_cloned())
+            .and(warp::body::stream())
     }
 
     pub fn extract_request_data_filter_body_as_string() -> impl Filter<Extract=ProxyRequestBodyAsString, Error=warp::Rejection> + Clone {

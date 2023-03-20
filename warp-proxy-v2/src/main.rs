@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate lazy_static;
 
 use std::convert::Infallible;
@@ -10,7 +9,7 @@ use warp::http::{Request, StatusCode};
 use warp::hyper::{Body, Uri};
 use warp::hyper::body::Bytes;
 
-use common::warp_request_filter::{extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri, string_filter};
+use common::warp_request_filter::{extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
 
 use crate::hyper::Client;
 use crate::hyper::client::HttpConnector;
