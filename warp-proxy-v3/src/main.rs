@@ -3,12 +3,11 @@ extern crate lazy_static;
 use std::convert::Infallible;
 use std::env;
 use std::future::Future;
-use std::time::Duration;
 
 use tokio::time::Instant;
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{Filter, hyper, Rejection, Reply};
-use warp::http::{HeaderValue, Request, StatusCode};
+use warp::http::{HeaderValue, Request};
 use warp::hyper::{Body, Uri};
 use warp::hyper::body::Bytes;
 

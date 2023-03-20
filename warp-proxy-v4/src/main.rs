@@ -1,17 +1,19 @@
 extern crate lazy_static;
 
 use std::env;
+
 use tokio::sync::mpsc;
 use tracing_subscriber::fmt::format::FmtSpan;
+use warp::Filter;
 use warp::hyper::Client;
 use warp::hyper::client::HttpConnector;
+
 use crate::config_manager::manager::{ProxyConfig, start_config_manager};
 use crate::db::db::create_pool;
 use crate::proxy::route::proxy_routes;
 use crate::proxyserver::db::list_server;
 use crate::proxyserver::route::server_routes;
 use crate::stats::route::stats_routes;
-use warp::Filter;
 
 mod db;
 mod config_manager;
@@ -28,8 +30,6 @@ lazy_static::lazy_static! {
          return client;
     };
 }
-
-
 
 
 // #[tokio::main(worker_threads = 2)]

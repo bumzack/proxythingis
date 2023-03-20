@@ -1,8 +1,9 @@
 use chrono::{DateTime, Utc};
 use deadpool_postgres::Pool;
+use serde::Serialize;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::task::JoinHandle;
-use  serde::Serialize;
+
 use crate::proxyserver::db::list_server;
 use crate::proxyserver::models::ServerSource;
 
@@ -115,7 +116,7 @@ pub fn start_config_manager(mut proxy_config: ProxyConfig, mut manager_receiver:
     })
 }
 
-pub  async fn send_config(pool: Pool, manager_sender: UnboundedSender<ManagerCommand>) {
+pub async fn send_config(pool: Pool, manager_sender: UnboundedSender<ManagerCommand>) {
     let server = list_server(pool, true).await.unwrap();
 
     let config = UpdateServerConfigData {

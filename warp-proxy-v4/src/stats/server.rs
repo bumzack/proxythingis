@@ -4,8 +4,9 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
 use warp::Reply;
 use warp::reply::json;
+
 use crate::config_manager::manager::{GetConfigData, ManagerCommand};
-use crate::server::server:: Result;
+use crate::server::server::Result;
 
 pub async fn stats_read_handler(manager_sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply> {
     let (tx, rx) = oneshot::channel();
@@ -27,7 +28,7 @@ pub async fn stats_store_handler(_pool: Pool, manager_sender: UnboundedSender<Ma
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
-        reset_start:true,
+        reset_start: true,
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     manager_sender.send(cmd).expect("stats_store_handler expected send successful");
