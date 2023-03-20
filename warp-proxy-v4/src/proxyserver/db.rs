@@ -1,41 +1,56 @@
-// https://morioh.com/p/47f04c30ffd7
-
 use std::collections::HashMap;
-use std::env;
 use std::ops::Add;
-
 use chrono::{DateTime, Utc};
-use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
-use dotenvy::dotenv;
-use tokio_postgres::NoTls;
-use warp::Rejection;
+use deadpool_postgres::Pool;
+use tokio_postgres::Row;
+use crate::db::db::{TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_TARGET};
+use crate::proxyserver::models::{NewServerSourcePost, NewServerTargetPost, Server2Target, ServerSource, ServerSourceStats, ServerTarget, ServerTargetStats};
+use crate::server::models::MyError::DBQueryError;
+use crate::server::server:: Result;
 
-use crate::models::{NewServerSourcePost, NewServerTargetPost, Server2Target, ServerSource, ServerSourceStats, ServerTarget};
-use crate::models::MyError::DBQueryError;
-
-const TABLE_SOURCE: &str = "source";
-const TABLE_TARGET: &str = "target";
-const TABLE_SOURCE2TARGET: &str = "source2target";
-const TABLE_SOURCE_STATS: &str = "source_stats";
-const TABLE_TARGET_STATS: &str = "target_stats";
-
-type Result<T> = std::result::Result<T, Rejection>;
-
-pub fn create_pool() -> Pool {
-    dotenv().ok();
-    let mut pg_config = tokio_postgres::Config::new();
-
-    pg_config.user(env::var("DBUSER").unwrap().as_str());
-    pg_config.password(env::var("DBPASSWORD").unwrap().as_str());
-    pg_config.host(env::var("DBHOSTNAME").unwrap().as_str());
-    pg_config.dbname(env::var("DBNAME").unwrap().as_str());
-    let mgr_config = ManagerConfig {
-        recycling_method: RecyclingMethod::Fast
-    };
-    let mgr = Manager::from_config(pg_config, NoTls, mgr_config);
-    let pool = Pool::builder(mgr).max_size(16).build().unwrap();
-    pool
+impl From<Row> for ServerSource {
+    fn from(value: Row) -> Self {
+        ServerSource {
+            id: value.get(0),
+            description: value.get(1),
+            path_starts_with: value.get(2),
+            method: value.get(3),
+            created: value.get(4),
+            targets: vec![],
+            stats: ServerSourceStats::default(),
+        }
+    }
 }
+
+impl From<Row> for ServerTarget {
+    fn from(value: Row) -> Self {
+        ServerTarget {
+            id: value.get(0),
+            description: value.get(1),
+            schema: value.get(2),
+            host: value.get(3),
+            port: value.get(4),
+            method: value.get(5),
+            path: value.get(6),
+            active: value.get(7),
+            stats: ServerTargetStats::default(),
+            created: Default::default(),
+        }
+    }
+}
+
+impl From<Row> for Server2Target {
+    fn from(value: Row) -> Self {
+        Server2Target {
+            id: value.get(0),
+            source_id: value.get(1),
+            target_id: value.get(2),
+        }
+    }
+}
+
+
+
 
 pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<ServerSource> {
     let client = pool.get().await.unwrap();
@@ -190,28 +205,4 @@ pub async fn change_activate_server(pool: Pool, id: i32, val: bool) -> Result<()
         .await
         .map_err(DBQueryError)?;
     Ok(())
-}
-
-pub async fn create_source_stats(pool: Pool, source_id: i32, hits: u32, start: DateTime<Utc>, stop: DateTime<Utc>) -> Result<ServerSourceStats> {
-    let client = pool.get().await.unwrap();
-    let query = format!("INSERT INTO {} (hits, source_id, start, stop) VALUES ($1, $2, $3, $4) RETURNING *", TABLE_SOURCE_STATS);
-    let row = client
-        .query_one(query.as_str(), &[&hits, &source_id, &start, &stop])
-        .await
-        .map_err(DBQueryError)?;
-    let server_source_stats = ServerSourceStats::from(row);
-
-    Ok(server_source_stats)
-}
-
-pub async fn create_target_stats(pool: Pool, target_id: i32, hits: u32, min_ns: u32, max_ns: u32, avg_ns: u32, start: DateTime<Utc>, stop: DateTime<Utc>) -> Result<ServerSourceStats> {
-    let client = pool.get().await.unwrap();
-    let query = format!("INSERT INTO {} (hits, target_id, start, stop, min_ns, max_ns, avg_ns) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", TABLE_TARGET_STATS);
-    let row = client
-        .query_one(query.as_str(), &[&hits, &target_id, &start, &stop, &min_ns, &max_ns, &avg_ns])
-        .await
-        .map_err(DBQueryError)?;
-    let server_source_stats = ServerSourceStats::from(row);
-
-    Ok(server_source_stats)
 }

@@ -1,9 +1,10 @@
 use chrono::{DateTime, Utc};
-use serde_derive::Serialize;
-use tokio::sync::mpsc::UnboundedReceiver;
+use deadpool_postgres::Pool;
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::task::JoinHandle;
-
-use crate::models::ServerSource;
+use  serde::Serialize;
+use crate::proxyserver::db::list_server;
+use crate::proxyserver::models::ServerSource;
 
 #[derive(Debug)]
 pub enum ManagerCommand {
@@ -112,4 +113,14 @@ pub fn start_config_manager(mut proxy_config: ProxyConfig, mut manager_receiver:
             }
         }
     })
+}
+
+pub  async fn send_config(pool: Pool, manager_sender: UnboundedSender<ManagerCommand>) {
+    let server = list_server(pool, true).await.unwrap();
+
+    let config = UpdateServerConfigData {
+        server_sources: server,
+    };
+    let cmd = ManagerCommand::UpdateServerConfig(config);
+    manager_sender.send(cmd).unwrap();
 }

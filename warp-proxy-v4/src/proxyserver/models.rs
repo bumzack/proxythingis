@@ -1,11 +1,8 @@
-// https://morioh.com/p/47f04c30ffd7
 
 use chrono::{DateTime, Utc};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
-use thiserror::Error;
 use tokio_postgres::Row;
-use warp::reject;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct ServerSource {
@@ -77,47 +74,6 @@ pub struct NewServerTarget<'a> {
     pub method: &'a str,
     pub source: i32,
     pub active: bool,
-}
-
-impl From<Row> for ServerSource {
-    fn from(value: Row) -> Self {
-        ServerSource {
-            id: value.get(0),
-            description: value.get(1),
-            path_starts_with: value.get(2),
-            method: value.get(3),
-            created: value.get(4),
-            targets: vec![],
-            stats: ServerSourceStats::default(),
-        }
-    }
-}
-
-impl From<Row> for ServerTarget {
-    fn from(value: Row) -> Self {
-        ServerTarget {
-            id: value.get(0),
-            description: value.get(1),
-            schema: value.get(2),
-            host: value.get(3),
-            port: value.get(4),
-            method: value.get(5),
-            path: value.get(6),
-            active: value.get(7),
-            stats: ServerTargetStats::default(),
-            created: Default::default(),
-        }
-    }
-}
-
-impl From<Row> for Server2Target {
-    fn from(value: Row) -> Self {
-        Server2Target {
-            id: value.get(0),
-            source_id: value.get(1),
-            target_id: value.get(2),
-        }
-    }
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -206,25 +162,4 @@ impl Default for ServerSourceStats {
 pub struct ErrorResponse {
     pub message: String,
 }
-
-
-#[derive(Error, Debug)]
-pub enum MyError {
-    #[error("error executing DB query: {0}")]
-    DBQueryError(#[from] tokio_postgres::Error),
-    // #[error("error creating table: {0}")]
-    // DBInitError(tokio_postgres::Error),
-    // #[error("error reading file: {0}")]
-    // ReadFileError(#[from] std::io::Error),
-}
-
-impl warp::reject::Reject for MyError {}
-
-// TODO: hihihii
-#[derive(Debug)]
-pub struct DivideByZero;
-
-impl reject::Reject for DivideByZero {}
-
-
 
