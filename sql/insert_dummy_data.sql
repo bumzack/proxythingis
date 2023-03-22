@@ -95,3 +95,19 @@ VALUES (1, 3);
 INSERT INTO source2target (source_id, target_id)
 VALUES (2, 4);
 
+
+
+
+
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('post a new  persons', '/api', 'POST');
+
+
+
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('simplest server. always returns 200 and no persons at all', 'http', 'localhost', 3040, '/api', 'POST',
+        true);
+
+INSERT INTO source2target (source_id, target_id)
+VALUES (3, 5);
+
