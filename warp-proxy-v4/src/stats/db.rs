@@ -30,4 +30,3 @@ impl From<Row> for ServerTargetStats {
         }
     }
 }
-

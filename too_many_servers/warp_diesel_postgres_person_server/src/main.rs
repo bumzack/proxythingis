@@ -1,7 +1,7 @@
 use std::env;
 
-use diesel::PgConnection;
 use diesel::r2d2::ConnectionManager;
+use diesel::PgConnection;
 use r2d2::Pool;
 use warp::Filter;
 
@@ -12,7 +12,6 @@ mod db;
 mod models;
 mod schema;
 mod server;
-
 
 #[tokio::main]
 async fn main() {
@@ -39,8 +38,7 @@ async fn main() {
         .and(with_db(pool.clone()))
         .and_then(move |pool: Pool<ConnectionManager<PgConnection>>| list_person_handler(pool));
 
-    let person_routes = person_create
-        .or(person_list);
+    let person_routes = person_create.or(person_list);
 
     let routes = health_route
         .or(person_routes)
@@ -49,4 +47,3 @@ async fn main() {
 
     warp::serve(routes).run(([127, 0, 0, 1], 3060)).await;
 }
-

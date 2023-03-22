@@ -9,13 +9,11 @@ use crate::db::{create_pool, with_db};
 use crate::server::{create_person_handler, handle_rejection, health_handler, list_person_handler};
 
 mod db;
-mod server;
 mod models;
-
+mod server;
 
 #[tokio::main]
 async fn main() {
-
     // TODO WTF why why ...
     let result = dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/too_many_servers/warp_tokio_postgres_person_server/.env");
     match &result {
@@ -47,8 +45,7 @@ async fn main() {
         .and(with_db(pool.clone()))
         .and_then(move |pool: Pool| list_person_handler(pool, limit));
 
-    let person_routes = person_create
-        .or(person_list);
+    let person_routes = person_create.or(person_list);
 
     let routes = health_route
         .or(person_routes)
@@ -57,4 +54,3 @@ async fn main() {
 
     warp::serve(routes).run(([127, 0, 0, 1], 3050)).await;
 }
-

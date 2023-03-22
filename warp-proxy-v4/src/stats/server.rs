@@ -2,21 +2,27 @@ use chrono::Utc;
 use deadpool_postgres::Pool;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::Reply;
 use warp::reply::json;
+use warp::Reply;
 
 use crate::config_manager::manager::{GetConfigData, ManagerCommand};
 use crate::server::server::Result;
 
-pub async fn stats_read_handler(manager_sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply> {
+pub async fn stats_read_handler(
+    manager_sender: UnboundedSender<ManagerCommand>,
+) -> Result<impl Reply> {
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
         reset_start: false,
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
-    manager_sender.send(cmd).expect("stats_read_handler expected send successful");
-    let proxy_config = rx.await.expect("stats_read_handler expected a valid proxy config");
+    manager_sender
+        .send(cmd)
+        .expect("stats_read_handler expected send successful");
+    let proxy_config = rx
+        .await
+        .expect("stats_read_handler expected a valid proxy config");
     // println!("got proxyconfig = {:?}", proxy_config);
 
     let res = json(&proxy_config);
@@ -24,15 +30,22 @@ pub async fn stats_read_handler(manager_sender: UnboundedSender<ManagerCommand>)
     Ok(res)
 }
 
-pub async fn stats_store_handler(_pool: Pool, manager_sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply> {
+pub async fn stats_store_handler(
+    _pool: Pool,
+    manager_sender: UnboundedSender<ManagerCommand>,
+) -> Result<impl Reply> {
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
         reset_start: true,
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
-    manager_sender.send(cmd).expect("stats_store_handler expected send successful");
-    let mut proxy_config = rx.await.expect("stats_store_handler expected a valid proxy config");
+    manager_sender
+        .send(cmd)
+        .expect("stats_store_handler expected send successful");
+    let mut proxy_config = rx
+        .await
+        .expect("stats_store_handler expected a valid proxy config");
     proxy_config.stop = Utc::now();
 
     // for source in &proxy_config.server_sources {
@@ -52,9 +65,13 @@ pub async fn stats_store_handler(_pool: Pool, manager_sender: UnboundedSender<Ma
     Ok(res)
 }
 
-pub async fn stats_reset_handler(manager_sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply> {
+pub async fn stats_reset_handler(
+    manager_sender: UnboundedSender<ManagerCommand>,
+) -> Result<impl Reply> {
     let cmd = ManagerCommand::ResetStats;
-    manager_sender.send(cmd).expect("stats_reset_handler expected send successful");
+    manager_sender
+        .send(cmd)
+        .expect("stats_reset_handler expected send successful");
     let msg = "successfully resetted stats";
     let res = json(&msg);
 
