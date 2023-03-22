@@ -65,6 +65,18 @@ async fn main() {
         .with_span_events(FmtSpan::CLOSE)
         .init();
 
+    let cors = warp::cors()
+        .allow_any_origin()
+        .allow_headers(vec![
+            "User-Agent",
+            "Sec-Fetch-Mode",
+            "Referer",
+            "Origin",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers",
+        ])
+        .allow_methods(vec!["POST", "GET"]);
+
     let stats_routes = stats_routes(&pool, &manager_sender);
     let server_routes = server_routes(pool, &manager_sender);
     let proxy_routes = proxy_routes(manager_sender);

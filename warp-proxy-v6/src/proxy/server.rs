@@ -1,8 +1,8 @@
-use futures_util::TryStreamExt;
 use std::convert::Infallible;
 use std::str::FromStr;
 use std::time::Instant;
 
+use futures_util::TryStreamExt;
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
@@ -181,6 +181,10 @@ async fn handler(
         .headers_mut()
         .insert("x-duration", HeaderValue::from_str(&d).unwrap());
     response.headers_mut().insert(
+        "access-control-allow-origin",
+        HeaderValue::from_str(&"http://localhost:4011").unwrap(),
+    );
+    response.headers_mut().insert(
         "x-provided-by",
         HeaderValue::from_str(target_description).unwrap(),
     );
@@ -203,6 +207,8 @@ fn find_match<'a>(
     method: &Method,
 ) -> Option<&'a ServerSource> {
     for s in &proxy_config.server_sources {
+        // println!("searching for request uri {}, method {}    comparing with config  path_starts_with  {} and method {}",
+        //          &uri.as_str(), &method,&s.path_starts_with, &s.method);
         if uri.as_str().starts_with(&s.path_starts_with)
             && method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase()
         {
