@@ -1,7 +1,7 @@
+use crate::stats::models::{ServerSourceStats, ServerTargetStats};
 use chrono::{DateTime, Utc};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
-use tokio_postgres::Row;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct ServerSource {
@@ -71,87 +71,6 @@ pub struct NewServerTarget<'a> {
     pub method: &'a str,
     pub source: i32,
     pub active: bool,
-}
-
-#[derive(Deserialize, Serialize, Clone, Debug)]
-pub struct ServerSourceStats {
-    pub id: i32,
-    pub source_id: i32,
-    pub hits: i32,
-    pub start: DateTime<Utc>,
-    pub stop: DateTime<Utc>,
-    pub created: DateTime<Utc>,
-}
-
-impl From<Row> for ServerSourceStats {
-    fn from(value: Row) -> Self {
-        ServerSourceStats {
-            id: value.get("id"),
-            source_id: value.get("source_id"),
-            hits: value.get("hits"),
-            start: value.get("start"),
-            stop: value.get("stop"),
-            created: value.get("created"),
-        }
-    }
-}
-
-#[derive(Deserialize, Serialize, Clone, Debug)]
-pub struct ServerTargetStats {
-    pub id: i32,
-    pub target_id: i32,
-    pub hits: i64,
-    pub avg_ns: i64,
-    pub max_ns: i64,
-    pub min_ns: i64,
-    pub start: DateTime<Utc>,
-    pub stop: DateTime<Utc>,
-    pub created: DateTime<Utc>,
-}
-
-impl From<Row> for ServerTargetStats {
-    fn from(value: Row) -> Self {
-        ServerTargetStats {
-            id: value.get("id"),
-            target_id: value.get("target_id"),
-            hits: value.get("hits"),
-            avg_ns: value.get("avg_ns"),
-            max_ns: value.get("max_ns"),
-            min_ns: value.get("min_ns"),
-            start: value.get("start"),
-            stop: value.get("stop"),
-            created: value.get("created"),
-        }
-    }
-}
-
-impl Default for ServerTargetStats {
-    fn default() -> Self {
-        ServerTargetStats {
-            id: 0,
-            target_id: 0,
-            hits: 0,
-            avg_ns: 0,
-            max_ns: 0,
-            min_ns: 99999999,
-            start: Default::default(),
-            stop: Default::default(),
-            created: Default::default(),
-        }
-    }
-}
-
-impl Default for ServerSourceStats {
-    fn default() -> Self {
-        ServerSourceStats {
-            id: 0,
-            source_id: 0,
-            hits: 0,
-            start: Default::default(),
-            stop: Default::default(),
-            created: Default::default(),
-        }
-    }
 }
 
 #[derive(Serialize)]

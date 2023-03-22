@@ -38,20 +38,9 @@ pub async fn execute_forward_request(
         Err(e) => println!("error sending cmd::GetConfig to manager {}", e),
     };
 
-    // sender.send(cmd).expect("execute_forward_request expected send successful");
     let proxy_config = rx
         .await
         .expect("execute_forward_request expected a valid proxy config");
-    // println!("got a config!!!! {:?}", proxy_config);
-
-    // println!("uri  {:?}", &uri);
-    // match &params {
-    //     Some(p) => println!("params  {:?}", p),
-    //     None => println!("no params provided"),
-    // }
-    // println!("params  {:?}", &params);
-    // println!("proxy_method  {:?}", &proxy_method);
-    // println!("headers  {:?}", &headers);
 
     // is there a match for the uri in the config
     let source = find_match(&uri, &proxy_config, &proxy_method);
@@ -96,21 +85,10 @@ pub async fn execute_forward_request(
         Some(p) => format!("{}{}?{}", target_path, path_to_pass_on, p),
         None => format!("{}{}", target_path, path_to_pass_on),
     };
-    // println!("path_to_pass_on       {:?}", &path_to_pass_on);
-    // println!("target_host           {:?}", &target_host);
-    // println!("target_port           {:?}", &target_port);
-    // println!("target_method         {:?}", &target_method);
-    // println!("target_schema         {:?}", &target_schema);
-    // println!("target_path           {:?}", &target_path);
-    // println!("full_path  {:?}", &full_path);
-    //
-    // println!("final path {:?}", &full_path);
 
     let m = Method::from_str(target_method).expect("cant determine method from str");
 
     let body = body.map_ok(|mut buf| buf.copy_to_bytes(buf.remaining()));
-
-    // println!("fullpath {}", &full_path);
 
     let mut hyper_request = hyper::http::Request::builder()
         .method(m)
@@ -158,20 +136,10 @@ async fn handler(
     target_schema: &String,
     target_description: &String,
 ) -> Result<impl warp::Reply, Infallible> {
-    // println!("full_path                         {:?}", &full_path);
-    // println!("target_host                       {:?}", &target_host);
-    // println!("target_port                       {:?}", &target_port);
-    // println!("target_method                     {:?}", &target_method);
-    // println!("target_schema                     {:?}", &target_schema);
-    // println!("request.uri().to_string()         {:?}", &request.uri().to_string());
-
     let proxy_url = format!(
         "{}://{}:{}{}",
         target_schema, target_host, target_port, full_path
     );
-    // println!("proxy_url         {:?}", &proxy_url);
-
-    // let proxyUriForLogging = proxyUrl.clone();
     let proxy_url = proxy_url.parse::<Uri>().unwrap();
     *request.uri_mut() = proxy_url.clone();
 
