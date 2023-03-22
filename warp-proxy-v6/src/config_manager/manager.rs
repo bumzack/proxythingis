@@ -35,7 +35,7 @@ pub struct UpdateSourceStatsData {
 #[derive(Debug, Clone)]
 pub struct UpdateTargetStatsData {
     pub(crate) id: i32,
-    pub(crate) duration_nanos: i32,
+    pub(crate) duration_nanos: i64,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -87,12 +87,14 @@ pub fn start_config_manager(
                                     t.stats.max_ns = target_stats.duration_nanos;
                                 }
                                 let avg = t.stats.avg_ns;
-                                let old_n = t.stats.hits;
-                                let sum = avg * old_n;
-                                let new_avg = (sum + target_stats.duration_nanos) / (old_n + 1);
+
+                                // FUNNY BUG: remove casts to u128 -> then this will overflow and crash the tasks
+                                let old_n = t.stats.hits as u128;
+                                let sum = avg as u128 * old_n;
+                                let new_avg = (sum + target_stats.duration_nanos as u128) / (old_n + 1);
 
                                 t.stats.hits += 1;
-                                t.stats.avg_ns = new_avg;
+                                t.stats.avg_ns = new_avg as i64;
                             }
                         }
                     }
