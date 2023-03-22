@@ -8,7 +8,7 @@ use serde_derive::Serialize;
 pub struct ServerSourceStats {
     pub id: i32,
     pub source_id: i32,
-    pub hits: u32,
+    pub hits: i32,
     pub start: DateTime<Utc>,
     pub stop: DateTime<Utc>,
     pub created: DateTime<Utc>,
@@ -18,10 +18,10 @@ pub struct ServerSourceStats {
 pub struct ServerTargetStats {
     pub id: i32,
     pub target_id: i32,
-    pub hits: u32,
-    pub avg_ns: u32,
-    pub max_ns: u32,
-    pub min_ns: u32,
+    pub hits: i32,
+    pub avg_ns: i32,
+    pub max_ns: i32,
+    pub min_ns: i32,
     pub start: DateTime<Utc>,
     pub stop: DateTime<Utc>,
     pub created: DateTime<Utc>,

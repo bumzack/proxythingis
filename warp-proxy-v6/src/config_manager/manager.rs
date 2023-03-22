@@ -35,7 +35,7 @@ pub struct UpdateSourceStatsData {
 #[derive(Debug, Clone)]
 pub struct UpdateTargetStatsData {
     pub(crate) id: i32,
-    pub(crate) duration_nanos: u32,
+    pub(crate) duration_nanos: i32,
 }
 
 #[derive(Debug, Clone, Serialize)]

@@ -7,7 +7,6 @@ use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
 use warp::http::{HeaderValue, Method, Request, Uri};
-use warp::hyper::body::Bytes;
 use warp::hyper::Body;
 use warp::{hyper, Buf, Rejection, Reply, Stream};
 
@@ -209,7 +208,7 @@ async fn handler(
 
     let update_target_stats_data = UpdateTargetStatsData {
         id: server_target_idx,
-        duration_nanos: duration.as_nanos() as u32,
+        duration_nanos: duration.as_nanos() as i32,
     };
     let cmd = ManagerCommand::UpdateTargetStats(update_target_stats_data);
     sender

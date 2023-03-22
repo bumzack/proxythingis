@@ -7,10 +7,12 @@ use warp::Reply;
 
 use crate::config_manager::manager::{GetConfigData, ManagerCommand};
 use crate::server::server::Result;
+use crate::stats::db::{create_source_stats, create_target_stats};
 
 pub async fn stats_read_handler(
     manager_sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply> {
+    println!("reading stats");
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
@@ -31,9 +33,10 @@ pub async fn stats_read_handler(
 }
 
 pub async fn stats_store_handler(
-    _pool: Pool,
+    pool: Pool,
     manager_sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply> {
+    println!("saving stats");
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
@@ -46,14 +49,22 @@ pub async fn stats_store_handler(
     let mut proxy_config = rx
         .await
         .expect("stats_store_handler expected a valid proxy config");
-    proxy_config.stop = Utc::now();
+    // proxy_config.stop = Utc::now();
 
-    // for source in &proxy_config.server_sources {
-    //     create_source_stats(pool.clone(), source.id, source.stats.hits, source.stats.start, source.stats.stop).await.expect("stats_store_handler expects to be able to write the source stats");
-    //     for target in &source.targets {
-    //         create_target_stats(pool.clone(), target.id, target.stats.hits, target.stats.min_ns, target.stats.max_ns, target.stats.avg_ns, source.stats.start, source.stats.stop).await.expect("stats_store_handler expects to be able to write the target stats");
-    //     }
-    // }
+    for source in &proxy_config.server_sources {
+        create_source_stats(
+            pool.clone(),
+            source.id,
+            source.stats.hits as i32,
+            source.stats.start,
+            source.stats.stop,
+        )
+        .await
+        .expect("stats_store_handler expects to be able to write the source stats");
+        // for target in &source.targets {
+        //     create_target_stats(pool.clone(), target.id, target.stats.hits, target.stats.min_ns, target.stats.max_ns, target.stats.avg_ns, source.stats.start, source.stats.stop).await.expect("stats_store_handler expects to be able to write the target stats");
+        // }
+    }
 
     // proxy_config.server_sources.iter().for_each(async |source| {
     //     source.targets.iter().for_each(async |target| {
@@ -68,11 +79,12 @@ pub async fn stats_store_handler(
 pub async fn stats_reset_handler(
     manager_sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply> {
+    println!("reset stats");
     let cmd = ManagerCommand::ResetStats;
     manager_sender
         .send(cmd)
         .expect("stats_reset_handler expected send successful");
-    let msg = "successfully reseted stats";
+    let msg = "successfully resetted stats";
     let res = json(&msg);
 
     Ok(res)

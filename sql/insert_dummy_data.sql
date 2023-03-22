@@ -20,23 +20,49 @@ CREATE TABLE IF NOT EXISTS target
     description VARCHAR(200)       NOT NULL,
     "schema"    VARCHAR(200)       NOT NULL,
     host        VARCHAR(200)       NOT NULL,
-    port        INTEGER            NOT NULL,
+    port        INT                NOT NULL,
     path        VARCHAR(200)       NOT NULL,
     method      VARCHAR(200)       NOT NULL,
-    active      boolean            NOT NULL,
+    active      BOOLEAN            NOT NULL,
     created     TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS source2target
 (
     id        serial PRIMARY KEY NOT NULL,
-    source_id int                NOT NULL,
-    target_id int                NOT NULL,
+    source_id INT                NOT NULL,
+    target_id INT                NOT NULL,
     created   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (source_id) REFERENCES source (id),
     FOREIGN KEY (target_id) REFERENCES target (id)
 );
 
+
+
+CREATE TABLE IF NOT EXISTS source_stats
+(
+    id        serial PRIMARY KEY       NOT NULL,
+    hits      INT                      NOT NULL,
+    source_id INT                      NOT NULL,
+    start     TIMESTAMP WITH TIME ZONE NOT NULL,
+    stop      TIMESTAMP WITH TIME ZONE NOT NULL,
+    created   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (source_id) REFERENCES source (id)
+);
+
+CREATE TABLE IF NOT EXISTS target_stats
+(
+    id        serial PRIMARY KEY       NOT NULL,
+    hits      INT                      NOT NULL,
+    min_ns    INT                      NOT NULL,
+    max_ns    INT                      NOT NULL,
+    avg_ns    INT                      NOT NULL,
+    start     TIMESTAMP WITH TIME ZONE NOT NULL,
+    stop      TIMESTAMP WITH TIME ZONE NOT NULL,
+    target_id INT                      NOT NULL,
+    created   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (target_id) REFERENCES target (id)
+);
 
 INSERT INTO source (description, path_starts_with, method)
 VALUES ('return a list of persons', '/api', 'GET');
