@@ -1,14 +1,15 @@
 use std::convert::Infallible;
 use std::str::FromStr;
 use std::time::Instant;
-
 use futures_util::TryStreamExt;
+
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::{Buf, hyper, Rejection, Reply, Stream};
 use warp::http::{HeaderValue, Method, Request, Uri};
+use warp::{Buf, hyper, Rejection, Reply, Stream};
 use warp::hyper::Body;
+use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
 
@@ -16,7 +17,7 @@ use crate::CLIENT;
 use crate::config_manager::manager::{GetConfigData, ManagerCommand, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData};
 use crate::proxyserver::models::{ServerSource, ServerTarget};
 
-pub async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters, proxy_method: ProxyMethod, headers: ProxyHeaders, body: impl Stream<Item=Result<impl Buf, warp::Error>> + Send + 'static, sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply, Rejection> {
+pub async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters, proxy_method: ProxyMethod, headers: ProxyHeaders, body:  impl Stream<Item=Result<impl Buf, warp::Error>> + Send + 'static, sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply, Rejection> {
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
@@ -173,6 +174,7 @@ async fn handler(mut request: Request<Body>, sender: UnboundedSender<ManagerComm
 
     Ok(response)
 }
+
 
 fn find_match<'a>(uri: &ProxyUri, proxy_config: &'a ProxyConfig, method: &Method) -> Option<&'a ServerSource> {
     for s in &proxy_config.server_sources {

@@ -10,10 +10,6 @@ pub enum MyError {
     // ReadFileError(#[from] std::io::Error),
 }
 
-
 // TODO: hihihii
 #[derive(Debug)]
 pub struct DivideByZero;
-
-
-

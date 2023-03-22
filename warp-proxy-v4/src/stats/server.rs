@@ -55,9 +55,8 @@ pub async fn stats_store_handler(_pool: Pool, manager_sender: UnboundedSender<Ma
 pub async fn stats_reset_handler(manager_sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply> {
     let cmd = ManagerCommand::ResetStats;
     manager_sender.send(cmd).expect("stats_reset_handler expected send successful");
-    let msg = "successfully reseted stats";
+    let msg = "successfully resetted stats";
     let res = json(&msg);
 
     Ok(res)
 }
-
