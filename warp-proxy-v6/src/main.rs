@@ -71,5 +71,5 @@ async fn main() {
 
     let routes = stats_routes.or(server_routes).or(proxy_routes);
 
-    warp::serve(routes).run(([127, 0, 0, 1], 3034)).await;
+    warp::serve(routes).run(([127, 0, 0, 1], 3036)).await;
 }
