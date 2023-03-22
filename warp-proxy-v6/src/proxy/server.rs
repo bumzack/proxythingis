@@ -208,7 +208,7 @@ async fn handler(
 
     let update_target_stats_data = UpdateTargetStatsData {
         id: server_target_idx,
-        duration_nanos: duration.as_nanos() as i32,
+        duration_nanos: duration.as_nanos() as i64,
     };
     let cmd = ManagerCommand::UpdateTargetStats(update_target_stats_data);
     sender
