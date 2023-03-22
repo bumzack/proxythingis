@@ -7,11 +7,11 @@ use tokio_postgres::Row;
 
 use crate::db::db::{TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_TARGET};
 use crate::proxyserver::models::{
-    NewServerSourcePost, NewServerTargetPost, Server2Target, ServerSource, ServerSourceStats,
-    ServerTarget, ServerTargetStats,
+    NewServerSourcePost, NewServerTargetPost, Server2Target, ServerSource, ServerTarget,
 };
 use crate::server::models::MyError::DBQueryError;
 use crate::server::server::Result;
+use crate::stats::models::{ServerSourceStats, ServerTargetStats};
 
 impl From<Row> for ServerSource {
     fn from(value: Row) -> Self {
@@ -60,8 +60,6 @@ pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<Serv
         "INSERT INTO {} (description, path_starts_with, method) VALUES ($1, $2, $3) RETURNING *",
         TABLE_SOURCE
     );
-    // println!("new server source {:?}", &body);
-    // println!("query   {}", &query);
     let row = client
         .query_one(
             query.as_str(),
@@ -76,8 +74,6 @@ pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<Serv
 pub async fn create_target(pool: Pool, body: NewServerTargetPost) -> Result<ServerTarget> {
     let client = pool.get().await.unwrap();
     let query = format!("INSERT INTO {} (description, schema, host, port, path, method, active) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", TABLE_TARGET);
-    // println!("new server target {:?}", &body);
-    // println!("query   {}", &query);
     let row = client
         .query_one(
             query.as_str(),
@@ -99,7 +95,6 @@ pub async fn create_target(pool: Pool, body: NewServerTargetPost) -> Result<Serv
     let _source_2_target = create_source2target(pool.clone(), body.source, server_target.id)
         .await
         .unwrap();
-    // println!("source_2_target   {:?}", &source_2_target);
 
     Ok(server_target)
 }
@@ -114,8 +109,6 @@ pub async fn create_source2target(
         "INSERT INTO {} (source_id, target_id) VALUES ($1, $2) RETURNING *",
         TABLE_SOURCE2TARGET
     );
-    // println!("new source -> target  {:?} -> {:?}", source_id, target_id);
-    // println!("query   {}", &query);
     let row = client
         .query_one(query.as_str(), &[&source_id, &target_id])
         .await
@@ -139,11 +132,6 @@ pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSour
         TABLE_TARGET, TABLE_SOURCE2TARGET, TABLE_TARGET
     );
 
-    // println!("query1 {}", &query1);
-    // println!("query2 {}", &query2);
-    // println!("query3 {}", &query3);
-    // println!("query4 {}", &query4);
-
     let mut map: HashMap<i32, ServerSource> = HashMap::new();
 
     let query_full = query1.add(&query2).add(&query3).add(&query4);
@@ -165,9 +153,6 @@ pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSour
         let target_method: &str = row.get("target_method");
         let target_active: bool = row.get("target_active");
         let target_created: DateTime<Utc> = row.get("target_created");
-
-        // println!("found server source: {} {} {} {:?}", source_id, source_description, source_method, source_path_starts_with);
-        // println!("\tfound server target: {} {} {} {:?} {} {} {:?}", target_id, target_description, target_schema, target_port, target_path, target_method, target_active);
 
         let mut server_source = ServerSource {
             id: source_id,
