@@ -3,13 +3,13 @@
 use std::convert::Infallible;
 
 use deadpool_postgres::Pool;
-use warp::{reject, Rejection, Reply};
 use warp::http::StatusCode;
 use warp::reply::json;
+use warp::{reject, Rejection, Reply};
 
 use crate::db::{create_person, list_person};
-use crate::models::{DivideByZero, ErrorResponse, MyError, PersonRequest, PersonResponse};
 use crate::models::MyError::DBQueryError;
+use crate::models::{DivideByZero, ErrorResponse, MyError, PersonRequest, PersonResponse};
 
 pub async fn create_person_handler(body: PersonRequest, pool: Pool) -> Result<impl Reply> {
     Ok(json(&PersonResponse::of(
@@ -23,7 +23,6 @@ pub async fn create_person_handler(body: PersonRequest, pool: Pool) -> Result<im
     )))
 }
 
-
 pub async fn list_person_handler(pool: Pool, limit: u32) -> Result<impl Reply> {
     let data = list_person(pool, limit)
         .await
@@ -33,12 +32,9 @@ pub async fn list_person_handler(pool: Pool, limit: u32) -> Result<impl Reply> {
             reject::custom(DivideByZero)
         })?;
 
-    let res: Vec<PersonResponse> = data.iter().map(|p| {
-        PersonResponse::of(p.clone())
-    }).collect();
+    let res: Vec<PersonResponse> = data.iter().map(|p| PersonResponse::of(p.clone())).collect();
     Ok(json(&res))
 }
-
 
 pub async fn health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejection> {
     let client = pool.get().await.unwrap();
@@ -52,7 +48,6 @@ pub async fn health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejec
 }
 
 type Result<T> = std::result::Result<T, Rejection>;
-
 
 pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply, Infallible> {
     let mut code = Default::default();
@@ -92,6 +87,3 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
 
     Ok(warp::reply::with_status(json, code))
 }
-
-
-

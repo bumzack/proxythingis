@@ -6,15 +6,17 @@ use std::future::Future;
 
 use tokio::time::Instant;
 use tracing_subscriber::fmt::format::FmtSpan;
-use warp::{Filter, hyper, Rejection, Reply};
 use warp::http::{HeaderValue, Request};
-use warp::hyper::{Body, Uri};
 use warp::hyper::body::Bytes;
+use warp::hyper::{Body, Uri};
+use warp::{hyper, Filter, Rejection, Reply};
 
-use common::warp_request_filter::{extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
+use common::warp_request_filter::{
+    extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri,
+};
 
-use crate::hyper::Client;
 use crate::hyper::client::HttpConnector;
+use crate::hyper::Client;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
@@ -44,12 +46,16 @@ async fn main() {
 
     let routes = warp::any()
         .and(extract_request_data_filter())
-        .map(|uri: ProxyUri, params: ProxyQueryParameters, proxy_method: ProxyMethod, headers: ProxyHeaders, body: Bytes| {
-            compose_forward_request(&uri, &params, &proxy_method, &headers, body)
-        })
-        .and_then(|hyper_request: Request<Body>| {
-            execute_forward_request(hyper_request)
-        });
+        .map(
+            |uri: ProxyUri,
+             params: ProxyQueryParameters,
+             proxy_method: ProxyMethod,
+             headers: ProxyHeaders,
+             body: Bytes| {
+                compose_forward_request(&uri, &params, &proxy_method, &headers, body)
+            },
+        )
+        .and_then(|hyper_request: Request<Body>| execute_forward_request(hyper_request));
     // .with(warp::trace(|info| {
     //     // Construct our own custom span for this route.
     //     tracing::info_span!("goodbye", req.path = ?info.path())
@@ -57,12 +63,12 @@ async fn main() {
     // .with(warp::trace::named("hello"))
     // .with(warp::trace::request());
 
-    warp::serve(routes)
-        .run(([127, 0, 0, 1], 3033))
-        .await;
+    warp::serve(routes).run(([127, 0, 0, 1], 3033)).await;
 }
 
-fn execute_forward_request(hyper_request: Request<Body>) -> impl Future<Output=Result<impl Reply + Sized, Rejection>> {
+fn execute_forward_request(
+    hyper_request: Request<Body>,
+) -> impl Future<Output = Result<impl Reply + Sized, Rejection>> {
     let result = handler(hyper_request);
 
     async move {
@@ -77,7 +83,13 @@ fn execute_forward_request(hyper_request: Request<Body>) -> impl Future<Output=R
     }
 }
 
-fn compose_forward_request(uri: &ProxyUri, params: &ProxyQueryParameters, proxy_method: &ProxyMethod, headers: &ProxyHeaders, body: Bytes) -> Request<Body> {
+fn compose_forward_request(
+    uri: &ProxyUri,
+    params: &ProxyQueryParameters,
+    proxy_method: &ProxyMethod,
+    headers: &ProxyHeaders,
+    body: Bytes,
+) -> Request<Body> {
     println!("uri  {:?}", &uri);
     match &params {
         Some(p) => println!("params  {:?}", p),
@@ -98,7 +110,6 @@ fn compose_forward_request(uri: &ProxyUri, params: &ProxyQueryParameters, proxy_
     println!("final path {:?}", &full_path);
     println!("body empty {:?}", &body.is_empty());
 
-
     let mut hyper_request = hyper::http::Request::builder()
         .method(method)
         .uri(full_path)
@@ -117,12 +128,13 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     let host = "localhost";
     let port = "3040";
     let path = "fromloadbalancer";
-    let proxy_url = format!("{}://{}:{}/{}{}",
-                            schema,
-                            host,
-                            port,
-                            path,
-                            request.uri().to_string()
+    let proxy_url = format!(
+        "{}://{}:{}/{}{}",
+        schema,
+        host,
+        port,
+        path,
+        request.uri().to_string()
     );
 
     // let proxyUriForLogging = proxyUrl.clone();
@@ -130,9 +142,15 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     *request.uri_mut() = proxy_url.clone();
 
     let headers = request.headers_mut();
-    headers.insert(hyper::header::HOST, hyper::header::HeaderValue::from_str("bla").unwrap());
+    headers.insert(
+        hyper::header::HOST,
+        hyper::header::HeaderValue::from_str("bla").unwrap(),
+    );
     let origin = format!("{}://{}::{}", schema, host, port);
-    headers.insert(hyper::header::ORIGIN, hyper::header::HeaderValue::from_str(origin.as_str()).unwrap());
+    headers.insert(
+        hyper::header::ORIGIN,
+        hyper::header::HeaderValue::from_str(origin.as_str()).unwrap(),
+    );
     //
     // let http_connector = hyper::client::HttpConnector::new();
     // let client = hyper::Client::builder().build(http_connector);
@@ -141,8 +159,15 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     let start = Instant::now();
     let mut response = CLIENT.request(request).await.expect("Request failed");
     let duration = start.elapsed();
-    let d = format!("duration {} ms,{} µs  {} ns ", duration.as_millis(), duration.as_micros(), duration.as_nanos());
+    let d = format!(
+        "duration {} ms,{} µs  {} ns ",
+        duration.as_millis(),
+        duration.as_micros(),
+        duration.as_nanos()
+    );
     println!("{} ", &d);
-    response.headers_mut().insert("x-duration", HeaderValue::from_str(&d).unwrap());
+    response
+        .headers_mut()
+        .insert("x-duration", HeaderValue::from_str(&d).unwrap());
     Ok(response)
 }

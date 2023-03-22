@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS source
     description      VARCHAR(200)       NOT NULL,
     path_starts_with VARCHAR(200)       NOT NULL,
     created          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                                   );
+);
 
 CREATE TABLE IF NOT EXISTS target
 (
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS target
     method      VARCHAR(200)       NOT NULL,
     active      boolean            NOT NULL,
     created     TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                              );
+);
 
 CREATE TABLE IF NOT EXISTS source2target
 (
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS source2target
     created   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (source_id) REFERENCES source (id),
     FOREIGN KEY (target_id) REFERENCES target (id)
-    );
+);
 
 
 CREATE TABLE IF NOT EXISTS source_stats
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS source_stats
     stop      TIMESTAMP WITH TIME ZONE NOT NULL,
     created   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (source_id) REFERENCES source (id)
-    );
+);
 
 CREATE TABLE IF NOT EXISTS target_stats
 (
@@ -53,4 +53,4 @@ CREATE TABLE IF NOT EXISTS target_stats
     target_id int                      NOT NULL,
     created   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (target_id) REFERENCES target (id)
-    );
+);

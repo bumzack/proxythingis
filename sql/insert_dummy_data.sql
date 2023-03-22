@@ -1,3 +1,10 @@
+DROP TABLE source_stats;
+DROP TABLE target_stats;
+
+DROP TABLE source2target;
+DROP TABLE source;
+DROP TABLE target;
+
 CREATE TABLE IF NOT EXISTS source
 (
     id               serial PRIMARY KEY NOT NULL,
@@ -36,7 +43,7 @@ VALUES ('return a list of persons', '/api', 'GET');
 
 
 INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('simplest server. always returns 200 and no persons at all', 'http', 'localhost', 3040, 'api/person', 'GET',
+VALUES ('simplest server. always returns 200 and no persons at all', 'http', 'localhost', 3040, '/api', 'GET',
         true);
 
 INSERT INTO target (description, schema, host, port, path, method, active)

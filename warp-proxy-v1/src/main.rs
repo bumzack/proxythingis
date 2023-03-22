@@ -3,12 +3,12 @@ extern crate lazy_static;
 use std::convert::Infallible;
 use std::env;
 
-use warp::{Filter, hyper};
 use warp::http::Request;
 use warp::hyper::{Body, Uri};
+use warp::{hyper, Filter};
 
-use crate::hyper::Client;
 use crate::hyper::client::HttpConnector;
+use crate::hyper::Client;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
@@ -57,9 +57,7 @@ async fn main() {
         });
     // println!("serving at {}", string_address);
 
-    warp::serve(routes)
-        .run(([127, 0, 0, 1], 3031))
-        .await;
+    warp::serve(routes).run(([127, 0, 0, 1], 3031)).await;
 }
 
 async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infallible> {
@@ -67,12 +65,13 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     let host = "localhost";
     let port = "3040";
     let path = "fromloadbalancer";
-    let proxy_url = format!("{}://{}:{}/{}{}",
-                            schema,
-                            host,
-                            port,
-                            path,
-                            request.uri().to_string()
+    let proxy_url = format!(
+        "{}://{}:{}/{}{}",
+        schema,
+        host,
+        port,
+        path,
+        request.uri().to_string()
     );
 
     // let proxyUriForLogging = proxyUrl.clone();
@@ -80,9 +79,15 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     *request.uri_mut() = proxy_url.clone();
 
     let headers = request.headers_mut();
-    headers.insert(hyper::header::HOST, hyper::header::HeaderValue::from_str("bla").unwrap());
+    headers.insert(
+        hyper::header::HOST,
+        hyper::header::HeaderValue::from_str("bla").unwrap(),
+    );
     let origin = format!("{}://{}::{}", schema, host, port);
-    headers.insert(hyper::header::ORIGIN, hyper::header::HeaderValue::from_str(origin.as_str()).unwrap());
+    headers.insert(
+        hyper::header::ORIGIN,
+        hyper::header::HeaderValue::from_str(origin.as_str()).unwrap(),
+    );
     //
     // let http_connector = hyper::client::HttpConnector::new();
     // let client = hyper::Client::builder().build(http_connector);

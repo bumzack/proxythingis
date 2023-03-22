@@ -1,9 +1,9 @@
 use deadpool_postgres::Pool;
-use warp::{reject, Rejection, Reply};
 use warp::http::StatusCode;
+use warp::{reject, Rejection, Reply};
 
-use crate::server::models::{DivideByZero, MyError};
 use crate::server::models::MyError::DBQueryError;
+use crate::server::models::{DivideByZero, MyError};
 
 pub type Result<T> = std::result::Result<T, Rejection>;
 
@@ -21,7 +21,6 @@ pub async fn health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejec
 impl warp::reject::Reject for MyError {}
 
 impl reject::Reject for DivideByZero {}
-
 
 // pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply, Infallible> {
 //     let code;
@@ -60,5 +59,3 @@ impl reject::Reject for DivideByZero {}
 //
 //     Ok(warp::reply::with_status(json, code))
 // }
-
-

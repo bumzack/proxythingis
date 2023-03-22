@@ -19,10 +19,9 @@ pub fn create_pool() -> Pool {
     pg_config.host(env::var("DBHOSTNAME").unwrap().as_str());
     pg_config.dbname(env::var("DBNAME").unwrap().as_str());
     let mgr_config = ManagerConfig {
-        recycling_method: RecyclingMethod::Fast
+        recycling_method: RecyclingMethod::Fast,
     };
     let mgr = Manager::from_config(pg_config, NoTls, mgr_config);
     let pool = Pool::builder(mgr).max_size(16).build().unwrap();
     pool
 }
-

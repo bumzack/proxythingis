@@ -1,11 +1,11 @@
 use std::convert::Infallible;
 use std::env;
 
-use diesel::{PgConnection, RunQueryDsl};
 use diesel::r2d2::ConnectionManager;
+use diesel::{PgConnection, RunQueryDsl};
 use r2d2::Pool;
-use warp::Filter;
 use warp::http::StatusCode;
+use warp::Filter;
 
 use crate::models::{ErrorMessage, NewPerson, Person};
 
@@ -25,7 +25,11 @@ pub fn read_persons(pool: Pool<ConnectionManager<PgConnection>>) -> Vec<Person> 
     results
 }
 
-pub fn create_person(pool: Pool<ConnectionManager<PgConnection>>, firstname: &str, lastname: &str) -> Result<impl warp::Reply, Infallible> {
+pub fn create_person(
+    pool: Pool<ConnectionManager<PgConnection>>,
+    firstname: &str,
+    lastname: &str,
+) -> Result<impl warp::Reply, Infallible> {
     use crate::schema::person;
     let connection = &mut pool.get().unwrap();
 
@@ -49,7 +53,10 @@ pub fn create_person(pool: Pool<ConnectionManager<PgConnection>>, firstname: &st
             Ok(warp::reply::with_status(json, code))
         }
         Err(e) => {
-            let message = format!("an error occurred inserting a new person which we are ignoring '{}'", e);
+            let message = format!(
+                "an error occurred inserting a new person which we are ignoring '{}'",
+                e
+            );
             let code = StatusCode::INTERNAL_SERVER_ERROR;
 
             let json = warp::reply::json(&ErrorMessage {
@@ -61,7 +68,6 @@ pub fn create_person(pool: Pool<ConnectionManager<PgConnection>>, firstname: &st
         }
     }
 }
-
 
 fn database_url_for_env() -> String {
     // TODO
@@ -88,6 +94,9 @@ pub fn get_connection_pool() -> Pool<ConnectionManager<PgConnection>> {
         .expect("Could not build connection pool")
 }
 
-pub fn with_db(db: Pool<ConnectionManager<PgConnection>>) -> impl Filter<Extract=(Pool<ConnectionManager<PgConnection>>, ), Error=std::convert::Infallible> + Clone {
+pub fn with_db(
+    db: Pool<ConnectionManager<PgConnection>>,
+) -> impl Filter<Extract = (Pool<ConnectionManager<PgConnection>>,), Error = std::convert::Infallible>
+       + Clone {
     warp::any().map(move || db.clone())
 }

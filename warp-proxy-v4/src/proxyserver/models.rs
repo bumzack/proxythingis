@@ -14,7 +14,6 @@ pub struct ServerSource {
     pub stats: ServerSourceStats,
 }
 
-
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct ServerTarget {
     pub id: i32,
@@ -28,7 +27,6 @@ pub struct ServerTarget {
     pub active: bool,
     pub created: DateTime<Utc>,
 }
-
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Server2Target {
@@ -127,7 +125,6 @@ impl From<Row> for ServerTargetStats {
     }
 }
 
-
 impl Default for ServerTargetStats {
     fn default() -> Self {
         ServerTargetStats {
@@ -161,4 +158,3 @@ impl Default for ServerSourceStats {
 pub struct ErrorResponse {
     pub message: String,
 }
-

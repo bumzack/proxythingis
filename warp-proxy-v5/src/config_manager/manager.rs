@@ -16,7 +16,6 @@ pub enum ManagerCommand {
     ResetStats,
 }
 
-
 // #[derive(Debug)]
 // pub struct ResetStatsData {
 //     pub(crate) sender: tokio::sync::oneshot::Sender<ProxyConfig>,
@@ -51,14 +50,19 @@ pub struct UpdateServerConfigData {
     pub(crate) server_sources: Vec<ServerSource>,
 }
 
-pub fn start_config_manager(mut proxy_config: ProxyConfig, mut manager_receiver: UnboundedReceiver<ManagerCommand>) -> JoinHandle<()> {
+pub fn start_config_manager(
+    mut proxy_config: ProxyConfig,
+    mut manager_receiver: UnboundedReceiver<ManagerCommand>,
+) -> JoinHandle<()> {
     tokio::spawn(async move {
         println!("manager thread started");
         while let Some(cmd) = manager_receiver.recv().await {
             match cmd {
                 ManagerCommand::GetConfig(c) => {
                     // println!("sending config");
-                    c.sender.send(proxy_config.clone()).expect("start_config_manager  ManagerCommand::GetConfig should succeed");
+                    c.sender
+                        .send(proxy_config.clone())
+                        .expect("start_config_manager  ManagerCommand::GetConfig should succeed");
                     // if c.reset_start {
                     //     proxy_config.start = Utc::now();
                     // }

@@ -1,12 +1,10 @@
 use std::convert::Infallible;
 
-use warp::{Filter, hyper};
 use warp::hyper::StatusCode;
+use warp::{hyper, Filter};
 
-pub fn proxy() -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::Rejection> + Clone {
-    warp::path!("data")
-        .and(warp::get())
-        .and_then(stream_data)
+pub fn proxy() -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
+    warp::path!("data").and(warp::get()).and_then(stream_data)
 }
 
 pub async fn stream_data() -> Result<impl warp::Reply, Infallible> {
@@ -27,4 +25,3 @@ pub async fn stream_data() -> Result<impl warp::Reply, Infallible> {
 async fn main() {
     warp::serve(proxy()).run(([127, 0, 0, 1], 3070)).await;
 }
-

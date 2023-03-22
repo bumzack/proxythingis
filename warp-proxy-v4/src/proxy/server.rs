@@ -5,18 +5,27 @@ use std::time::Instant;
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::{hyper, Rejection, Reply};
 use warp::http::{HeaderValue, Method, Request, Uri};
-use warp::hyper::Body;
 use warp::hyper::body::Bytes;
+use warp::hyper::Body;
+use warp::{hyper, Rejection, Reply};
 
 use common::warp_request_filter::{ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
 
-use crate::CLIENT;
-use crate::config_manager::manager::{GetConfigData, ManagerCommand, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData};
+use crate::config_manager::manager::{
+    GetConfigData, ManagerCommand, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
+};
 use crate::proxyserver::models::{ServerSource, ServerTarget};
+use crate::CLIENT;
 
-pub async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters, proxy_method: ProxyMethod, headers: ProxyHeaders, body: Bytes, sender: UnboundedSender<ManagerCommand>) -> Result<impl Reply, Rejection> {
+pub async fn execute_forward_request(
+    uri: ProxyUri,
+    params: ProxyQueryParameters,
+    proxy_method: ProxyMethod,
+    headers: ProxyHeaders,
+    body: Bytes,
+    sender: UnboundedSender<ManagerCommand>,
+) -> Result<impl Reply, Rejection> {
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
@@ -25,24 +34,13 @@ pub async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters
     let cmd = ManagerCommand::GetConfig(get_config_data);
     match sender.send(cmd) {
         Ok(_) => println!("send ok"),
-        Err(e) => println!("error sending cmd::GetConfig to manager {}", e)
+        Err(e) => println!("error sending cmd::GetConfig to manager {}", e),
     };
 
-    // sender.send(cmd).expect("execute_forward_request expected send successful");
-    let proxy_config = rx.await.expect("execute_forward_request expected a valid proxy config");
-    // println!("got a config!!!! {:?}", proxy_config);
+    let proxy_config = rx
+        .await
+        .expect("execute_forward_request expected a valid proxy config");
 
-
-    // println!("uri  {:?}", &uri);
-    // match &params {
-    //     Some(p) => println!("params  {:?}", p),
-    //     None => println!("no params provided"),
-    // }
-    // println!("params  {:?}", &params);
-    // println!("proxy_method  {:?}", &proxy_method);
-    // println!("headers  {:?}", &headers);
-
-    // is there a match for the uri in the config
     let source = find_match(&uri, &proxy_config, &proxy_method);
     let target: Option<&ServerTarget> = match source {
         Some(server) => {
@@ -51,7 +49,12 @@ pub async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters
                 let mut rng = rand::thread_rng();
                 let i = rng.gen_range(0..targets.len());
                 if i > targets.len() {
-                    println!("random number WRONG between {} and {}: {}", 0, targets.len(), i);
+                    println!(
+                        "random number WRONG between {} and {}: {}",
+                        0,
+                        targets.len(),
+                        i
+                    );
                 }
                 let t = targets.get(i as usize).expect("cant unwrap target server");
                 Some(t)
@@ -59,9 +62,7 @@ pub async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters
                 None
             }
         }
-        None => {
-            None
-        }
+        None => None,
     };
     if target.is_none() {
         return Err(warp::reject::not_found());
@@ -82,16 +83,6 @@ pub async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters
         Some(p) => format!("{}{}?{}", target_path, path_to_pass_on, p),
         None => format!("{}{}", target_path, path_to_pass_on),
     };
-    // println!("path_to_pass_on       {:?}", &path_to_pass_on);
-    // println!("target_host           {:?}", &target_host);
-    // println!("target_port           {:?}", &target_port);
-    // println!("target_method         {:?}", &target_method);
-    // println!("target_schema         {:?}", &target_schema);
-    // println!("target_path           {:?}", &target_path);
-    // println!("full_path  {:?}", &full_path);
-
-    // println!("final path {:?}", &full_path);
-    // println!("body empty {:?}", &body.is_empty());
 
     let m = Method::from_str(target_method).expect("cant determine method from str");
 
@@ -104,13 +95,22 @@ pub async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters
         *hyper_request.headers_mut() = headers.clone();
     }
 
-    let update_source_stats_data = UpdateSourceStatsData {
-        id: 1,
-    };
+    let update_source_stats_data = UpdateSourceStatsData { id: 1 };
     let cmd = ManagerCommand::UpdateSourceStats(update_source_stats_data);
-    sender.send(cmd).expect("expect the send with command UpdateSourceStats to work");
+    sender
+        .send(cmd)
+        .expect("expect the send with command UpdateSourceStats to work");
 
-    let result = handler(hyper_request, sender, target.id, target_port, target_host, full_path, target_schema, &target.description);
+    let result = handler(
+        hyper_request,
+        sender,
+        target.id,
+        target_port,
+        target_host,
+        full_path,
+        target_schema,
+        &target.description,
+    );
 
     let res = match result.await {
         Ok(response) => Ok(response),
@@ -122,60 +122,75 @@ pub async fn execute_forward_request(uri: ProxyUri, params: ProxyQueryParameters
     res
 }
 
-async fn handler(mut request: Request<Body>, sender: UnboundedSender<ManagerCommand>, server_target_idx: i32, target_port: &i32, target_host: &String, full_path: String, target_schema: &String, target_description: &String) -> Result<impl warp::Reply, Infallible> {
-    // println!("full_path                         {:?}", &full_path);
-    // println!("target_host                       {:?}", &target_host);
-    // println!("target_port                       {:?}", &target_port);
-    // println!("target_method                     {:?}", &target_method);
-    // println!("target_schema                     {:?}", &target_schema);
-    // println!("request.uri().to_string()         {:?}", &request.uri().to_string());
-
-    let proxy_url = format!("{}://{}:{}{}",
-                            target_schema,
-                            target_host,
-                            target_port,
-                            full_path
+async fn handler(
+    mut request: Request<Body>,
+    sender: UnboundedSender<ManagerCommand>,
+    server_target_idx: i32,
+    target_port: &i32,
+    target_host: &String,
+    full_path: String,
+    target_schema: &String,
+    target_description: &String,
+) -> Result<impl warp::Reply, Infallible> {
+    let proxy_url = format!(
+        "{}://{}:{}{}",
+        target_schema, target_host, target_port, full_path
     );
-    // println!("proxy_url         {:?}", &proxy_url);
 
-    // let proxyUriForLogging = proxyUrl.clone();
     let proxy_url = proxy_url.parse::<Uri>().unwrap();
     *request.uri_mut() = proxy_url.clone();
 
     let headers = request.headers_mut();
-    headers.insert(hyper::header::HOST, hyper::header::HeaderValue::from_str("bla").unwrap());
+    headers.insert(
+        hyper::header::HOST,
+        hyper::header::HeaderValue::from_str("bla").unwrap(),
+    );
     let origin = format!("{}://{}::{}", target_schema, target_host, target_port);
-    headers.insert(hyper::header::ORIGIN, hyper::header::HeaderValue::from_str(origin.as_str()).unwrap());
-    //
-    // let http_connector = hyper::client::HttpConnector::new();
-    // let client = hyper::Client::builder().build(http_connector);
+    headers.insert(
+        hyper::header::ORIGIN,
+        hyper::header::HeaderValue::from_str(origin.as_str()).unwrap(),
+    );
 
     let start = Instant::now();
-    //println!("request uri {}", request.uri().to_string());
     let mut response = CLIENT.request(request).await.expect("Request failed");
     let duration = start.elapsed();
-    let d = format!("duration {} ms, {} µs, {} ns ", duration.as_millis(), duration.as_micros(), duration.as_nanos());
-    // println!("{} ", &d);
-    response.headers_mut().insert("x-duration", HeaderValue::from_str(&d).unwrap());
-    response.headers_mut().insert("x-provided-by", HeaderValue::from_str(target_description).unwrap());
+    let d = format!(
+        "duration {} ms, {} µs, {} ns ",
+        duration.as_millis(),
+        duration.as_micros(),
+        duration.as_nanos()
+    );
+    response
+        .headers_mut()
+        .insert("x-duration", HeaderValue::from_str(&d).unwrap());
+    response.headers_mut().insert(
+        "x-provided-by",
+        HeaderValue::from_str(target_description).unwrap(),
+    );
 
     let update_target_stats_data = UpdateTargetStatsData {
         id: server_target_idx,
         duration_nanos: duration.as_nanos() as u32,
     };
     let cmd = ManagerCommand::UpdateTargetStats(update_target_stats_data);
-    sender.send(cmd).expect("expect the send with command UpdateTargetStats to work");
+    sender
+        .send(cmd)
+        .expect("expect the send with command UpdateTargetStats to work");
 
     Ok(response)
 }
 
-
-fn find_match<'a>(uri: &ProxyUri, proxy_config: &'a ProxyConfig, method: &Method) -> Option<&'a ServerSource> {
+fn find_match<'a>(
+    uri: &ProxyUri,
+    proxy_config: &'a ProxyConfig,
+    method: &Method,
+) -> Option<&'a ServerSource> {
     for s in &proxy_config.server_sources {
-        if uri.as_str().starts_with(&s.path_starts_with) && method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase() {
+        if uri.as_str().starts_with(&s.path_starts_with)
+            && method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase()
+        {
             return Some(s);
         }
     }
     None
 }
-

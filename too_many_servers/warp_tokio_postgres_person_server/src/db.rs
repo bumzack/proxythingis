@@ -10,8 +10,8 @@ use tokio_postgres::{NoTls, Row};
 use warp::Filter;
 use warp::Rejection;
 
-use crate::models::{Person, PersonRequest};
 use crate::models::MyError::DBQueryError;
+use crate::models::{Person, PersonRequest};
 
 type Result<T> = std::result::Result<T, Rejection>;
 
@@ -26,21 +26,23 @@ pub fn create_pool() -> Pool {
     pg_config.host(env::var("DBHOSTNAME").unwrap().as_str());
     pg_config.dbname(env::var("DBNAME").unwrap().as_str());
     let mgr_config = ManagerConfig {
-        recycling_method: RecyclingMethod::Fast
+        recycling_method: RecyclingMethod::Fast,
     };
     let mgr = Manager::from_config(pg_config, NoTls, mgr_config);
     let pool = Pool::builder(mgr).max_size(16).build().unwrap();
     pool
 }
 
-pub fn with_db(pool: Pool) -> impl Filter<Extract=(Pool, ), Error=Infallible> + Clone {
+pub fn with_db(pool: Pool) -> impl Filter<Extract = (Pool,), Error = Infallible> + Clone {
     warp::any().map(move || pool.clone())
 }
 
-
 pub async fn create_person(pool: Pool, body: PersonRequest) -> Result<Person> {
     let client = pool.get().await.unwrap();
-    let query = format!("INSERT INTO {} (firstname, lastname) VALUES ($1, $2) RETURNING *", TABLE);
+    let query = format!(
+        "INSERT INTO {} (firstname, lastname) VALUES ($1, $2) RETURNING *",
+        TABLE
+    );
     // println!("person {:?}", &body);
     // println!("query   {}", &query);
     let row = client
@@ -52,11 +54,13 @@ pub async fn create_person(pool: Pool, body: PersonRequest) -> Result<Person> {
     Ok(p)
 }
 
-
 pub async fn list_person(pool: Pool, limit: u32) -> Result<Vec<Person>> {
     let mut persons = vec![];
     let client = pool.get().await.unwrap();
-    let query = format!("SELECT id, firstname, lastname, created FROM {} ORDER BY lastname DESC LIMIT {}", TABLE, limit);
+    let query = format!(
+        "SELECT id, firstname, lastname, created FROM {} ORDER BY lastname DESC LIMIT {}",
+        TABLE, limit
+    );
     // println!("query   {}", &query);
     let data = client.query(&query, &[]).await.unwrap();
     for row in data {

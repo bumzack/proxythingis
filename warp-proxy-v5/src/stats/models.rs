@@ -27,7 +27,6 @@ pub struct ServerTargetStats {
     pub created: DateTime<Utc>,
 }
 
-
 impl Default for ServerTargetStats {
     fn default() -> Self {
         ServerTargetStats {

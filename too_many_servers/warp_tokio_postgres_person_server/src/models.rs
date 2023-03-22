@@ -22,7 +22,6 @@ pub struct PersonRequest {
     pub lastname: String,
 }
 
-
 #[derive(Serialize)]
 pub struct PersonResponse {
     pub id: i32,
@@ -44,7 +43,6 @@ impl PersonResponse {
 pub struct ErrorResponse {
     pub message: String,
 }
-
 
 #[derive(Error, Debug)]
 pub enum MyError {
