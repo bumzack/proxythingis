@@ -1,5 +1,4 @@
 use tokio_postgres::Row;
-
 use crate::stats::models::{ServerSourceStats, ServerTargetStats};
 
 impl From<Row> for ServerSourceStats {

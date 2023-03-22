@@ -6,7 +6,10 @@ use deadpool_postgres::Pool;
 use tokio_postgres::Row;
 
 use crate::db::db::{TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_TARGET};
-use crate::proxyserver::models::{NewServerSourcePost, NewServerTargetPost, Server2Target, ServerSource, ServerSourceStats, ServerTarget, ServerTargetStats};
+use crate::proxyserver::models::{
+    NewServerSourcePost, NewServerTargetPost, Server2Target, ServerSource, ServerSourceStats,
+    ServerTarget, ServerTargetStats,
+};
 use crate::server::models::MyError::DBQueryError;
 use crate::server::server::Result;
 
@@ -51,14 +54,19 @@ impl From<Row> for Server2Target {
     }
 }
 
-
 pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<ServerSource> {
     let client = pool.get().await.unwrap();
-    let query = format!("INSERT INTO {} (description, path_starts_with, method) VALUES ($1, $2, $3) RETURNING *", TABLE_SOURCE);
+    let query = format!(
+        "INSERT INTO {} (description, path_starts_with, method) VALUES ($1, $2, $3) RETURNING *",
+        TABLE_SOURCE
+    );
     // println!("new server source {:?}", &body);
     // println!("query   {}", &query);
     let row = client
-        .query_one(query.as_str(), &[&body.description, &body.path_starts_with, &body.method])
+        .query_one(
+            query.as_str(),
+            &[&body.description, &body.path_starts_with, &body.method],
+        )
         .await
         .map_err(DBQueryError)?;
     let server_source = ServerSource::from(row);
@@ -71,21 +79,41 @@ pub async fn create_target(pool: Pool, body: NewServerTargetPost) -> Result<Serv
     // println!("new server target {:?}", &body);
     // println!("query   {}", &query);
     let row = client
-        .query_one(query.as_str(), &[&body.description, &body.schema, &body.host, &body.port, &body.path, &body.method, &body.active])
+        .query_one(
+            query.as_str(),
+            &[
+                &body.description,
+                &body.schema,
+                &body.host,
+                &body.port,
+                &body.path,
+                &body.method,
+                &body.active,
+            ],
+        )
         .await
         .map_err(DBQueryError)?;
     let server_target = ServerTarget::from(row);
 
     // add cross table entry
-    let _source_2_target = create_source2target(pool.clone(), body.source, server_target.id).await.unwrap();
+    let _source_2_target = create_source2target(pool.clone(), body.source, server_target.id)
+        .await
+        .unwrap();
     // println!("source_2_target   {:?}", &source_2_target);
 
     Ok(server_target)
 }
 
-pub async fn create_source2target(pool: Pool, source_id: i32, target_id: i32) -> Result<Server2Target> {
+pub async fn create_source2target(
+    pool: Pool,
+    source_id: i32,
+    target_id: i32,
+) -> Result<Server2Target> {
     let client = pool.get().await.unwrap();
-    let query = format!("INSERT INTO {} (source_id, target_id) VALUES ($1, $2) RETURNING *", TABLE_SOURCE2TARGET);
+    let query = format!(
+        "INSERT INTO {} (source_id, target_id) VALUES ($1, $2) RETURNING *",
+        TABLE_SOURCE2TARGET
+    );
     // println!("new source -> target  {:?} -> {:?}", source_id, target_id);
     // println!("query   {}", &query);
     let row = client
@@ -102,8 +130,14 @@ pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSour
 
     let query1 = format!("SELECT {}.id AS source_id, {}.description AS source_description, {}.path_starts_with AS source_path_starts_with , {}.method AS source_method , {}.created AS source_created, ", TABLE_SOURCE, TABLE_SOURCE, TABLE_SOURCE, TABLE_SOURCE, TABLE_SOURCE);
     let query2 = format!("{}.id AS target_id, {}.description AS target_description,   {}.schema AS target_schema,  {}.host AS target_host,  {}.port AS target_port ,  {}.path AS target_path ,  {}.method AS target_method ,  {}.active AS target_active ,{}.created AS target_created      FROM {} ", TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_SOURCE2TARGET);
-    let query3 = format!(" LEFT JOIN {} ON ({}.source_id = {}.id) ", TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_SOURCE);
-    let query4 = format!(" LEFT JOIN {} ON ({}.target_id = {}.id) ", TABLE_TARGET, TABLE_SOURCE2TARGET, TABLE_TARGET);
+    let query3 = format!(
+        " LEFT JOIN {} ON ({}.source_id = {}.id) ",
+        TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_SOURCE
+    );
+    let query4 = format!(
+        " LEFT JOIN {} ON ({}.target_id = {}.id) ",
+        TABLE_TARGET, TABLE_SOURCE2TARGET, TABLE_TARGET
+    );
 
     // println!("query1 {}", &query1);
     // println!("query2 {}", &query2);
@@ -132,10 +166,8 @@ pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSour
         let target_active: bool = row.get("target_active");
         let target_created: DateTime<Utc> = row.get("target_created");
 
-
         // println!("found server source: {} {} {} {:?}", source_id, source_description, source_method, source_path_starts_with);
         // println!("\tfound server target: {} {} {} {:?} {} {} {:?}", target_id, target_description, target_schema, target_port, target_path, target_method, target_active);
-
 
         let mut server_source = ServerSource {
             id: source_id,
@@ -169,14 +201,16 @@ pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSour
         }
     }
 
-    let sources: Vec<ServerSource> = map.values()
-        .cloned()
-        .collect();
+    let sources: Vec<ServerSource> = map.values().cloned().collect();
 
     Ok(sources)
 }
 
-fn add_to_map(map: &mut HashMap<i32, ServerSource>, server_source: &ServerSource, server_target: ServerTarget) {
+fn add_to_map(
+    map: &mut HashMap<i32, ServerSource>,
+    server_source: &ServerSource,
+    server_target: ServerTarget,
+) {
     if map.contains_key(&server_source.id) {
         let s = map.get_mut(&server_source.id).unwrap();
         s.targets.push(server_target);
@@ -198,7 +232,10 @@ pub async fn deactivate_server(pool: Pool, id: i32) -> Result<()> {
 pub async fn change_activate_server(pool: Pool, id: i32, val: bool) -> Result<()> {
     println!("(de-)activating server {}. val {}", id, val);
     let client = pool.get().await.unwrap();
-    let query = format!("UPDATE  {}  SET active= {} WHERE  id = $1 RETURNING *", TABLE_TARGET, val);
+    let query = format!(
+        "UPDATE  {}  SET active= {} WHERE  id = $1 RETURNING *",
+        TABLE_TARGET, val
+    );
 
     let _row = client
         .query_one(query.as_str(), &[&id])
