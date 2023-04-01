@@ -1,9 +1,9 @@
 use deadpool_postgres::Pool;
-use warp::{reject, Rejection, Reply};
 use warp::http::StatusCode;
+use warp::{reject, Rejection, Reply};
 
-use crate::server::models::{DivideByZero, MyError};
 use crate::server::models::MyError::DBQueryError;
+use crate::server::models::{DivideByZero, MyError};
 
 pub type Result<T> = std::result::Result<T, Rejection>;
 
@@ -39,7 +39,7 @@ impl reject::Reject for DivideByZero {}
 //                 message = "Could not Execute request";
 //             }
 //             // _ => {
-//             //     einfo!("unhandled application error: {:?}", err);
+//             //     error!("unhandled application error: {:?}", err);
 //             //     code = StatusCode::INTERNAL_SERVER_ERROR;
 //             //     message = "Internal Server Error";
 //             // }
@@ -48,7 +48,7 @@ impl reject::Reject for DivideByZero {}
 //         code = StatusCode::METHOD_NOT_ALLOWED;
 //         message = "Method Not Allowed";
 //     } else {
-//         einfo!("unhandled error: {:?}", err);
+//         error!("unhandled error: {:?}", err);
 //         code = StatusCode::INTERNAL_SERVER_ERROR;
 //         message = "Internal Server Error";
 //     }
