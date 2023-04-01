@@ -1,22 +1,19 @@
-use deadpool_postgres::Pool;
-use warp::http::StatusCode;
-use warp::{reject, Rejection, Reply};
+use warp::{reject, Rejection};
 
-use crate::server::models::MyError::DBQueryError;
 use crate::server::models::{DivideByZero, MyError};
 
 pub type Result<T> = std::result::Result<T, Rejection>;
 
-pub async fn health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejection> {
-    let client = pool.get().await.unwrap();
-
-    println!("hello from healthhandler");
-    client
-        .execute("SELECT 1", &[])
-        .await
-        .map_err(|e| reject::custom(DBQueryError(e)))?;
-    Ok(StatusCode::OK)
-}
+// pub async fn health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejection> {
+//     let client = pool.get().await.unwrap();
+//
+//     println!("hello from healthhandler");
+//     client
+//         .execute("SELECT 1", &[])
+//         .await
+//         .map_err(|e| reject::custom(DBQueryError(e)))?;
+//     Ok(StatusCode::OK)
+// }
 
 impl warp::reject::Reject for MyError {}
 
