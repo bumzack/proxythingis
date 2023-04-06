@@ -3,11 +3,11 @@ extern crate lazy_static;
 use std::env;
 
 use tokio::sync::mpsc;
-use warp::Filter;
-use warp::hyper::Client;
 use warp::hyper::client::HttpConnector;
+use warp::hyper::Client;
+use warp::Filter;
 
-use crate::config_manager::manager::{ProxyConfig, start_config_manager};
+use crate::config_manager::manager::{start_config_manager, ProxyConfig};
 use crate::db::db::create_pool;
 use crate::proxy::route::proxy_routes;
 use crate::proxyserver::db::list_server;

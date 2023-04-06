@@ -5,17 +5,17 @@ use std::env;
 
 use log::error;
 use log::info;
-use warp::{Filter, hyper};
 use warp::http::{Request, StatusCode};
-use warp::hyper::{Body, Uri};
 use warp::hyper::body::Bytes;
+use warp::hyper::{Body, Uri};
+use warp::{hyper, Filter};
 
 use common::warp_request_filter::{
     extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri,
 };
 
-use crate::hyper::Client;
 use crate::hyper::client::HttpConnector;
+use crate::hyper::Client;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {

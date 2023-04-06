@@ -1,10 +1,10 @@
 use deadpool_postgres::Pool;
 use log::info;
-use warp::{reject, Rejection, Reply};
 use warp::http::StatusCode;
+use warp::{reject, Rejection, Reply};
 
-use crate::server::models::{DivideByZero, MyError};
 use crate::server::models::MyError::DBQueryError;
+use crate::server::models::{DivideByZero, MyError};
 
 pub type Result<T> = std::result::Result<T, Rejection>;
 

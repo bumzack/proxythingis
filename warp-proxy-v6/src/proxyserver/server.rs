@@ -1,10 +1,10 @@
 use deadpool_postgres::Pool;
 use log::info;
 use tokio::sync::mpsc::UnboundedSender;
-use warp::{reject, Reply};
 use warp::reply::json;
+use warp::{reject, Reply};
 
-use crate::config_manager::manager::{ManagerCommand, send_config};
+use crate::config_manager::manager::{send_config, ManagerCommand};
 use crate::proxyserver::db::{
     activate_server, create_source, create_target, deactivate_server, list_server,
 };
