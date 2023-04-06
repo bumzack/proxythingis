@@ -1,5 +1,6 @@
 use std::env;
 
+use log::{error, info};
 use serde::Deserialize;
 use serde::Serialize;
 use warp::Filter;
@@ -32,11 +33,11 @@ async fn main() {
              proxy_method: ProxyMethod,
              headers: ProxyHeaders,
              body_string: String| {
-                println!("uri  {:?}", &uri);
-                println!("params  {:?}", &params);
-                println!("proxy_method  {:?}", &proxy_method);
-                println!("headers  {:?}", &headers);
-                println!("body as string {:?}", &body_string);
+                info!("uri  {:?}", &uri);
+                info!("params  {:?}", &params);
+                info!("proxy_method  {:?}", &proxy_method);
+                info!("headers  {:?}", &headers);
+                info!("body as string {:?}", &body_string);
 
                 let headers: Vec<String> = headers
                     .into_iter()
@@ -48,7 +49,7 @@ async fn main() {
                         let value = match h.1.to_str() {
                             Ok(n) => n.to_string(),
                             Err(e) => {
-                                println!("error2 {}", e);
+                                error!("error2 {}", e);
                                 "n/a".to_string()
                             }
                         };

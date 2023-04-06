@@ -35,7 +35,7 @@ return client;
 
 #[tokio::main]
 async fn main() {
-println!("Hello, world!");
+info!("Hello, world!");
 
     if env::var_os("RUST_LOG").is_none() {
         // Set `RUST_LOG=todos=debug` to see debug logs,
@@ -77,7 +77,7 @@ println!("Hello, world!");
                 });
             return result;
         });
-    println!("servin at {}", string_address);
+    info!("servin at {}", string_address);
 
     warp::serves(routes)
         .run(([127, 0, 0, 1], 3031))

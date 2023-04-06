@@ -3,6 +3,7 @@ use std::ops::Add;
 
 use chrono::{DateTime, Utc};
 use deadpool_postgres::Pool;
+use log::info;
 use tokio_postgres::Row;
 
 use crate::db::db::{TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_TARGET};

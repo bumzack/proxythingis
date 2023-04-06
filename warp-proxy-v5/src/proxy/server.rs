@@ -3,6 +3,7 @@ use std::str::FromStr;
 use std::time::Instant;
 
 use futures_util::TryStreamExt;
+use log::{error, info};
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
@@ -34,8 +35,8 @@ pub async fn execute_forward_request(
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     match sender.send(cmd) {
-        Ok(_) => println!("send ok"),
-        Err(e) => println!("error sending cmd::GetConfig to manager {}", e),
+        Ok(_) => info!("send ok"),
+        Err(e) => error!("error sending cmd::GetConfig to manager {}", e),
     };
 
     let proxy_config = rx
@@ -51,7 +52,7 @@ pub async fn execute_forward_request(
                 let mut rng = rand::thread_rng();
                 let i = rng.gen_range(0..targets.len());
                 if i > targets.len() {
-                    println!(
+                    info!(
                         "random number WRONG between {} and {}: {}",
                         0,
                         targets.len(),
@@ -119,7 +120,7 @@ pub async fn execute_forward_request(
     let res = match result.await {
         Ok(response) => Ok(response),
         Err(_e) => {
-            // println!("error from client {}", e);
+            // info!("error from client {}", e);
             Err(warp::reject::not_found())
         }
     };
@@ -158,7 +159,7 @@ async fn handler(
     // let client = hyper::Client::builder().build(http_connector);
 
     let start = Instant::now();
-    //println!("request uri {}", request.uri().to_string());
+    //info!("request uri {}", request.uri().to_string());
     let mut response = CLIENT.request(request).await.expect("Request failed");
     let duration = start.elapsed();
     let d = format!(
@@ -167,7 +168,7 @@ async fn handler(
         duration.as_micros(),
         duration.as_nanos()
     );
-    // println!("{} ", &d);
+    // info!("{} ", &d);
     response
         .headers_mut()
         .insert("x-duration", HeaderValue::from_str(&d).unwrap());

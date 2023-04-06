@@ -1,15 +1,13 @@
 extern crate lazy_static;
-#[macro_use]
-extern crate log;
 
 use std::env;
 
 use tokio::sync::mpsc;
-use warp::Filter;
-use warp::hyper::Client;
 use warp::hyper::client::HttpConnector;
+use warp::hyper::Client;
+use warp::Filter;
 
-use crate::config_manager::manager::{ProxyConfig, start_config_manager};
+use crate::config_manager::manager::{start_config_manager, ProxyConfig};
 use crate::db::db::create_pool;
 use crate::proxy::route::proxy_routes;
 use crate::proxyserver::db::list_server;
@@ -35,8 +33,6 @@ lazy_static::lazy_static! {
 // #[tokio::main(worker_threads = 2)]
 #[tokio::main]
 async fn main() {
-    pretty_env_logger::init();
-
     let _result =
         dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/warp-proxy-v4/.env");
 
@@ -45,6 +41,8 @@ async fn main() {
         // this only shows access logs.
         env::set_var("RUST_LOG", "todos=info");
     }
+    pretty_env_logger::init();
+
     let pool = create_pool();
 
     let servers = list_server(pool.clone(), true)
@@ -59,7 +57,6 @@ async fn main() {
     let (manager_sender, manager_receiver) = mpsc::unbounded_channel();
 
     let _handle_config_manager = start_config_manager(proxy_config, manager_receiver);
-
 
     // let cors = warp::cors()
     //     .allow_any_origin()

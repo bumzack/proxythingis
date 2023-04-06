@@ -2,6 +2,7 @@ use std::convert::Infallible;
 use std::str::FromStr;
 use std::time::Instant;
 
+use log::info;
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
@@ -33,8 +34,8 @@ pub async fn execute_forward_request(
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     match sender.send(cmd) {
-        Ok(_) => println!("send ok"),
-        Err(e) => println!("error sending cmd::GetConfig to manager {}", e),
+        Ok(_) => info!("send ok"),
+        Err(e) => info!("error sending cmd::GetConfig to manager {}", e),
     };
 
     let proxy_config = rx
@@ -49,7 +50,7 @@ pub async fn execute_forward_request(
                 let mut rng = rand::thread_rng();
                 let i = rng.gen_range(0..targets.len());
                 if i > targets.len() {
-                    println!(
+                    info!(
                         "random number WRONG between {} and {}: {}",
                         0,
                         targets.len(),
@@ -115,7 +116,7 @@ pub async fn execute_forward_request(
     let res = match result.await {
         Ok(response) => Ok(response),
         Err(_e) => {
-            // println!("error from client {}", e);
+            // info!("error from client {}", e);
             Err(warp::reject::not_found())
         }
     };

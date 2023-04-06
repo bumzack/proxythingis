@@ -13,7 +13,8 @@ tracing = "0.1"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tower-http = { version = "0.4.0", features = ["trace"] }
-
+log = "0.4.17"
+pretty_env_logger = "0.4.0"
 
 [dev-dependencies]
 tokio = { version = "1.26.0", features = ["macros", "rt-multi-thread"] }

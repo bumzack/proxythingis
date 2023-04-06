@@ -3,12 +3,11 @@ extern crate lazy_static;
 use std::env;
 
 use tokio::sync::mpsc;
-use tracing_subscriber::fmt::format::FmtSpan;
-use warp::Filter;
-use warp::hyper::Client;
 use warp::hyper::client::HttpConnector;
+use warp::hyper::Client;
+use warp::Filter;
 
-use crate::config_manager::manager::{ProxyConfig, start_config_manager};
+use crate::config_manager::manager::{start_config_manager, ProxyConfig};
 use crate::db::db::create_pool;
 use crate::proxy::route::proxy_routes;
 use crate::proxyserver::db::list_server;
@@ -42,6 +41,8 @@ async fn main() {
         // this only shows access logs.
         env::set_var("RUST_LOG", "todos=info");
     }
+    pretty_env_logger::init();
+
     let pool = create_pool();
 
     let servers = list_server(pool.clone(), true)
@@ -58,14 +59,6 @@ async fn main() {
     let _handle_config_manager = start_config_manager(proxy_config, manager_receiver);
 
     //pretty_env_logger::init();
-    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "tracing=info,warp=debug".to_owned());
-    tracing_subscriber::fmt()
-        // Use the filter we built above to determine which traces to record.
-        .with_env_filter(filter)
-        // Record an event when each span closes. This can be used to time our
-        // routes' durations!
-        .with_span_events(FmtSpan::CLOSE)
-        .init();
 
     let stats_routes = stats_routes(&pool, &manager_sender);
     let server_routes = server_routes(pool, &manager_sender);

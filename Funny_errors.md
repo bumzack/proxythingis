@@ -3,7 +3,7 @@
 wenn man in Zeile 286 ein
 
 ```
-println!("request uri {}", request.uri().to_string());
+info!("request uri {}", request.uri().to_string());
 ```
 
 Statement einfügt, dann verschwindet der Fehler
