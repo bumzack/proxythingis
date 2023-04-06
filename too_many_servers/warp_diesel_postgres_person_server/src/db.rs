@@ -1,11 +1,11 @@
 use std::convert::Infallible;
 use std::env;
 
-use diesel::r2d2::ConnectionManager;
 use diesel::{PgConnection, RunQueryDsl};
+use diesel::r2d2::ConnectionManager;
 use r2d2::Pool;
-use warp::http::StatusCode;
 use warp::Filter;
+use warp::http::StatusCode;
 
 use crate::models::{ErrorMessage, NewPerson, Person};
 
@@ -96,7 +96,7 @@ pub fn get_connection_pool() -> Pool<ConnectionManager<PgConnection>> {
 
 pub fn with_db(
     db: Pool<ConnectionManager<PgConnection>>,
-) -> impl Filter<Extract = (Pool<ConnectionManager<PgConnection>>,), Error = std::convert::Infallible>
-       + Clone {
+) -> impl Filter<Extract=(Pool<ConnectionManager<PgConnection>>, ), Error=std::convert::Infallible>
++ Clone {
     warp::any().map(move || db.clone())
 }

@@ -2,21 +2,22 @@ use std::convert::Infallible;
 use std::str::FromStr;
 use std::time::Instant;
 
+use log::info;
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::http::{HeaderValue, Method, Request, Uri};
-use warp::hyper::body::Bytes;
-use warp::hyper::Body;
 use warp::{hyper, Rejection, Reply};
+use warp::http::{HeaderValue, Method, Request, Uri};
+use warp::hyper::Body;
+use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
 
+use crate::CLIENT;
 use crate::config_manager::manager::{
     GetConfigData, ManagerCommand, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
 };
 use crate::proxyserver::models::{ServerSource, ServerTarget};
-use crate::CLIENT;
 
 pub async fn execute_forward_request(
     uri: ProxyUri,
@@ -33,8 +34,8 @@ pub async fn execute_forward_request(
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     match sender.send(cmd) {
-        Ok(_) => println!("send ok"),
-        Err(e) => println!("error sending cmd::GetConfig to manager {}", e),
+        Ok(_) => info!("send ok"),
+        Err(e) => info!("error sending cmd::GetConfig to manager {}", e),
     };
 
     let proxy_config = rx
@@ -49,7 +50,7 @@ pub async fn execute_forward_request(
                 let mut rng = rand::thread_rng();
                 let i = rng.gen_range(0..targets.len());
                 if i > targets.len() {
-                    println!(
+                    info!(
                         "random number WRONG between {} and {}: {}",
                         0,
                         targets.len(),
@@ -115,7 +116,7 @@ pub async fn execute_forward_request(
     let res = match result.await {
         Ok(response) => Ok(response),
         Err(_e) => {
-            // println!("error from client {}", e);
+            // info!("error from client {}", e);
             Err(warp::reject::not_found())
         }
     };

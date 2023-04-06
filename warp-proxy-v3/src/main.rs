@@ -4,19 +4,19 @@ use std::convert::Infallible;
 use std::env;
 use std::future::Future;
 
+use log::{error, info};
 use tokio::time::Instant;
-use tracing_subscriber::fmt::format::FmtSpan;
+use warp::{Filter, hyper, Rejection, Reply};
 use warp::http::{HeaderValue, Request};
-use warp::hyper::body::Bytes;
 use warp::hyper::{Body, Uri};
-use warp::{hyper, Filter, Rejection, Reply};
+use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{
     extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri,
 };
 
-use crate::hyper::client::HttpConnector;
 use crate::hyper::Client;
+use crate::hyper::client::HttpConnector;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
@@ -34,15 +34,7 @@ async fn main() {
         // this only shows access logs.
         env::set_var("RUST_LOG", "todos=info");
     }
-    //pretty_env_logger::init();
-    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "tracing=info,warp=debug".to_owned());
-    tracing_subscriber::fmt()
-        // Use the filter we built above to determine which traces to record.
-        .with_env_filter(filter)
-        // Record an event when each span closes. This can be used to time our
-        // routes' durations!
-        .with_span_events(FmtSpan::CLOSE)
-        .init();
+    pretty_env_logger::init();
 
     let routes = warp::any()
         .and(extract_request_data_filter())
@@ -56,26 +48,20 @@ async fn main() {
             },
         )
         .and_then(|hyper_request: Request<Body>| execute_forward_request(hyper_request));
-    // .with(warp::trace(|info| {
-    //     // Construct our own custom span for this route.
-    //     tracing::info_span!("goodbye", req.path = ?info.path())
-    // }))
-    // .with(warp::trace::named("hello"))
-    // .with(warp::trace::request());
 
     warp::serve(routes).run(([127, 0, 0, 1], 3033)).await;
 }
 
 fn execute_forward_request(
     hyper_request: Request<Body>,
-) -> impl Future<Output = Result<impl Reply + Sized, Rejection>> {
+) -> impl Future<Output=Result<impl Reply + Sized, Rejection>> {
     let result = handler(hyper_request);
 
     async move {
         let res = match result.await {
             Ok(response) => Ok(response),
             Err(e) => {
-                println!("error from client {}", e);
+                error!("error from client {}", e);
                 Err(warp::reject::not_found())
             }
         };
@@ -90,10 +76,10 @@ fn compose_forward_request(
     headers: &ProxyHeaders,
     body: Bytes,
 ) -> Request<Body> {
-    println!("uri  {:?}", &uri);
+    info!("uri  {:?}", &uri);
     match &params {
-        Some(p) => println!("params  {:?}", p),
-        None => println!("no params provided"),
+        Some(p) => info!("params  {:?}", p),
+        None => info!("no params provided"),
     }
     println!("params  {:?}", &params);
     println!("proxy_method  {:?}", &proxy_method);

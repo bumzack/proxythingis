@@ -1,14 +1,16 @@
-use crate::config_manager::manager::{send_config, ManagerCommand};
+use deadpool_postgres::Pool;
+use log::info;
+use tokio::sync::mpsc::UnboundedSender;
+use warp::{reject, Reply};
+use warp::reply::json;
+
+use crate::config_manager::manager::{ManagerCommand, send_config};
 use crate::proxyserver::db::{
     activate_server, create_source, create_target, deactivate_server, list_server,
 };
 use crate::proxyserver::models::{NewServerSourcePost, NewServerTargetPost};
 use crate::server::models::DivideByZero;
 use crate::server::server::Result;
-use deadpool_postgres::Pool;
-use tokio::sync::mpsc::UnboundedSender;
-use warp::reply::json;
-use warp::{reject, Reply};
 
 pub async fn create_source_handler(
     pool: Pool,
@@ -20,7 +22,7 @@ pub async fn create_source_handler(
             .await
             // TODO fix CustomError
             .map_err(|e| {
-                println!("error rejection {:?}", e);
+                info!("error rejection {:?}", e);
                 reject::custom(DivideByZero)
             })?,
     );
@@ -39,7 +41,7 @@ pub async fn create_target_handler(
             .await
             // TODO fix CustomError
             .map_err(|e| {
-                println!("error rejection {:?}", e);
+                info!("error rejection {:?}", e);
                 reject::custom(DivideByZero)
             })?,
     );
@@ -52,7 +54,7 @@ pub async fn list_servers_handler(pool: Pool) -> Result<impl Reply> {
         .await
         // TODO fix CustomError
         .map_err(|e| {
-            println!("error rejection {:?}", e);
+            info!("error rejection {:?}", e);
             reject::custom(DivideByZero)
         })?;
     Ok(json(&data))
@@ -67,7 +69,7 @@ pub async fn activate_server_handler(
         .await
         // TODO fix CustomError
         .map_err(|e| {
-            println!("error rejection {:?}", e);
+            info!("error rejection {:?}", e);
             reject::custom(DivideByZero)
         })?;
     send_config(pool, manager_sender).await;
@@ -84,7 +86,7 @@ pub async fn deactivate_server_handler(
         .await
         // TODO fix CustomError
         .map_err(|e| {
-            println!("error rejection {:?}", e);
+            info!("error rejection {:?}", e);
             reject::custom(DivideByZero)
         })?;
     send_config(pool, manager_sender).await;

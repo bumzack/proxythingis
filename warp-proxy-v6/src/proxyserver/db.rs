@@ -3,6 +3,7 @@ use std::ops::Add;
 
 use chrono::{DateTime, Utc};
 use deadpool_postgres::Pool;
+use log::info;
 use tokio_postgres::Row;
 
 use crate::db::db::{TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_TARGET};
@@ -135,7 +136,7 @@ pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSour
     let mut map: HashMap<i32, ServerSource> = HashMap::new();
 
     let query_full = query1.add(&query2).add(&query3).add(&query4);
-    // println!("query   {}", &query_full);
+    // info!("query   {}", &query_full);
     let data = client.query(&query_full, &[]).await.unwrap();
     for row in data {
         let source_id: i32 = row.get("source_id");
@@ -215,7 +216,7 @@ pub async fn deactivate_server(pool: Pool, id: i32) -> Result<()> {
 }
 
 pub async fn change_activate_server(pool: Pool, id: i32, val: bool) -> Result<()> {
-    println!("(de-)activating server {}. val {}", id, val);
+    info!("(de-)activating server {}. val {}", id, val);
     let client = pool.get().await.unwrap();
     let query = format!(
         "UPDATE  {}  SET active= {} WHERE  id = $1 RETURNING *",

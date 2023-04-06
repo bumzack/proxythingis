@@ -3,27 +3,28 @@ use std::str::FromStr;
 use std::time::Instant;
 
 use futures_util::TryStreamExt;
+use log::{error, info};
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
+use warp::{Buf, hyper, Rejection, Reply, Stream};
 use warp::http::{HeaderValue, Method, Request, Uri};
 use warp::hyper::Body;
-use warp::{hyper, Buf, Rejection, Reply, Stream};
 
 use common::warp_request_filter::{ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
 
+use crate::CLIENT;
 use crate::config_manager::manager::{
     GetConfigData, ManagerCommand, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
 };
 use crate::proxyserver::models::{ServerSource, ServerTarget};
-use crate::CLIENT;
 
 pub async fn execute_forward_request(
     uri: ProxyUri,
     params: ProxyQueryParameters,
     proxy_method: ProxyMethod,
     headers: ProxyHeaders,
-    body: impl Stream<Item = Result<impl Buf, warp::Error>> + Send + 'static,
+    body: impl Stream<Item=Result<impl Buf, warp::Error>> + Send + 'static,
     sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply, Rejection> {
     let (tx, rx) = oneshot::channel();
@@ -33,8 +34,8 @@ pub async fn execute_forward_request(
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     match sender.send(cmd) {
-        Ok(_) => println!("send ok"),
-        Err(e) => println!("error sending cmd::GetConfig to manager {}", e),
+        Ok(_) => info!("send ok"),
+        Err(e) => error!("error sending cmd::GetConfig to manager {}", e),
     };
 
     let proxy_config = rx
@@ -50,7 +51,7 @@ pub async fn execute_forward_request(
                 let mut rng = rand::thread_rng();
                 let i = rng.gen_range(0..targets.len());
                 if i > targets.len() {
-                    println!(
+                    info!(
                         "random number WRONG between {} and {}: {}",
                         0,
                         targets.len(),
@@ -118,7 +119,7 @@ pub async fn execute_forward_request(
     let res = match result.await {
         Ok(response) => Ok(response),
         Err(_e) => {
-            // println!("error from client {}", e);
+            // info!("error from client {}", e);
             Err(warp::reject::not_found())
         }
     };
@@ -135,18 +136,18 @@ async fn handler(
     target_schema: &String,
     target_description: &String,
 ) -> Result<impl warp::Reply, Infallible> {
-    // println!("full_path                         {:?}", &full_path);
-    // println!("target_host                       {:?}", &target_host);
-    // println!("target_port                       {:?}", &target_port);
-    // println!("target_method                     {:?}", &target_method);
-    // println!("target_schema                     {:?}", &target_schema);
-    // println!("request.uri().to_string()         {:?}", &request.uri().to_string());
+    // info!("full_path                         {:?}", &full_path);
+    // info!("target_host                       {:?}", &target_host);
+    // info!("target_port                       {:?}", &target_port);
+    // info!("target_method                     {:?}", &target_method);
+    // info!("target_schema                     {:?}", &target_schema);
+    // info!("request.uri().to_string()         {:?}", &request.uri().to_string());
 
     let proxy_url = format!(
         "{}://{}:{}{}",
         target_schema, target_host, target_port, full_path
     );
-    // println!("proxy_url         {:?}", &proxy_url);
+    // info!("proxy_url         {:?}", &proxy_url);
 
     // let proxyUriForLogging = proxyUrl.clone();
     let proxy_url = proxy_url.parse::<Uri>().unwrap();
@@ -167,7 +168,7 @@ async fn handler(
     // let client = hyper::Client::builder().build(http_connector);
 
     let start = Instant::now();
-    //println!("request uri {}", request.uri().to_string());
+    //info!("request uri {}", request.uri().to_string());
     let mut response = CLIENT.request(request).await.expect("Request failed");
     let duration = start.elapsed();
     let d = format!(
@@ -176,7 +177,7 @@ async fn handler(
         duration.as_micros(),
         duration.as_nanos()
     );
-    // println!("{} ", &d);
+    // info!("{} ", &d);
     response
         .headers_mut()
         .insert("x-duration", HeaderValue::from_str(&d).unwrap());
@@ -207,7 +208,7 @@ fn find_match<'a>(
     method: &Method,
 ) -> Option<&'a ServerSource> {
     for s in &proxy_config.server_sources {
-        // println!("searching for request uri {}, method {}    comparing with config  path_starts_with  {} and method {}",
+        // info!("searching for request uri {}, method {}    comparing with config  path_starts_with  {} and method {}",
         //          &uri.as_str(), &method,&s.path_starts_with, &s.method);
         if uri.as_str().starts_with(&s.path_starts_with)
             && method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase()

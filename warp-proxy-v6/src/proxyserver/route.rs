@@ -1,3 +1,7 @@
+use deadpool_postgres::Pool;
+use tokio::sync::mpsc::UnboundedSender;
+use warp::Filter;
+
 use crate::config_manager::manager::ManagerCommand;
 use crate::config_manager::server::with_sender;
 use crate::db::server::with_db;
@@ -5,14 +9,11 @@ use crate::proxyserver::server::{
     activate_server_handler, create_source_handler, create_target_handler,
     deactivate_server_handler, list_servers_handler,
 };
-use deadpool_postgres::Pool;
-use tokio::sync::mpsc::UnboundedSender;
-use warp::Filter;
 
 pub fn server_routes(
     pool: Pool,
     manager_sender: &UnboundedSender<ManagerCommand>,
-) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
+) -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::Rejection> + Clone {
     let server_source = warp::path!("proxythingi" / "server" / "source");
     let server_source_create = server_source
         .and(warp::post())
