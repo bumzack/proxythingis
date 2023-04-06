@@ -24,6 +24,7 @@ async fn main() {
     if env::var_os("RUST_LOG").is_none() {
         env::set_var("RUST_LOG", "response_to_everything=info");
     }
+    pretty_env_logger::init();
 
     let routes = warp::any()
         .and(extract_request_data_filter_body_as_string())

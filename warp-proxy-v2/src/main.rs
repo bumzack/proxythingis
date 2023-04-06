@@ -34,7 +34,6 @@ async fn main() {
         env::set_var("RUST_LOG", "todos=info");
     }
     pretty_env_logger::init();
-    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "tracing=info,warp=debug".to_owned());
 
     let routes = warp::any()
         .and(extract_request_data_filter())

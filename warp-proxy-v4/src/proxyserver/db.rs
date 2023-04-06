@@ -3,6 +3,7 @@ use std::ops::Add;
 
 use chrono::{DateTime, Utc};
 use deadpool_postgres::Pool;
+use log::info;
 use tokio_postgres::Row;
 
 use crate::db::db::{TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_TARGET};
@@ -60,8 +61,8 @@ pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<Serv
         "INSERT INTO {} (description, path_starts_with, method) VALUES ($1, $2, $3) RETURNING *",
         TABLE_SOURCE
     );
-    // println!("new server source {:?}", &body);
-    // println!("query   {}", &query);
+    // info!("new server source {:?}", &body);
+    // info!("query   {}", &query);
     let row = client
         .query_one(
             query.as_str(),
@@ -76,8 +77,8 @@ pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<Serv
 pub async fn create_target(pool: Pool, body: NewServerTargetPost) -> Result<ServerTarget> {
     let client = pool.get().await.unwrap();
     let query = format!("INSERT INTO {} (description, schema, host, port, path, method, active) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", TABLE_TARGET);
-    // println!("new server target {:?}", &body);
-    // println!("query   {}", &query);
+    // info!("new server target {:?}", &body);
+    // info!("query   {}", &query);
     let row = client
         .query_one(
             query.as_str(),
@@ -99,7 +100,7 @@ pub async fn create_target(pool: Pool, body: NewServerTargetPost) -> Result<Serv
     let _source_2_target = create_source2target(pool.clone(), body.source, server_target.id)
         .await
         .unwrap();
-    // println!("source_2_target   {:?}", &source_2_target);
+    // info!("source_2_target   {:?}", &source_2_target);
 
     Ok(server_target)
 }
@@ -114,8 +115,8 @@ pub async fn create_source2target(
         "INSERT INTO {} (source_id, target_id) VALUES ($1, $2) RETURNING *",
         TABLE_SOURCE2TARGET
     );
-    // println!("new source -> target  {:?} -> {:?}", source_id, target_id);
-    // println!("query   {}", &query);
+    // info!("new source -> target  {:?} -> {:?}", source_id, target_id);
+    // info!("query   {}", &query);
     let row = client
         .query_one(query.as_str(), &[&source_id, &target_id])
         .await
@@ -139,15 +140,15 @@ pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSour
         TABLE_TARGET, TABLE_SOURCE2TARGET, TABLE_TARGET
     );
 
-    // println!("query1 {}", &query1);
-    // println!("query2 {}", &query2);
-    // println!("query3 {}", &query3);
-    // println!("query4 {}", &query4);
+    // info!("query1 {}", &query1);
+    // info!("query2 {}", &query2);
+    // info!("query3 {}", &query3);
+    // info!("query4 {}", &query4);
 
     let mut map: HashMap<i32, ServerSource> = HashMap::new();
 
     let query_full = query1.add(&query2).add(&query3).add(&query4);
-    // println!("query   {}", &query_full);
+    // info!("query   {}", &query_full);
     let data = client.query(&query_full, &[]).await.unwrap();
     for row in data {
         let source_id: i32 = row.get("source_id");
@@ -166,8 +167,8 @@ pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSour
         let target_active: bool = row.get("target_active");
         let target_created: DateTime<Utc> = row.get("target_created");
 
-        // println!("found server source: {} {} {} {:?}", source_id, source_description, source_method, source_path_starts_with);
-        // println!("\tfound server target: {} {} {} {:?} {} {} {:?}", target_id, target_description, target_schema, target_port, target_path, target_method, target_active);
+        // info!("found server source: {} {} {} {:?}", source_id, source_description, source_method, source_path_starts_with);
+        // info!("\tfound server target: {} {} {} {:?} {} {} {:?}", target_id, target_description, target_schema, target_port, target_path, target_method, target_active);
 
         let mut server_source = ServerSource {
             id: source_id,
@@ -230,7 +231,7 @@ pub async fn deactivate_server(pool: Pool, id: i32) -> Result<()> {
 }
 
 pub async fn change_activate_server(pool: Pool, id: i32, val: bool) -> Result<()> {
-    println!("(de-)activating server {}. val {}", id, val);
+    info!("(de-)activating server {}. val {}", id, val);
     let client = pool.get().await.unwrap();
     let query = format!(
         "UPDATE  {}  SET active= {} WHERE  id = $1 RETURNING *",
