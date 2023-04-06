@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use deadpool_postgres::Pool;
+use log::info;
 use serde::Serialize;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::task::JoinHandle;

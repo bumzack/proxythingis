@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use deadpool_postgres::Pool;
+use log::info;
 use tokio_postgres::Row;
 
 use crate::db::db::{TABLE_SOURCE_STATS, TABLE_TARGET_STATS};

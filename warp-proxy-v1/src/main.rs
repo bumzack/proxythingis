@@ -3,12 +3,13 @@ extern crate lazy_static;
 use std::convert::Infallible;
 use std::env;
 
-use warp::{Filter, hyper};
+use log::info;
 use warp::http::Request;
 use warp::hyper::{Body, Uri};
+use warp::{hyper, Filter};
 
-use crate::hyper::Client;
 use crate::hyper::client::HttpConnector;
+use crate::hyper::Client;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
@@ -26,7 +27,7 @@ async fn main() {
         // this only shows access logs.
         env::set_var("RUST_LOG", "todos=info");
     }
-    //pretty_env_logger::init();
+    pretty_env_logger::init();
 
     let routes = warp::any()
         .map(|| {
@@ -48,14 +49,14 @@ async fn main() {
                 let res = match result.await {
                     Ok(response) => Ok(response),
                     Err(e) => {
-                        println!("error from client {}", e);
+                        info!("error from client {}", e);
                         Err(warp::reject::not_found())
                     }
                 };
                 res
             }
         });
-    // println!("serving at {}", string_address);
+    // info!("serving at {}", string_address);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3031)).await;
 }
@@ -91,7 +92,7 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     //
     // let http_connector = hyper::client::HttpConnector::new();
     // let client = hyper::Client::builder().build(http_connector);
-    println!("redirecting to proxyUrl {}", proxy_url);
+    info!("redirecting to proxyUrl {}", proxy_url);
     let response = CLIENT.request(request).await.expect("Request failed");
 
     return Ok(response);

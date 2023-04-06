@@ -23,7 +23,7 @@ pub async fn stats_read_handler(
     let proxy_config = rx
         .await
         .expect("stats_read_handler expected a valid proxy config");
-    // println!("got proxyconfig = {:?}", proxy_config);
+    // info!("got proxyconfig = {:?}", proxy_config);
 
     let res = json(&proxy_config);
 

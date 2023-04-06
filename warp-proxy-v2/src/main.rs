@@ -3,18 +3,19 @@ extern crate lazy_static;
 use std::convert::Infallible;
 use std::env;
 
-use tracing_subscriber::fmt::format::FmtSpan;
-use warp::{Filter, hyper};
+use log::error;
+use log::info;
 use warp::http::{Request, StatusCode};
-use warp::hyper::{Body, Uri};
 use warp::hyper::body::Bytes;
+use warp::hyper::{Body, Uri};
+use warp::{hyper, Filter};
 
 use common::warp_request_filter::{
     extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri,
 };
 
-use crate::hyper::Client;
 use crate::hyper::client::HttpConnector;
+use crate::hyper::Client;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
@@ -32,15 +33,8 @@ async fn main() {
         // this only shows access logs.
         env::set_var("RUST_LOG", "todos=info");
     }
-    //pretty_env_logger::init();
+    pretty_env_logger::init();
     let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "tracing=info,warp=debug".to_owned());
-    tracing_subscriber::fmt()
-        // Use the filter we built above to determine which traces to record.
-        .with_env_filter(filter)
-        // Record an event when each span closes. This can be used to time our
-        // routes' durations!
-        .with_span_events(FmtSpan::CLOSE)
-        .init();
 
     let routes = warp::any()
         .and(extract_request_data_filter())
@@ -50,14 +44,14 @@ async fn main() {
              proxy_method: ProxyMethod,
              headers: ProxyHeaders,
              body: Bytes| {
-                println!("uri  {:?}", &uri);
+                info!("uri  {:?}", &uri);
                 match &params {
-                    Some(p) => println!("params  {:?}", p),
-                    None => println!("no params provided"),
+                    Some(p) => info!("params  {:?}", p),
+                    None => error!("no params provided"),
                 }
-                println!("params  {:?}", &params);
-                println!("proxy_method  {:?}", &proxy_method);
-                println!("headers  {:?}", &headers);
+                info!("params  {:?}", &params);
+                info!("proxy_method  {:?}", &proxy_method);
+                info!("headers  {:?}", &headers);
 
                 let method = hyper::http::Method::POST;
                 let path = "full_path_ahead";
@@ -67,7 +61,7 @@ async fn main() {
                     None => path.to_string(),
                 };
 
-                println!("final path {:?}", &full_path);
+                info!("final path {:?}", &full_path);
 
                 let mut hyper_request = hyper::http::Request::builder()
                     .method(method)
@@ -89,19 +83,13 @@ async fn main() {
                 let res = match result.await {
                     Ok(response) => Ok(response),
                     Err(e) => {
-                        println!("error from client {}", e);
+                        error!("error from client {}", e);
                         Err(warp::reject::not_found())
                     }
                 };
                 res
             }
-        })
-        .with(warp::trace(|info| {
-            // Construct our own custom span for this route.
-            tracing::info_span!("goodbye", req.path = ?info.path())
-        }))
-        .with(warp::trace::named("hello"))
-        .with(warp::trace::request());
+        });
 
     warp::serve(routes).run(([127, 0, 0, 1], 3032)).await;
 }
@@ -146,7 +134,7 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     //
     // let http_connector = hyper::client::HttpConnector::new();
     // let client = hyper::Client::builder().build(http_connector);
-    println!("redirecting to proxyUrl {}", proxy_url);
+    info!("redirecting to proxyUrl {}", proxy_url);
     let response = CLIENT.request(request).await.expect("Request failed");
 
     return Ok(response);

@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use deadpool_postgres::Pool;
+use log::info;
 use serde::Serialize;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::task::JoinHandle;
@@ -55,11 +56,11 @@ pub fn start_config_manager(
     mut manager_receiver: UnboundedReceiver<ManagerCommand>,
 ) -> JoinHandle<()> {
     tokio::spawn(async move {
-        println!("manager thread started");
+        info!("manager thread started");
         while let Some(cmd) = manager_receiver.recv().await {
             match cmd {
                 ManagerCommand::GetConfig(c) => {
-                    // println!("sending config");
+                    // info!("sending config");
                     c.sender
                         .send(proxy_config.clone())
                         .expect("start_config_manager  ManagerCommand::GetConfig should succeed");
@@ -68,7 +69,7 @@ pub fn start_config_manager(
                     // }
                 }
                 ManagerCommand::UpdateSourceStats(source_stats) => {
-                    // println!("updating stats for source server {}", source_stats.id);
+                    // info!("updating stats for source server {}", source_stats.id);
                     for s in proxy_config.server_sources.iter_mut() {
                         if s.id == source_stats.id {
                             s.stats.hits += 1;

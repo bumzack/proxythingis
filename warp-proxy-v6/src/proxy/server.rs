@@ -3,6 +3,7 @@ use std::str::FromStr;
 use std::time::Instant;
 
 use futures_util::TryStreamExt;
+use log::{error, info};
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
@@ -117,8 +118,8 @@ pub async fn execute_forward_request(
 
     let res = match result.await {
         Ok(response) => Ok(response),
-        Err(e) => {
-            error!("error from client {}", e);
+        Err(_e) => {
+            // info!("error from client {}", e);
             Err(warp::reject::not_found())
         }
     };

@@ -1,5 +1,6 @@
 use chrono::Utc;
 use deadpool_postgres::Pool;
+use log::info;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
 use warp::Reply;
