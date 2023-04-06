@@ -9,11 +9,11 @@ add path to .zshrc
 ## simple "testing"
 
 ```
-wrk -t12 -c400 -d30s http://127.0.0.1:3031/hallo
+wrk -t12 -c2 -d10s http://proxy.proxythingi.at/hallo
 ```
 
 ```
-curl -H "Authorization: Bearer with some JWT Token" http://localhost:3031/post_json?parameter1=has_aa_value&param2=val2 
+curl -H "Authorization: Bearer with some JWT Token" http://proxy.proxythingi.at/post_json?parameter1=has_aa_value&param2=val2 
 ```
 
 ```
@@ -42,6 +42,10 @@ curl -d '{"description":"new target for new server", "schema":"http", "host": "l
 
 ```
 curl http://localhost:3035/proxythingi/server | jq
+
+curl http://www.proxythingi.at/proxythingi/server | jq
+
+
 ```
 
 ### Activate target server
