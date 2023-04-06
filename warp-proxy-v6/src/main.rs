@@ -1,17 +1,20 @@
 extern crate lazy_static;
+#[macro_use]
+extern crate log;
 
-use crate::config_manager::manager::{start_config_manager, ProxyConfig};
+use std::env;
+
+use tokio::sync::mpsc;
+use warp::Filter;
+use warp::hyper::Client;
+use warp::hyper::client::HttpConnector;
+
+use crate::config_manager::manager::{ProxyConfig, start_config_manager};
 use crate::db::db::create_pool;
 use crate::proxy::route::proxy_routes;
 use crate::proxyserver::db::list_server;
 use crate::proxyserver::route::server_routes;
 use crate::stats::route::stats_routes;
-use std::env;
-use tokio::sync::mpsc;
-use tracing_subscriber::fmt::format::FmtSpan;
-use warp::hyper::client::HttpConnector;
-use warp::hyper::Client;
-use warp::Filter;
 
 mod config_manager;
 mod db;
@@ -32,6 +35,8 @@ lazy_static::lazy_static! {
 // #[tokio::main(worker_threads = 2)]
 #[tokio::main]
 async fn main() {
+    pretty_env_logger::init();
+
     let _result =
         dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/warp-proxy-v4/.env");
 
@@ -55,15 +60,6 @@ async fn main() {
 
     let _handle_config_manager = start_config_manager(proxy_config, manager_receiver);
 
-    //pretty_env_logger::init();
-    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "tracing=info,warp=debug".to_owned());
-    tracing_subscriber::fmt()
-        // Use the filter we built above to determine which traces to record.
-        .with_env_filter(filter)
-        // Record an event when each span closes. This can be used to time our
-        // routes' durations!
-        .with_span_events(FmtSpan::CLOSE)
-        .init();
 
     let cors = warp::cors()
         .allow_any_origin()
