@@ -1,10 +1,11 @@
+use chrono::{DateTime, Utc};
+use deadpool_postgres::Pool;
+use tokio_postgres::Row;
+
 use crate::db::db::{TABLE_SOURCE_STATS, TABLE_TARGET_STATS};
 use crate::server::models::MyError::DBQueryError;
 use crate::server::server::Result;
 use crate::stats::models::{ServerSourceStats, ServerTargetStats};
-use chrono::{DateTime, Utc};
-use deadpool_postgres::Pool;
-use tokio_postgres::Row;
 
 impl From<Row> for ServerSourceStats {
     fn from(value: Row) -> Self {

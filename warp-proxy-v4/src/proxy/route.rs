@@ -1,6 +1,6 @@
 use tokio::sync::mpsc::UnboundedSender;
-use warp::hyper::body::Bytes;
 use warp::Filter;
+use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{
     extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri,
@@ -12,7 +12,7 @@ use crate::proxy::server::execute_forward_request;
 
 pub fn proxy_routes(
     manager_sender: UnboundedSender<ManagerCommand>,
-) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
+) -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::Rejection> + Clone {
     warp::any()
         .and(extract_request_data_filter())
         .and(with_sender(manager_sender.clone()))

@@ -4,17 +4,17 @@ use std::convert::Infallible;
 use std::env;
 
 use tracing_subscriber::fmt::format::FmtSpan;
+use warp::{Filter, hyper};
 use warp::http::{Request, StatusCode};
-use warp::hyper::body::Bytes;
 use warp::hyper::{Body, Uri};
-use warp::{hyper, Filter};
+use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{
     extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri,
 };
 
-use crate::hyper::client::HttpConnector;
 use crate::hyper::Client;
+use crate::hyper::client::HttpConnector;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
