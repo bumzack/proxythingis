@@ -1,7 +1,7 @@
 use std::env;
 
-use diesel::r2d2::ConnectionManager;
 use diesel::PgConnection;
+use diesel::r2d2::ConnectionManager;
 use r2d2::Pool;
 use warp::Filter;
 

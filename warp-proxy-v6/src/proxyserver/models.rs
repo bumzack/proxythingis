@@ -1,7 +1,8 @@
-use crate::stats::models::{ServerSourceStats, ServerTargetStats};
 use chrono::{DateTime, Utc};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
+
+use crate::stats::models::{ServerSourceStats, ServerTargetStats};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct ServerSource {

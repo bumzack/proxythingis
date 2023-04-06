@@ -2,8 +2,8 @@ use chrono::Utc;
 use deadpool_postgres::Pool;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::reply::json;
 use warp::Reply;
+use warp::reply::json;
 
 use crate::config_manager::manager::{GetConfigData, ManagerCommand};
 use crate::server::server::Result;
@@ -12,7 +12,7 @@ use crate::stats::db::{create_source_stats, create_target_stats};
 pub async fn stats_read_handler(
     manager_sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply> {
-    println!("reading stats");
+    info!("reading stats");
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
@@ -25,7 +25,7 @@ pub async fn stats_read_handler(
     let proxy_config = rx
         .await
         .expect("stats_read_handler expected a valid proxy config");
-    // println!("got proxyconfig = {:?}", proxy_config);
+    // info!("got proxyconfig = {:?}", proxy_config);
 
     let res = json(&proxy_config);
 
@@ -36,7 +36,7 @@ pub async fn stats_store_handler(
     pool: Pool,
     manager_sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply> {
-    println!("saving stats");
+    info!("saving stats");
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
@@ -59,8 +59,8 @@ pub async fn stats_store_handler(
             source.stats.start,
             source.stats.stop,
         )
-        .await
-        .expect("stats_store_handler expects to be able to write the source stats");
+            .await
+            .expect("stats_store_handler expects to be able to write the source stats");
         for target in &source.targets {
             create_target_stats(
                 pool.clone(),
@@ -72,8 +72,8 @@ pub async fn stats_store_handler(
                 source.stats.start,
                 source.stats.stop,
             )
-            .await
-            .expect("stats_store_handler expects to be able to write the target stats");
+                .await
+                .expect("stats_store_handler expects to be able to write the target stats");
         }
     }
 
@@ -90,7 +90,7 @@ pub async fn stats_store_handler(
 pub async fn stats_reset_handler(
     manager_sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply> {
-    println!("reset stats");
+    info!("reset stats");
     let cmd = ManagerCommand::ResetStats;
     manager_sender
         .send(cmd)
