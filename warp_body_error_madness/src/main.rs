@@ -1,12 +1,11 @@
-use std::future::Future;
-
 use futures::TryStreamExt;
+use log::info;
 use warp::{Buf, Filter, hyper, Rejection, Reply, Stream};
 use warp::http::StatusCode;
 use warp::path::FullPath;
 
 fn main() {
-    println!("Hello, world!");
+    info!("Hello, world!");
 }
 
 pub fn extract_request_data_filter_body_stream() -> impl Filter<

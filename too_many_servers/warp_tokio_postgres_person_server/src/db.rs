@@ -43,8 +43,8 @@ pub async fn create_person(pool: Pool, body: PersonRequest) -> Result<Person> {
         "INSERT INTO {} (firstname, lastname) VALUES ($1, $2) RETURNING *",
         TABLE
     );
-    // println!("person {:?}", &body);
-    // println!("query   {}", &query);
+    // info!("person {:?}", &body);
+    // info!("query   {}", &query);
     let row = client
         .query_one(query.as_str(), &[&body.firstname, &body.lastname])
         .await
@@ -61,7 +61,7 @@ pub async fn list_person(pool: Pool, limit: u32) -> Result<Vec<Person>> {
         "SELECT id, firstname, lastname, created FROM {} ORDER BY lastname DESC LIMIT {}",
         TABLE, limit
     );
-    // println!("query   {}", &query);
+    // info!("query   {}", &query);
     let data = client.query(&query, &[]).await.unwrap();
     for row in data {
         let id: i32 = row.get(0);
@@ -69,7 +69,7 @@ pub async fn list_person(pool: Pool, limit: u32) -> Result<Vec<Person>> {
         let lastname: &str = row.get(2);
         let created: DateTime<Utc> = row.get(3);
 
-        // println!("found person: {} {} {} {:?}", id, firstname, lastname, created);
+        // info!("found person: {} {} {} {:?}", id, firstname, lastname, created);
         let p = Person {
             id,
             firstname: firstname.to_string(),

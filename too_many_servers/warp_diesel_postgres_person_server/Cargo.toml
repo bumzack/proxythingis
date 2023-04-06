@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-warp = "0.3.3"
+warp = "0.3.4"
 tokio = { version = "1.0", features = ["fs", "sync", "time"] }
 diesel = { version = "2.0.3", features = ["postgres", "r2d2", "chrono"] }
 dotenvy = "0.15"
@@ -17,7 +17,8 @@ serde_json = "1.0.94"
 serde_urlencoded = "0.7.1"
 serde_derive = "1.0.156"
 chrono = { version = "0.4.24", features = ["serde"] }
-
+log = "0.4.17"
+pretty_env_logger = "0.4.0"
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }

@@ -3,6 +3,7 @@
 use std::env;
 
 use deadpool_postgres::Pool;
+use log::{error, info};
 use warp::Filter;
 
 use crate::db::{create_pool, with_db};
@@ -17,8 +18,8 @@ async fn main() {
     // TODO WTF why why ...
     let result = dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/too_many_servers/warp_tokio_postgres_person_server/.env");
     match &result {
-        Ok(p) => println!("path to .env {:?}", &p),
-        Err(e) => println!("error {:?}", e),
+        Ok(p) => info!("path to .env {:?}", &p),
+        Err(e) => error!("error {:?}", e),
     }
 
     if env::var_os("RUST_LOG").is_none() {

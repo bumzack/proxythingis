@@ -29,7 +29,7 @@ pub async fn health_handler(
 ) -> std::result::Result<impl Reply, Rejection> {
     let _client = pool.get().unwrap();
 
-    // println!("hello from healthhandler");
+    // info!("hello from healthhandler");
 
     // TODO
     // client

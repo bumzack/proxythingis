@@ -3,6 +3,8 @@ use std::env;
 
 use diesel::{PgConnection, RunQueryDsl};
 use diesel::r2d2::ConnectionManager;
+use log::error;
+use log::info;
 use r2d2::Pool;
 use warp::Filter;
 use warp::http::StatusCode;
@@ -18,9 +20,9 @@ pub fn read_persons(pool: Pool<ConnectionManager<PgConnection>>) -> Vec<Person> 
         .load::<Person>(connection)
         .expect("Error loading persons");
 
-    // println!("Displaying {} persons", results.len());
+    // info!("Displaying {} persons", results.len());
     // for p in &results {
-    //     println!("id {}:  {} {}, created at {}", p.id, p.firstname, p.lastname, p.created);
+    //     info!("id {}:  {} {}, created at {}", p.id, p.firstname, p.lastname, p.created);
     // }
     results
 }
@@ -74,12 +76,12 @@ fn database_url_for_env() -> String {
     // WTF why why ...
     let result = dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/too_many_servers/warp_diesel_postgres_person_server/.env");
     match &result {
-        Ok(p) => println!("path to .env {:?}", &p),
-        Err(e) => println!("error {:?}", e),
+        Ok(p) => info!("path to .env {:?}", &p),
+        Err(e) => error!("error {:?}", e),
     }
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    println!("DATABASE URL {}", database_url);
+    info!("DATABASE URL {}", database_url);
     database_url
 }
 

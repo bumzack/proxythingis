@@ -6,17 +6,17 @@ use std::future::Future;
 
 use log::{error, info};
 use tokio::time::Instant;
+use warp::{Filter, hyper, Rejection, Reply};
 use warp::http::{HeaderValue, Request};
-use warp::hyper::body::Bytes;
 use warp::hyper::{Body, Uri};
-use warp::{hyper, Filter, Rejection, Reply};
+use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{
     extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri,
 };
 
-use crate::hyper::client::HttpConnector;
 use crate::hyper::Client;
+use crate::hyper::client::HttpConnector;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
@@ -54,7 +54,7 @@ async fn main() {
 
 fn execute_forward_request(
     hyper_request: Request<Body>,
-) -> impl Future<Output = Result<impl Reply + Sized, Rejection>> {
+) -> impl Future<Output=Result<impl Reply + Sized, Rejection>> {
     let result = handler(hyper_request);
 
     async move {
@@ -81,9 +81,9 @@ fn compose_forward_request(
         Some(p) => info!("params  {:?}", p),
         None => info!("no params provided"),
     }
-    println!("params  {:?}", &params);
-    println!("proxy_method  {:?}", &proxy_method);
-    println!("headers  {:?}", &headers);
+    info!("params  {:?}", &params);
+    info!("proxy_method  {:?}", &proxy_method);
+    info!("headers  {:?}", &headers);
 
     let method = hyper::http::Method::POST;
     let path = "full_path_ahead";
@@ -93,8 +93,8 @@ fn compose_forward_request(
         None => path.to_string(),
     };
 
-    println!("final path {:?}", &full_path);
-    println!("body empty {:?}", &body.is_empty());
+    info!("final path {:?}", &full_path);
+    info!("body empty {:?}", &body.is_empty());
 
     let mut hyper_request = hyper::http::Request::builder()
         .method(method)
@@ -140,7 +140,7 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
     //
     // let http_connector = hyper::client::HttpConnector::new();
     // let client = hyper::Client::builder().build(http_connector);
-    println!("redirecting to proxyUrl {}", proxy_url);
+    info!("redirecting to proxyUrl {}", proxy_url);
 
     let start = Instant::now();
     let mut response = CLIENT.request(request).await.expect("Request failed");
@@ -151,7 +151,7 @@ async fn handler(mut request: Request<Body>) -> Result<impl warp::Reply, Infalli
         duration.as_micros(),
         duration.as_nanos()
     );
-    println!("{} ", &d);
+    info!("{} ", &d);
     response
         .headers_mut()
         .insert("x-duration", HeaderValue::from_str(&d).unwrap());

@@ -5,17 +5,17 @@ use std::env;
 
 use log::error;
 use log::info;
+use warp::{Filter, hyper};
 use warp::http::{Request, StatusCode};
-use warp::hyper::body::Bytes;
 use warp::hyper::{Body, Uri};
-use warp::{hyper, Filter};
+use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{
     extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri,
 };
 
-use crate::hyper::client::HttpConnector;
 use crate::hyper::Client;
+use crate::hyper::client::HttpConnector;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
@@ -34,7 +34,6 @@ async fn main() {
         env::set_var("RUST_LOG", "todos=info");
     }
     pretty_env_logger::init();
-    let filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "tracing=info,warp=debug".to_owned());
 
     let routes = warp::any()
         .and(extract_request_data_filter())

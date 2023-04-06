@@ -1,7 +1,3 @@
-// https://morioh.com/p/47f04c30ffd7
-
-use std::str::FromStr;
-
 use chrono::{DateTime, Utc};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;

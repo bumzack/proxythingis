@@ -77,7 +77,7 @@ pub fn start_config_manager(
                     }
                 }
                 ManagerCommand::UpdateTargetStats(target_stats) => {
-                    // println!("updating stats for target server {}", target_stats.id);
+                    // info!("updating stats for target server {}", target_stats.id);
                     for s in proxy_config.server_sources.iter_mut() {
                         for t in s.targets.iter_mut() {
                             if t.id == target_stats.id {
@@ -99,11 +99,11 @@ pub fn start_config_manager(
                     }
                 }
                 ManagerCommand::UpdateServerConfig(new_config) => {
-                    // println!("got a new config");
+                    // info!("got a new config");
                     proxy_config.server_sources = new_config.server_sources;
                 }
                 ManagerCommand::ResetStats => {
-                    // println!("reset config. stats_started was {}", stats_started);
+                    // info!("reset config. stats_started was {}", stats_started);
                     for s in proxy_config.server_sources.iter_mut() {
                         s.stats.hits = 0;
                         for t in s.targets.iter_mut() {
