@@ -2,8 +2,8 @@ use chrono::Utc;
 use deadpool_postgres::Pool;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::reply::json;
 use warp::Reply;
+use warp::reply::json;
 
 use crate::config_manager::manager::{GetConfigData, ManagerCommand};
 use crate::server::server::Result;

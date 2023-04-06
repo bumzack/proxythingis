@@ -1,3 +1,7 @@
+use deadpool_postgres::Pool;
+use tokio::sync::mpsc::UnboundedSender;
+use warp::Filter;
+
 use crate::config_manager::manager::ManagerCommand;
 use crate::config_manager::server::with_sender;
 use crate::db::server::with_db;
@@ -5,9 +9,6 @@ use crate::proxyserver::server::{
     activate_server_handler, create_source_handler, create_target_handler,
     deactivate_server_handler, list_servers_handler,
 };
-use deadpool_postgres::Pool;
-use tokio::sync::mpsc::UnboundedSender;
-use warp::Filter;
 
 pub fn server_routes(
     pool: Pool,

@@ -1,14 +1,15 @@
-use crate::config_manager::manager::{send_config, ManagerCommand};
+use deadpool_postgres::Pool;
+use tokio::sync::mpsc::UnboundedSender;
+use warp::{reject, Reply};
+use warp::reply::json;
+
+use crate::config_manager::manager::{ManagerCommand, send_config};
 use crate::proxyserver::db::{
     activate_server, create_source, create_target, deactivate_server, list_server,
 };
 use crate::proxyserver::models::{NewServerSourcePost, NewServerTargetPost};
 use crate::server::models::DivideByZero;
 use crate::server::server::Result;
-use deadpool_postgres::Pool;
-use tokio::sync::mpsc::UnboundedSender;
-use warp::reply::json;
-use warp::{reject, Reply};
 
 pub async fn create_source_handler(
     pool: Pool,

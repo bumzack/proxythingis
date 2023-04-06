@@ -1,12 +1,12 @@
 use std::net::SocketAddr;
 use std::time::Duration;
 
+use axum::{Json, Router};
 use axum::body::Bytes;
 use axum::http::{HeaderMap, Request, StatusCode};
 use axum::response::Response;
 use axum::routing::get;
 use axum::routing::post;
-use axum::{Json, Router};
 use serde::Deserialize;
 use serde::Serialize;
 use tower_http::{classify::ServerErrorsFailureClass, trace::TraceLayer};

@@ -2,8 +2,8 @@ use chrono::Utc;
 use deadpool_postgres::Pool;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::reply::json;
 use warp::Reply;
+use warp::reply::json;
 
 use crate::config_manager::manager::{GetConfigData, ManagerCommand};
 use crate::server::server::Result;
@@ -59,8 +59,8 @@ pub async fn stats_store_handler(
             source.stats.start,
             source.stats.stop,
         )
-        .await
-        .expect("stats_store_handler expects to be able to write the source stats");
+            .await
+            .expect("stats_store_handler expects to be able to write the source stats");
         for target in &source.targets {
             create_target_stats(
                 pool.clone(),
@@ -72,8 +72,8 @@ pub async fn stats_store_handler(
                 source.stats.start,
                 source.stats.stop,
             )
-            .await
-            .expect("stats_store_handler expects to be able to write the target stats");
+                .await
+                .expect("stats_store_handler expects to be able to write the target stats");
         }
     }
 

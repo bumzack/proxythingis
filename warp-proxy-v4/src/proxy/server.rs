@@ -5,18 +5,18 @@ use std::time::Instant;
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::http::{HeaderValue, Method, Request, Uri};
-use warp::hyper::body::Bytes;
-use warp::hyper::Body;
 use warp::{hyper, Rejection, Reply};
+use warp::http::{HeaderValue, Method, Request, Uri};
+use warp::hyper::Body;
+use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
 
+use crate::CLIENT;
 use crate::config_manager::manager::{
     GetConfigData, ManagerCommand, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
 };
 use crate::proxyserver::models::{ServerSource, ServerTarget};
-use crate::CLIENT;
 
 pub async fn execute_forward_request(
     uri: ProxyUri,
