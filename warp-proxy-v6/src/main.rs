@@ -2,12 +2,14 @@ extern crate lazy_static;
 
 use std::env;
 
+use log::LevelFilter;
+use pretty_env_logger::env_logger::Builder;
 use tokio::sync::mpsc;
-use warp::hyper::client::HttpConnector;
-use warp::hyper::Client;
 use warp::Filter;
+use warp::hyper::Client;
+use warp::hyper::client::HttpConnector;
 
-use crate::config_manager::manager::{start_config_manager, ProxyConfig};
+use crate::config_manager::manager::{ProxyConfig, start_config_manager};
 use crate::db::db::create_pool;
 use crate::proxy::route::proxy_routes;
 use crate::proxyserver::db::list_server;
@@ -33,15 +35,11 @@ lazy_static::lazy_static! {
 // #[tokio::main(worker_threads = 2)]
 #[tokio::main]
 async fn main() {
+    Builder::new().filter_level(LevelFilter::Info).init();
+    pretty_env_logger::init();
+
     let _result =
         dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/warp-proxy-v4/.env");
-
-    if env::var_os("RUST_LOG").is_none() {
-        // Set `RUST_LOG=todos=debug` to see debug logs,
-        // this only shows access logs.
-        env::set_var("RUST_LOG", "todos=info");
-    }
-    pretty_env_logger::init();
 
     let pool = create_pool();
 

@@ -2,7 +2,6 @@
 
 ## ubuuntu service
 
-
 /lib/systemd/system
 
 proxythingi.service
@@ -39,7 +38,6 @@ SyslogIdentifier=proxythingi
 WantedBy=multi-user.target
 ```
 
-
 ```
 systemctl daemon-reload
 ```
@@ -48,23 +46,18 @@ systemctl daemon-reload
 sudo systemctl  restart  proxythingi.service
 ```
 
-
 ## ubuntu postgresql install
 
 sudo -u postgres psql
- create database bumzack;
- create user bumzack with encrypted password 'bumzack';
- grant all privileges on database bumzack to bumzack;
-
+create database bumzack;
+create user bumzack with encrypted password 'bumzack';
+grant all privileges on database bumzack to bumzack;
 
 sudo -u bumzack psql bumzack
 
 insert sql script
 
-
-
 ## start as service
-
 
 Reverse Proxy API GateWay Load Balancer - a laymans implemention attempt using rust
 

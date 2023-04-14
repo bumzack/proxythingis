@@ -1,4 +1,5 @@
 use deadpool_postgres::Pool;
+use log::info;
 use tokio::sync::mpsc::UnboundedSender;
 use warp::Filter;
 
@@ -15,18 +16,27 @@ pub fn stats_routes(
     let stats_read = stats
         .and(warp::get())
         .and(with_sender(manager_sender.clone()))
-        .and_then(|sender| stats_read_handler(sender));
+        .and_then(|sender| {
+            info!("GET /proxythingi/stats matched");
+            stats_read_handler(sender)
+        });
 
     let stats_store = stats
         .and(warp::post())
         .and(with_db(pool.clone()))
         .and(with_sender(manager_sender.clone()))
-        .and_then(|pool, sender| stats_store_handler(pool, sender));
+        .and_then(|pool, sender| {
+            info!("POST /proxythingi/stats matched");
+            stats_store_handler(pool, sender)
+        });
 
     let stats_reset = stats
         .and(warp::delete())
         .and(with_sender(manager_sender.clone()))
-        .and_then(|sender| stats_reset_handler(sender));
+        .and_then(|sender| {
+            info!("DELETE /proxythingi/stats matched");
+            stats_reset_handler(sender)
+        });
 
     stats_read.or(stats_store).or(stats_reset)
 }

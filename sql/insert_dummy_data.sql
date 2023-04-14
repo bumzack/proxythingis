@@ -111,9 +111,6 @@ VALUES (3, 5);
 
 
 
-
-
-
 INSERT INTO source (description, path_starts_with, method)
 VALUES ('Solr 10.0 / GET', '/solr', 'GET');
 INSERT INTO source (description, path_starts_with, method)
@@ -144,8 +141,6 @@ VALUES (7, 9);
 
 
 
-
-
 INSERT INTO source (description, path_starts_with, method)
 VALUES ('Meilisearch 1.1.0 / GET', '/meili', 'GET');
 INSERT INTO source (description, path_starts_with, method)
@@ -160,7 +155,7 @@ VALUES ('Meilisearch 1.1.0 / GET', 'http', 'localhost', 18984, '/', 'GET', true)
 INSERT INTO target (description, schema, host, port, path, method, active)
 VALUES ('Meilisearch 1.1.0 / POST', 'http', 'localhost', 18984, '/', 'POST', true);
 INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Meilisearch 1.1.0 / PUT', 'http', 'localhost',18984, '/', 'PUT', true);
+VALUES ('Meilisearch 1.1.0 / PUT', 'http', 'localhost', 18984, '/', 'PUT', true);
 INSERT INTO target (description, schema, host, port, path, method, active)
 VALUES ('Meilisearch 1.1.0 / PATCH', 'http', 'localhost', 18984, '/', 'PATCH', true);
 

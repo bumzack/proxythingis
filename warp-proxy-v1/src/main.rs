@@ -4,12 +4,12 @@ use std::convert::Infallible;
 use std::env;
 
 use log::info;
+use warp::{Filter, hyper};
 use warp::http::Request;
 use warp::hyper::{Body, Uri};
-use warp::{hyper, Filter};
 
-use crate::hyper::client::HttpConnector;
 use crate::hyper::Client;
+use crate::hyper::client::HttpConnector;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {

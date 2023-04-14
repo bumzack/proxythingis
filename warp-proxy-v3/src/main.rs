@@ -6,17 +6,17 @@ use std::future::Future;
 
 use log::{error, info};
 use tokio::time::Instant;
+use warp::{Filter, hyper, Rejection, Reply};
 use warp::http::{HeaderValue, Request};
-use warp::hyper::body::Bytes;
 use warp::hyper::{Body, Uri};
-use warp::{hyper, Filter, Rejection, Reply};
+use warp::hyper::body::Bytes;
 
 use common::warp_request_filter::{
     extract_request_data_filter, ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri,
 };
 
-use crate::hyper::client::HttpConnector;
 use crate::hyper::Client;
+use crate::hyper::client::HttpConnector;
 
 // gotta give credit where credit is due and stuff
 lazy_static::lazy_static! {
@@ -54,7 +54,7 @@ async fn main() {
 
 fn execute_forward_request(
     hyper_request: Request<Body>,
-) -> impl Future<Output = Result<impl Reply + Sized, Rejection>> {
+) -> impl Future<Output=Result<impl Reply + Sized, Rejection>> {
     let result = handler(hyper_request);
 
     async move {

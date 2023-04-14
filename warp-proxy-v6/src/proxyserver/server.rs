@@ -1,10 +1,10 @@
 use deadpool_postgres::Pool;
 use log::info;
 use tokio::sync::mpsc::UnboundedSender;
-use warp::reply::json;
 use warp::{reject, Reply};
+use warp::reply::json;
 
-use crate::config_manager::manager::{send_config, ManagerCommand};
+use crate::config_manager::manager::{ManagerCommand, send_config};
 use crate::proxyserver::db::{
     activate_server, create_source, create_target, deactivate_server, list_server,
 };
@@ -65,7 +65,7 @@ pub async fn activate_server_handler(
     id: i32,
     manager_sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply> {
-    let _ = activate_server(pool.clone(), id)
+    activate_server(pool.clone(), id)
         .await
         // TODO fix CustomError
         .map_err(|e| {
@@ -82,7 +82,7 @@ pub async fn deactivate_server_handler(
     id: i32,
     manager_sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply> {
-    let _ = deactivate_server(pool.clone(), id)
+    deactivate_server(pool.clone(), id)
         .await
         // TODO fix CustomError
         .map_err(|e| {
