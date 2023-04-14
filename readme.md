@@ -1,5 +1,71 @@
 # ProxyThingis
 
+## ubuuntu service
+
+
+/lib/systemd/system
+
+proxythingi.service
+
+```
+
+[Unit]
+Description=ProxyThingi service
+ConditionPathExists=/home/bumzack/proxythingis/target/release
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=10
+startLimitIntervalSec=60
+
+WorkingDirectory=/home/bumzack/proxythingis/warp-proxy-v6
+ExecStart=/home/bumzack/proxythingis/target/release/warp-proxy-v6
+
+# make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/proxythingi
+ExecStartPre=/bin/chown syslog:adm /var/log/proxythingi
+ExecStartPre=/bin/chmod 755 /var/log/proxythingi
+/home/bumzack/prox home/{user_name}/workspace/startupSuccessExitStatus=143
+SyslogIdentifier=proxythingi
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
+```
+systemctl daemon-reload
+```
+
+```
+sudo systemctl  restart  proxythingi.service
+```
+
+
+## ubuntu postgresql install
+
+sudo -u postgres psql
+ create database bumzack;
+ create user bumzack with encrypted password 'bumzack';
+ grant all privileges on database bumzack to bumzack;
+
+
+sudo -u bumzack psql bumzack
+
+insert sql script
+
+
+
+## start as service
+
+
 Reverse Proxy API GateWay Load Balancer - a laymans implemention attempt using rust
 
 ## postgresql

@@ -109,3 +109,70 @@ VALUES ('simplest server. always returns 200 and no persons at all', 'http', 'lo
 INSERT INTO source2target (source_id, target_id)
 VALUES (3, 5);
 
+
+
+
+
+
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Solr 10.0 / GET', '/solr', 'GET');
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Solr 10.0 / POST', '/solr', 'POST');
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Solr 10.0 / PUT', '/solr', 'PUT');
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Solr 10.0 / PATCH', '/solr', 'PATCH');
+
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Solr 10.0 / GET', 'http', 'localhost', 8984, '/', 'GET', true);
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Solr 10.0 / POST', 'http', 'localhost', 8984, '/', 'POST', true);
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Solr 10.0 / PUT', 'http', 'localhost', 8984, '/', 'PUT', true);
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Solr 10.0 / PATCH', 'http', 'localhost', 8984, '/', 'PATCH', true);
+
+
+INSERT INTO source2target (source_id, target_id)
+VALUES (4, 6);
+INSERT INTO source2target (source_id, target_id)
+VALUES (5, 7);
+INSERT INTO source2target (source_id, target_id)
+VALUES (6, 8);
+INSERT INTO source2target (source_id, target_id)
+VALUES (7, 9);
+
+
+
+
+
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Meilisearch 1.1.0 / GET', '/meili', 'GET');
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Meilisearch 1.1.0 / POST', '/meili', 'POST');
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Meilisearch 1.1.0 / PUT', '/meili', 'PUT');
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Meilisearch 1.1.0 / PATCH', '/meili', 'PATCH');
+
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Meilisearch 1.1.0 / GET', 'http', 'localhost', 18984, '/', 'GET', true);
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Meilisearch 1.1.0 / POST', 'http', 'localhost', 18984, '/', 'POST', true);
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Meilisearch 1.1.0 / PUT', 'http', 'localhost',18984, '/', 'PUT', true);
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Meilisearch 1.1.0 / PATCH', 'http', 'localhost', 18984, '/', 'PATCH', true);
+
+
+INSERT INTO source2target (source_id, target_id)
+VALUES (8, 10);
+INSERT INTO source2target (source_id, target_id)
+VALUES (9, 11);
+INSERT INTO source2target (source_id, target_id)
+VALUES (10, 12);
+INSERT INTO source2target (source_id, target_id)
+VALUES (11, 13);
+
+
+

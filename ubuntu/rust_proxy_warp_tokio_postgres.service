@@ -1,0 +1,27 @@
+[Unit]
+Description=Rust Price Service
+ConditionPathExists=/home/bumzack/proxythingis/too_many_servers/warp_diesel_postgres_person_server
+
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=10
+startLimitIntervalSec=60
+WorkingDirectory=/home/bumzack/proxythingis/too_many_servers/warp_diesel_postgres_person_server
+ExecStart=/home/bumzack/proxythingis/target/release/warp_diesel_postgres_person_server
+
+# make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/rust_warp_diesel_postgres_person_server
+ExecStartPre=/bin/chown syslog:adm /var/log/rust_warp_diesel_postgres_person_server
+ExecStartPre=/bin/chmod 755 /var/log/rust_warp_diesel_postgres_person_server
+SyslogIdentifier=rust_warp_diesel_postgres_person_server
+
+[Install]
+WantedBy=multi-user.target
