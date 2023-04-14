@@ -24,10 +24,10 @@ jquery(document).ready(function () {
 
         let person = {
             firstname: "Bli",
-            lastname:"Blupp"
+            lastname: "Blupp"
         }
 
-        jquery.post("http://127.0.0.1:3036/api/person", person ,function (data) {
+        jquery.post("http://127.0.0.1:3036/api/person", person, function (data) {
             console.log(`response from POST request.  data: ${JSON.stringify(data, null, 4)}`)
             jquery("#persons").html(JSON.stringify(data, null, 4));
         });

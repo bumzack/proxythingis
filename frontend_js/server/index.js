@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {value: true});
 const Koa = require("koa");
 const serve = require("koa-static");
 const cors = require("@koa/cors");
