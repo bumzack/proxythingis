@@ -1,6 +1,7 @@
 use std::convert::Infallible;
-use std::env;
 
+use log::LevelFilter;
+use pretty_env_logger::env_logger::Builder;
 use warp::{Filter, hyper};
 use warp::hyper::StatusCode;
 
@@ -24,10 +25,7 @@ pub async fn stream_data() -> Result<impl warp::Reply, Infallible> {
 
 #[tokio::main]
 async fn main() {
-    if env::var_os("RUST_LOG").is_none() {
-        env::set_var("RUST_LOG", "response_to_everything=info");
-    }
-    pretty_env_logger::init();
+    Builder::new().filter_level(LevelFilter::Info).init();
 
     warp::serve(proxy()).run(([127, 0, 0, 1], 3070)).await;
 }

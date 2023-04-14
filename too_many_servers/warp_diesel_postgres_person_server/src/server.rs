@@ -14,7 +14,7 @@ use crate::models::NewPersonPost;
 pub async fn create_person_handler(
     body: NewPersonPost,
     pool: Pool<ConnectionManager<PgConnection>>,
-) -> Result<impl warp::Reply, Infallible> {
+) -> Result<impl Reply, Infallible> {
     create_person(pool, &body.firstname, &body.lastname)
 }
 
@@ -26,7 +26,7 @@ pub async fn list_person_handler(
 
 pub async fn health_handler(
     pool: Pool<ConnectionManager<PgConnection>>,
-) -> std::result::Result<impl Reply, Rejection> {
+) -> Result<impl Reply, Rejection> {
     let _client = pool.get().unwrap();
 
     // info!("hello from healthhandler");

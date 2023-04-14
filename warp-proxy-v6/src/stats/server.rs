@@ -17,7 +17,7 @@ pub async fn stats_read_handler(
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
-        reset_start: false,
+        //   reset_start: false,
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     manager_sender
@@ -41,7 +41,7 @@ pub async fn stats_store_handler(
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
-        reset_start: true,
+        //   reset_start: true,
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     manager_sender

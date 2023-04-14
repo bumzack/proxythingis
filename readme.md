@@ -9,19 +9,19 @@ add path to .zshrc
 ## simple "testing"
 
 ```
-wrk -t12 -c400 -d30s http://127.0.0.1:3031/hallo
+wrk -t12 -c400 -d30s http://127.0.0.1:3036/hallo
 ```
 
 ```
-curl -H "Authorization: Bearer with some JWT Token" http://localhost:3031/post_json?parameter1=has_aa_value&param2=val2 
+curl -H "Authorization: Bearer with some JWT Token" http://localhost:3036/post_json?parameter1=has_aa_value&param2=val2 
 ```
 
 ```
-curl -d '{"ksdsdsdsdey1":"vsdsdsdadsadaadlue1", "kasdadadey2":"vasdadadasdasdalue2"}' -H "Content-Type: application/json" -X POST http://localhost:3031/post_json?parameter1=has_aa_value&param2=val2 | jq
+curl -d '{"ksdsdsdsdey1":"vsdsdsdadsadaadlue1", "kasdadadey2":"vasdadadasdasdalue2"}' -H "Content-Type: application/json" -X POST http://localhost:3036/post_json?parameter1=has_aa_value&param2=val2 | jq
 ```
 
 ```
-curl -d '{"ksdsdsdsdey1":"vsdsdsdadsadaadlue1", "kasdadadey2":"vasdadadasdasdalue2"}' -H "Authorization: Bearer with some JWT Token" -H "Content-Type: application/json" -X POST http://localhost:3031/post_json\?parameter1\=has_aa_value\&param2\=val2 | jq
+curl -d '{"ksdsdsdsdey1":"vsdsdsdadsadaadlue1", "kasdadadey2":"vasdadadasdasdalue2"}' -H "Authorization: Bearer with some JWT Token" -H "Content-Type: application/json" -X POST http://localhost:3036/post_json\?parameter1\=has_aa_value\&param2\=val2 | jq
 ```
 
 ## warp-proxy-v5
@@ -29,35 +29,35 @@ curl -d '{"ksdsdsdsdey1":"vsdsdsdadsadaadlue1", "kasdadadey2":"vasdadadasdasdalu
 ### add new source server
 
 ```
-curl -d '{"description":"new server", "path_starts_with":"/api/person", "method": "GET"}'   -H "Content-Type: application/json" -X POST http://localhost:3035/proxythingi/server/source | jq
+curl -d '{"description":"new server", "path_starts_with":"/api/person", "method": "GET"}'   -H "Content-Type: application/json" -X POST http://localhost:3036/proxythingi/server/source | jq
 ```
 
 ### add new target server
 
 ```
-curl -d '{"description":"new target for new server", "schema":"http", "host": "localhost", "port": 1234, "path": "/api/person", "method": "GET", "active": true, "source": 4}'   -H "Content-Type: application/json" -X POST http://localhost:3035/proxythingi/server/target | jq
+curl -d '{"description":"new target for new server", "schema":"http", "host": "localhost", "port": 1234, "path": "/api/person", "method": "GET", "active": true, "source": 4}'   -H "Content-Type: application/json" -X POST http://localhost:3036/proxythingi/server/target | jq
 ```
 
 ### list servers
 
 ```
-curl http://localhost:3035/proxythingi/server | jq
+curl http://localhost:3036/proxythingi/server | jq
 ```
 
 ### Activate target server
 
 ```
-curl http://localhost:3035/proxythingi/server/activate/2 | jq
+curl http://localhost:3036/proxythingi/server/activate/2 | jq
 
-curl http://localhost:3035/proxythingi/server/activate/3 | jq
+curl http://localhost:3036/proxythingi/server/activate/3 | jq
 ```
 
 ### Activate target server
 
 ```
-curl http://localhost:3035/proxythingi/server/deactivate/2 | jq
+curl http://localhost:3036/proxythingi/server/deactivate/2 | jq
 
-curl http://localhost:3035/proxythingi/server/deactivate/3 | jq
+curl http://localhost:3036/proxythingi/server/deactivate/3 | jq
 ```
 
 ## Stats
@@ -65,19 +65,19 @@ curl http://localhost:3035/proxythingi/server/deactivate/3 | jq
 ### get stats (currently whole server config)
 
 ```
-curl http://localhost:3035/proxythingi/stats | jq
+curl http://localhost:3036/proxythingi/stats | jq
 ```
 
 ### store stats in DB
 
 ```
-curl -X POST http://localhost:3035/proxythingi/stats | jq
+curl -X POST http://localhost:3036/proxythingi/stats | jq
 ```
 
 ### reset stats in memory
 
 ```
-curl -X DELETE http://localhost:3035/proxythingi/stats | jq
+curl -X DELETE http://localhost:3036/proxythingi/stats | jq
 ```
 
 ## Database stuff
@@ -108,6 +108,7 @@ INSERT INTO person (firstname, lastname) VALUES ('max', 'mustermann');
 ```
 
 ```
+
 INSERT INTO person (firstname, lastname) VALUES ('Matilde', 'Bernhard');
 INSERT INTO person (firstname, lastname) VALUES ('Cruz', 'Stiedemann');
 INSERT INTO person (firstname, lastname) VALUES ('Cade', 'Collier');
@@ -208,4 +209,5 @@ INSERT INTO person (firstname, lastname) VALUES ('Flo', 'Wilderman');
 INSERT INTO person (firstname, lastname) VALUES ('Esteban', 'Monahan');
 INSERT INTO person (firstname, lastname) VALUES ('Cleve', 'Hilll');
 INSERT INTO person (firstname, lastname) VALUES ('Celine', 'Beier');
+
 ```

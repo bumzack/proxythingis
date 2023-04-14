@@ -7,8 +7,8 @@ use tokio_postgres::NoTls;
 pub const TABLE_SOURCE: &str = "source";
 pub const TABLE_TARGET: &str = "target";
 pub const TABLE_SOURCE2TARGET: &str = "source2target";
-pub const TABLE_SOURCE_STATS: &str = "source_stats";
-pub const TABLE_TARGET_STATS: &str = "target_stats";
+// pub const TABLE_SOURCE_STATS: &str = "source_stats";
+// pub const TABLE_TARGET_STATS: &str = "target_stats";
 
 pub fn create_pool() -> Pool {
     dotenv().ok();

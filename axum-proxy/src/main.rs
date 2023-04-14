@@ -1,10 +1,10 @@
 use std::env;
 use std::net::SocketAddr;
 
+use axum::{Json, Router};
 use axum::http::StatusCode;
 use axum::routing::get;
 use axum::routing::post;
-use axum::{Json, Router};
 use serde::Deserialize;
 use serde::Serialize;
 

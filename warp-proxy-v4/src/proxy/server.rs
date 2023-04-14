@@ -30,7 +30,7 @@ pub async fn execute_forward_request(
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
-        reset_start: false,
+        // reset_start: false,
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     match sender.send(cmd) {

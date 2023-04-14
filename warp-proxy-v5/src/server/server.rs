@@ -8,7 +8,7 @@ use crate::server::models::MyError::DBQueryError;
 
 pub type Result<T> = std::result::Result<T, Rejection>;
 
-pub async fn health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejection> {
+pub async fn _health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejection> {
     let client = pool.get().await.unwrap();
 
     info!("hello from healthhandler");
