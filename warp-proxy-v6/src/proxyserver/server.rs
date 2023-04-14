@@ -65,7 +65,7 @@ pub async fn activate_server_handler(
     id: i32,
     manager_sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply> {
-    let _ = activate_server(pool.clone(), id)
+    activate_server(pool.clone(), id)
         .await
         // TODO fix CustomError
         .map_err(|e| {
@@ -82,7 +82,7 @@ pub async fn deactivate_server_handler(
     id: i32,
     manager_sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply> {
-    let _ = deactivate_server(pool.clone(), id)
+    deactivate_server(pool.clone(), id)
         .await
         // TODO fix CustomError
         .map_err(|e| {

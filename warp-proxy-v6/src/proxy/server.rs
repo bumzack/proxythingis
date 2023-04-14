@@ -46,6 +46,11 @@ pub async fn execute_forward_request(
     let source = find_match(&uri, &proxy_config, &proxy_method);
     let target: Option<&ServerTarget> = match source {
         Some(server) => {
+            info!(
+                "found a matching source server for uri: {}, method  {} ",
+                &uri.as_str(),
+                &proxy_method.as_str()
+            );
             let targets = &server.targets;
             if targets.len() > 0 {
                 let mut rng = rand::thread_rng();
@@ -59,12 +64,25 @@ pub async fn execute_forward_request(
                     );
                 }
                 let t = targets.get(i as usize).expect("cant unwrap target server");
+                info!("found a matching target server for uri: {}, method  {} //  target server: host: {} // port {} // method {} // path {}", &uri.as_str(), &proxy_method.as_str() ,t.host, t.port, t.method, t.path);
                 Some(t)
             } else {
+                error!(
+                    "NOT found a matching target server for uri: {}, method  {} ",
+                    &uri.as_str(),
+                    &proxy_method.as_str()
+                );
                 None
             }
         }
-        None => None,
+        None => {
+            error!(
+                "NOT found a matching source server for uri: {}, method  {} ",
+                &uri.as_str(),
+                &proxy_method.as_str()
+            );
+            None
+        }
     };
     if target.is_none() {
         return Err(warp::reject::not_found());
@@ -116,14 +134,20 @@ pub async fn execute_forward_request(
         &target.description,
     );
 
-    let res = match result.await {
-        Ok(response) => Ok(response),
-        Err(_e) => {
-            // info!("error from client {}", e);
+    match result.await {
+        Ok(response) => {
+            info!(
+                "forwarded request successfully handled for  source uri: {}, method  {}    ",
+                &uri.as_str(),
+                &proxy_method.as_str()
+            );
+            Ok(response)
+        }
+        Err(e) => {
+            error!("forwarded request returned an error  for  source uri: {}, method  {}   ==>  error {:?} ",&uri.as_str(),&proxy_method.as_str(),e);
             Err(warp::reject::not_found())
         }
-    };
-    res
+    }
 }
 
 async fn handler(
@@ -168,7 +192,7 @@ async fn handler(
     // let client = hyper::Client::builder().build(http_connector);
 
     let start = Instant::now();
-    //info!("request uri {}", request.uri().to_string());
+    info!("request uri {}", request.uri().to_string());
     let mut response = CLIENT.request(request).await.expect("Request failed");
     let duration = start.elapsed();
     let d = format!(
@@ -207,14 +231,18 @@ fn find_match<'a>(
     proxy_config: &'a ProxyConfig,
     method: &Method,
 ) -> Option<&'a ServerSource> {
-    for s in &proxy_config.server_sources {
-        // info!("searching for request uri {}, method {}    comparing with config  path_starts_with  {} and method {}",
-        //          &uri.as_str(), &method,&s.path_starts_with, &s.method);
-        if uri.as_str().starts_with(&s.path_starts_with)
+    // nice, funny demo
+    // for s in &proxy_config.server_sources {
+    //     // info!("searching for request uri {}, method {}    comparing with config  path_starts_with  {} and method {}",
+    //     //          &uri.as_str(), &method,&s.path_starts_with, &s.method);
+    //     if uri.as_str().starts_with(&s.path_starts_with)
+    //         && method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase()
+    //     {
+    //         return Some(s);
+    //     }
+    // }
+    proxy_config.server_sources.iter().find(|&s| {
+        uri.as_str().starts_with(&s.path_starts_with)
             && method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase()
-        {
-            return Some(s);
-        }
-    }
-    None
+    })
 }

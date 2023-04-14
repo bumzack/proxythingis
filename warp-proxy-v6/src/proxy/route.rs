@@ -1,3 +1,4 @@
+use log::info;
 use tokio::sync::mpsc::UnboundedSender;
 use warp::Filter;
 
@@ -24,6 +25,7 @@ pub fn proxy_routes(
              proxy_method: ProxyMethod,
              headers: ProxyHeaders,
              body| {
+                info!("some route matched and will be forwarded url ");
                 execute_forward_request(uri, params, proxy_method, headers, body, sender)
             },
         )

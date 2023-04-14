@@ -1,0 +1,27 @@
+[Unit]
+Description=Rust Price Service
+ConditionPathExists=/home/bumzack/proxythingis/too_many_servers/response_ok_to_everything
+
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=10
+startLimitIntervalSec=60
+WorkingDirectory=/home/bumzack/proxythingis/too_many_servers/response_ok_to_everything
+ExecStart=/home/bumzack/proxythingis/target/release/response_ok_to_everything
+
+# make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/rust_response_ok_to_everything
+ExecStartPre=/bin/chown syslog:adm /var/log/rust_response_ok_to_everything
+ExecStartPre=/bin/chmod 755 /var/log/rust_response_ok_to_everything
+SyslogIdentifier=rust_response_ok_to_everything
+
+[Install]
+WantedBy=multi-user.target
