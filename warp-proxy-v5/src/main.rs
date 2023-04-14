@@ -33,8 +33,7 @@ lazy_static::lazy_static! {
 // #[tokio::main(worker_threads = 2)]
 #[tokio::main]
 async fn main() {
-    let _result =
-        dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/warp-proxy-v5/.env");
+    let _result = dotenvy::from_filename("/home/bumzack/proxythingis/warp-proxy-v5/.env");
 
     if env::var_os("RUST_LOG").is_none() {
         // Set `RUST_LOG=todos=debug` to see debug logs,
