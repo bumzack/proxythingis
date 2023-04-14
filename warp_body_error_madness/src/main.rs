@@ -19,19 +19,19 @@ pub fn proxy_routes() -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::R
 {
     warp::any()
         .and(extract_request_data_filter_body_stream())
-        .and_then(|fullpath, body| execute_forward_request(body))
+        .and_then(|_fullpath, body| execute_forward_request(body))
 }
 
 pub async fn execute_forward_request(
     body: impl Stream<Item=Result<impl Buf, warp::Error>> + Send + 'static,
-) -> std::result::Result<impl Reply, Rejection> {
+) -> Result<impl Reply, Rejection> {
     let body = body.map_ok(|mut buf| buf.copy_to_bytes(buf.remaining()));
 
     let mut _hyper_request = hyper::http::Request::builder()
         .body(hyper::body::Body::wrap_stream(body))
         .expect("Request::builder() failed");
 
-    let json = warp::reply::json(&"bla");
+    let _json = warp::reply::json(&"bla");
 
     Ok(StatusCode::OK)
 }
