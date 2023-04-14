@@ -1,7 +1,5 @@
 extern crate lazy_static;
 
-use std::env;
-
 use log::LevelFilter;
 use pretty_env_logger::env_logger::Builder;
 use tokio::sync::mpsc;
@@ -35,10 +33,10 @@ lazy_static::lazy_static! {
 // #[tokio::main(worker_threads = 2)]
 #[tokio::main]
 async fn main() {
-    Builder::new().filter_level(LevelFilter::Info).init();
-    pretty_env_logger::init();
+    let _result =
+        dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/warp-proxy-v6/.env");
 
-    let _result = dotenvy::from_filename("/home/bumzack/proxythingis/warp-proxy-v4/.env");
+    Builder::new().filter_level(LevelFilter::Info).init();
 
     let pool = create_pool();
 

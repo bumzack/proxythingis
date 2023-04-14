@@ -1,8 +1,5 @@
-use std::env;
-
-use diesel::PgConnection;
-use diesel::r2d2::ConnectionManager;
-use r2d2::Pool;
+use log::LevelFilter;
+use pretty_env_logger::env_logger::Builder;
 use warp::Filter;
 
 use crate::db::{get_connection_pool, with_db};
@@ -15,11 +12,7 @@ mod server;
 
 #[tokio::main]
 async fn main() {
-    if env::var_os("RUST_LOG").is_none() {
-        // Set `RUST_LOG=todos=debug` to see debug logs,
-        // this only shows access logs.
-        env::set_var("RUST_LOG", "response_to_everything=info");
-    }
+    Builder::new().filter_level(LevelFilter::Info).init();
 
     let pool = get_connection_pool();
     let health_route = warp::path!("health")
@@ -36,7 +29,7 @@ async fn main() {
     let person_list = person
         .and(warp::get())
         .and(with_db(pool.clone()))
-        .and_then(move |pool: Pool<ConnectionManager<PgConnection>>| list_person_handler(pool));
+        .and_then(list_person_handler);
 
     let person_routes = person_create.or(person_list);
 

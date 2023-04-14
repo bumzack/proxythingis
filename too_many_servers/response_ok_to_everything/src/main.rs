@@ -1,6 +1,5 @@
-use std::env;
-
-use log::{error, info};
+use log::{error, info, LevelFilter};
+use pretty_env_logger::env_logger::Builder;
 use serde::Deserialize;
 use serde::Serialize;
 use warp::Filter;
@@ -21,10 +20,7 @@ struct ResponseSummary {
 
 #[tokio::main]
 async fn main() {
-    if env::var_os("RUST_LOG").is_none() {
-        env::set_var("RUST_LOG", "response_to_everything=info");
-    }
-    pretty_env_logger::init();
+    Builder::new().filter_level(LevelFilter::Info).init();
 
     let routes = warp::any()
         .and(extract_request_data_filter_body_as_string())

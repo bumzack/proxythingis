@@ -25,7 +25,7 @@ pub enum ManagerCommand {
 #[derive(Debug)]
 pub struct GetConfigData {
     pub(crate) sender: tokio::sync::oneshot::Sender<ProxyConfig>,
-    pub(crate) reset_start: bool,
+    // pub(crate) reset_start: bool,
 }
 
 #[derive(Debug, Clone)]
