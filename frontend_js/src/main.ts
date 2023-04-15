@@ -1,10 +1,15 @@
 import './style.css'
 import { setupCounter } from './counter.ts'
 
+import $ from 'jquery';
+
+$( document ).ready(function() {
+    console.log( "yeahhhh!" );
+});
+
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
- 
-    
+
     <h1>Vite + TypeScript</h1>
     <div class="card">
       <button id="counter" type="button"></button>
