@@ -8,4 +8,10 @@ export default defineConfig({
             jQuery: 'jquery',
         })
     ],
+    resolve: {
+        alias: {
+            '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
+        }
+    },
+
 })
