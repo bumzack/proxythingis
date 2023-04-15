@@ -53,23 +53,23 @@ async fn main() {
 
     let _handle_config_manager = start_config_manager(proxy_config, manager_receiver);
 
-    // let cors = warp::cors()
-    //     .allow_any_origin()
-    //     .allow_headers(vec![
-    //         "User-Agent",
-    //         "Sec-Fetch-Mode",
-    //         "Referer",
-    //         "Origin",
-    //         "Access-Control-Request-Method",
-    //         "Access-Control-Request-Headers",
-    //     ])
-    //     .allow_methods(vec!["POST", "GET"]);
+    let cors = warp::cors()
+        .allow_any_origin()
+        .allow_headers(vec![
+            "User-Agent",
+            "Sec-Fetch-Mode",
+            "Referer",
+            "Origin",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers",
+        ])
+        .allow_methods(vec!["POST", "GET"]);
 
     let stats_routes = stats_routes(&pool, &manager_sender);
     let server_routes = server_routes(pool, &manager_sender);
     let proxy_routes = proxy_routes(manager_sender);
 
-    let routes = stats_routes.or(server_routes).or(proxy_routes);
+    let routes = stats_routes.or(server_routes).or(proxy_routes).with(cors);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3036)).await;
 }
