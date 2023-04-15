@@ -98,7 +98,7 @@ VALUES (2, 4);
 
 
 INSERT INTO source (description, path_starts_with, method)
-VALUES ('post a new  persons', '/api', 'POST');
+VALUES ('post a new  person', '/api', 'POST');
 
 
 
@@ -170,4 +170,43 @@ INSERT INTO source2target (source_id, target_id)
 VALUES (11, 13);
 
 
+
+
+
+
+
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Article Search Rust MicroServices - Solr', '/rust/solr/search', 'POST');
+
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Article Search Rust Solr / POST', 'http', 'localhost', 18600, '/api/v1/solr/article', 'POST', true);
+
+INSERT INTO source2target (source_id, target_id)
+VALUES (12, 14);
+
+
+
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Article Search Rust MicroServices - Meili', '/rust/meili/search', 'POST');
+
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Article Search Rust Meili / POST', 'http', 'localhost', 18600, '/api/v1/meili/article', 'POST', true);
+
+-- UPDATE target SET description= 'Article Search Rust Meili / POST', path =  '/api/v1/meili/article' WHERE id = 15;
+-- UPDATE target SET   path =  '/api/v1/solr/article' WHERE id = 14;
+
+
+INSERT INTO source2target (source_id, target_id) VALUES (13, 15);
+
+
+
+
+
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('User Login  Rust MicroServices', '/rust/login', 'POST');
+
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Rust login / POST', 'http', 'localhost', 18982, '/api/v1/authentication/login', 'POST', true);
+
+INSERT INTO source2target (source_id, target_id) VALUES (14, 16);
 
