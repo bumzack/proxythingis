@@ -1,0 +1,19 @@
+{
+  "name": "my-project",
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "rm dist/* &&  yarn parcel build src/index.html && ./blupp.sh",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@parcel/transformer-typescript-tsc": "^2.8.3",
+    "parcel": "^2.8.3",
+    "typescript": "5.0.4"
+  },
+  "dependencies": {
+    "bootstrap": "^5.2.3",
+    "jquery": "3.6.4"
+  },
+  "browserslist": "> 0.5%, last 2 versions, not dead"
+}
