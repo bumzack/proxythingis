@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+<head><script src="public/js/color-mode.js"></script>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.111.3">
+    <title>Cheatsheet · Bootstrap v5.3</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/cheatsheet/">
+
+    <link href="public/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        .b-example-divider {
+            width: 100%;
+            height: 3rem;
+            background-color: rgba(0, 0, 0, .1);
+            border: solid rgba(0, 0, 0, .15);
+            border-width: 1px 0;
+            box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+        }
+
+        .b-example-vr {
+            flex-shrink: 0;
+            width: 1.5rem;
+            height: 100vh;
+        }
+
+        .bi {
+            vertical-align: -.125em;
+            fill: currentColor;
+        }
+
+        .nav-scroller {
+            position: relative;
+            z-index: 2;
+            height: 2.75rem;
+            overflow-y: hidden;
+        }
+
+        .nav-scroller .nav {
+            display: flex;
+            flex-wrap: nowrap;
+            padding-bottom: 1rem;
+            margin-top: -1px;
+            overflow-x: auto;
+            text-align: center;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .btn-bd-primary {
+            --bd-violet-bg: #712cf9;
+            --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+            --bs-btn-font-weight: 600;
+            --bs-btn-color: var(--bs-white);
+            --bs-btn-bg: var(--bd-violet-bg);
+            --bs-btn-border-color: var(--bd-violet-bg);
+            --bs-btn-hover-color: var(--bs-white);
+            --bs-btn-hover-bg: #6528e0;
+            --bs-btn-hover-border-color: #6528e0;
+            --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+            --bs-btn-active-color: var(--bs-btn-hover-color);
+            --bs-btn-active-bg: #5a23c8;
+            --bs-btn-active-border-color: #5a23c8;
+        }
+        .bd-mode-toggle {
+            z-index: 1500;
+        }
+    </style>
+
+
+    <!-- Custom styles for this template -->
+    <link href="public/css/cheatsheet.css" rel="stylesheet">
+</head>
+<body class="bg-body-tertiary">
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="check2" viewBox="0 0 16 16">
+        <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+    </symbol>
+    <symbol id="circle-half" viewBox="0 0 16 16">
+        <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
+    </symbol>
+    <symbol id="moon-stars-fill" viewBox="0 0 16 16">
+        <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+        <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z"/>
+    </symbol>
+    <symbol id="sun-fill" viewBox="0 0 16 16">
+        <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+    </symbol>
+</svg>
+
+<header class="bd-header bg-dark py-3 d-flex align-items-stretch border-bottom border-dark">
+    <div class="container-fluid d-flex align-items-center">
+        <h1 class="d-flex align-items-center fs-4 text-white mb-0">
+            <img src="../assets/brand/bootstrap-logo-white.svg" width="38" height="30" class="me-3" alt="Bootstrap">
+            Cheatsheet sdfsf
+        </h1>
+        <a href="../examples/cheatsheet-rtl/" class="ms-auto link-light" hreflang="ar">RTL cheatsheet</a>
+    </div>
+</header>
+<aside class="bd-heading sticky-xl-top align-self-start mt-5 mb-3 mt-xl-0 mb-xl-2">
+    <h2 class="h6 pt-4 pb-3 mb-4 border-bottom">On this page</h2>
+    <nav class="small" id="toc">
+        <ul class="list-unstyled">
+            <li class="my-2">
+                <button class="btn d-inline-flex align-items-center collapsed border-0" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#contents-collapse" aria-controls="contents-collapse">Contents</button>
+                <ul class="list-unstyled ps-3 collapse" id="contents-collapse">
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#typography">Typography</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#images">Images dfdf</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#tables">Tables</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#figures">Figures</a></li>
+                </ul>
+            </li>
+            <li class="my-2">
+                <button class="btn d-inline-flex align-items-center collapsed border-0" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#forms-collapse" aria-controls="forms-collapse">Forms</button>
+                <ul class="list-unstyled ps-3 collapse" id="forms-collapse">
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#overview">Overview</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#disabled-forms">Disabled forms</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#sizing">Sizing</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#input-group">Input group</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#floating-labels">Floating labels</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#validation">Validation</a></li>
+                </ul>
+            </li>
+            <li class="my-2">
+                <button class="btn d-inline-flex align-items-center collapsed border-0" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#components-collapse" aria-controls="components-collapse">Components</button>
+                <ul class="list-unstyled ps-3 collapse" id="components-collapse">
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#accordion">Accordion</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#alerts">Alerts</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#badge">Badge</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#breadcrumb">Breadcrumb</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#buttons">Buttons</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#button-group">Button group</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#card">Card</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#carousel">Carousel</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#dropdowns">Dropdowns</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#list-group">List group</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#modal">Modal</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#navs">Navs</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#navbar">Navbar</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#pagination">Pagination</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#popovers">Popovers</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#progress">Progress</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#scrollspy">Scrollspy</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#spinners">Spinners</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#toasts">Toasts</a></li>
+                    <li><a class="d-inline-flex align-items-center rounded text-decoration-none" href="#tooltips">Tooltips</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</aside>
+<div class="bd-cheatsheet container-fluid bg-body">
+    <section id="content">
+        <h2 class="sticky-xl-top fw-bold pt-3 pt-xl-5 pb-2 pb-xl-3">Here come the server</h2>
+
+        <article class="my-3" id="typography">
+         <!--   <div class="bd-heading sticky-xl-top align-self-start mt-5 mb-3 mt-xl-0 mb-xl-2">
+                <h3>Typography</h3>
+                <a class="d-flex align-items-center" href="../content/typography/">Documentation</a>
+            </div>-->
+
+            <div>
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <p class="display-1">Display 1</p>
+                    <p class="display-2">Display 2</p>
+                    <p class="display-3">Display 3</p>
+                    <p class="display-4">Display 4</p>
+                    <p class="display-5">Display 5</p>
+                    <p class="display-6">Display 6</p>
+                </div></div>
+
+
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <p class="h1">Heading 1</p>
+                    <p class="h2">Heading 2</p>
+                    <p class="h3">Heading 3</p>
+                    <p class="h4">Heading 4</p>
+                    <p class="h5">Heading 5</p>
+                    <p class="h6">Heading 6</p>
+                </div></div>
+
+
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <p class="lead">
+                        This is a lead paragraph. It stands out from regular paragraphs.
+                    </p>
+                </div></div>
+
+
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <p>You can use the mark tag to <mark>highlight</mark> text.</p>
+                    <p><del>This line of text is meant to be treated as deleted text.</del></p>
+                    <p><s>This line of text is meant to be treated as no longer accurate.</s></p>
+                    <p><ins>This line of text is meant to be treated as an addition to the document.</ins></p>
+                    <p><u>This line of text will render as underlined.</u></p>
+                    <p><small>This line of text is meant to be treated as fine print.</small></p>
+                    <p><strong>This line rendered as bold text.</strong></p>
+                    <p><em>This line rendered as italicized text.</em></p>
+                </div></div>
+
+
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <hr>
+                </div></div>
+
+
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <blockquote class="blockquote">
+                        <p>A well-known quote, contained in a blockquote element.</p>
+                        <footer class="blockquote-footer">Someone famous in <cite title="Source Title">Source Title</cite></footer>
+                    </blockquote>
+                </div></div>
+
+
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <ul class="list-unstyled">
+                        <li>This is a list.</li>
+                        <li>It appears completely unstyled.</li>
+                        <li>Structurally, it's still a list.</li>
+                        <li>However, this style only applies to immediate child elements.</li>
+                        <li>Nested lists:
+                            <ul>
+                                <li>are unaffected by this style</li>
+                                <li>will still show a bullet</li>
+                                <li>and have appropriate left margin</li>
+                            </ul>
+                        </li>
+                        <li>This may still come in handy in some situations.</li>
+                    </ul>
+                </div></div>
+
+
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <ul class="list-inline">
+                        <li class="list-inline-item">This is a list item.</li>
+                        <li class="list-inline-item">And another one.</li>
+                        <li class="list-inline-item">But they're displayed inline.</li>
+                    </ul>
+                </div></div>
+
+            </div>
+        </article>
+        <article class="my-3" id="images">
+      <!--      <div class="bd-heading sticky-xl-top align-self-start mt-5 mb-3 mt-xl-0 mb-xl-2">
+                <h3>Images dfdf</h3>
+                <a class="d-flex align-items-center" href="../content/images/">Documentation dfdf</a>
+            </div>-->
+
+            <div>
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <svg class="bd-placeholder-img bd-placeholder-img-lg img-fluid" width="100%" height="250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Responsive image" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#868e96"/><text x="50%" y="50%" fill="#dee2e6" dy=".3em">Responsive image</text></svg>
+                </div></div>
+
+
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <svg class="bd-placeholder-img img-thumbnail" width="200" height="200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A generic square placeholder image with a white border around it, making it resemble a photograph taken with an old instant camera: 200x200" preserveAspectRatio="xMidYMid slice" focusable="false"><title>A generic square placeholder image with a white border around it, making it resemble a photograph taken with an old instant camera</title><rect width="100%" height="100%" fill="#868e96"/><text x="50%" y="50%" fill="#dee2e6" dy=".3em">200x200</text></svg>
+                </div></div>
+
+            </div>
+        </article>
+        <article class="my-3" id="tables">
+          <!--  <div class="bd-heading sticky-xl-top align-self-start mt-5 mb-3 mt-xl-0 mb-xl-2">
+                <h3>Tables</h3>
+                <a class="d-flex align-items-center" href="../content/tables/">Documentation</a>
+            </div>-->
+
+            <div>
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">First</th>
+                            <th scope="col">Last</th>
+                            <th scope="col">Handle</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Mark</td>
+                            <td>Otto</td>
+                            <td>@mdo</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Jacob</td>
+                            <td>Thornton</td>
+                            <td>@fat</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">3</th>
+                            <td colspan="2">Larry the Bird</td>
+                            <td>@twitter</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div></div>
+
+
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <table class="table table-dark table-borderless">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">First</th>
+                            <th scope="col">Last</th>
+                            <th scope="col">Handle</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Mark</td>
+                            <td>Otto</td>
+                            <td>@mdo</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Jacob</td>
+                            <td>Thornton</td>
+                            <td>@fat</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">3</th>
+                            <td colspan="2">Larry the Bird</td>
+                            <td>@twitter</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div></div>
+
+
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="col">Class</th>
+                            <th scope="col">Heading</th>
+                            <th scope="col">Heading</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row">Default</th>
+                            <td>Cell</td>
+                            <td>Cell</td>
+                        </tr>
+
+                        <tr class="table-primary">
+                            <th scope="row">Primary</th>
+                            <td>Cell</td>
+                            <td>Cell</td>
+                        </tr>
+                        <tr class="table-secondary">
+                            <th scope="row">Secondary</th>
+                            <td>Cell</td>
+                            <td>Cell</td>
+                        </tr>
+                        <tr class="table-success">
+                            <th scope="row">Success</th>
+                            <td>Cell</td>
+                            <td>Cell</td>
+                        </tr>
+                        <tr class="table-danger">
+                            <th scope="row">Danger</th>
+                            <td>Cell</td>
+                            <td>Cell</td>
+                        </tr>
+                        <tr class="table-warning">
+                            <th scope="row">Warning</th>
+                            <td>Cell</td>
+                            <td>Cell</td>
+                        </tr>
+                        <tr class="table-info">
+                            <th scope="row">Info</th>
+                            <td>Cell</td>
+                            <td>Cell</td>
+                        </tr>
+                        <tr class="table-light">
+                            <th scope="row">Light</th>
+                            <td>Cell</td>
+                            <td>Cell</td>
+                        </tr>
+                        <tr class="table-dark">
+                            <th scope="row">Dark</th>
+                            <td>Cell</td>
+                            <td>Cell</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div></div>
+
+
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">First</th>
+                            <th scope="col">Last</th>
+                            <th scope="col">Handle</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Mark</td>
+                            <td>Otto</td>
+                            <td>@mdo</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Jacob</td>
+                            <td>Thornton</td>
+                            <td>@fat</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">3</th>
+                            <td colspan="2">Larry the Bird</td>
+                            <td>@twitter</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div></div>
+
+            </div>
+        </article>
+        <article class="my-3" id="figures">
+<!--            <div class="bd-heading sticky-xl-top align-self-start mt-5 mb-3 mt-xl-0 mb-xl-2">
+                <h3>Figures</h3>
+                <a class="d-flex align-items-center" href="../content/figures/">Documentation</a>
+            </div>-->
+
+            <div>
+                <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
+                    <figure class="figure">
+                        <svg class="bd-placeholder-img figure-img img-fluid rounded" width="400" height="300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 400x300" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#868e96"/><text x="50%" y="50%" fill="#dee2e6" dy=".3em">400x300</text></svg>
+                        <figcaption class="figure-caption">A caption for the above image.</figcaption>
+                    </figure>
+                </div></div>
+
+            </div>
+        </article>
+    </section>
+
+</div>
+
+
+<script src="public/js/bootstrap.bundle.min.js"></script>
+
+<script src="public/js/cheatsheet.js"></script>
+</body>
+</html>
