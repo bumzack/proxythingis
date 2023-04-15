@@ -11,7 +11,7 @@ use crate::stats::server::{stats_read_handler, stats_reset_handler, stats_store_
 pub fn stats_routes(
     pool: &Pool,
     manager_sender: &UnboundedSender<ManagerCommand>,
-) -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::Rejection> + Clone {
+) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
     let stats = warp::path!("proxythingi" / "stats");
     let stats_read = stats
         .and(warp::get())
