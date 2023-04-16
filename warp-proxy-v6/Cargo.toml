@@ -1,5 +1,5 @@
 [package]
-name = "warp-proxy-v6"
+name = "proxythingi"
 version = "0.1.0"
 edition = "2021"
 

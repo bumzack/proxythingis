@@ -7,24 +7,24 @@ use log::{error, info};
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
+use warp::{Buf, hyper, Rejection, Reply, Stream};
 use warp::http::{HeaderValue, Method, Request, Uri};
 use warp::hyper::Body;
-use warp::{hyper, Buf, Rejection, Reply, Stream};
 
 use common::warp_request_filter::{ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
 
+use crate::CLIENT;
 use crate::config_manager::manager::{
     GetConfigData, ManagerCommand, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
 };
 use crate::proxyserver::models::{ServerSource, ServerTarget};
-use crate::CLIENT;
 
 pub async fn execute_forward_request(
     uri: ProxyUri,
     params: ProxyQueryParameters,
     proxy_method: ProxyMethod,
     headers: ProxyHeaders,
-    body: impl Stream<Item = Result<impl Buf, warp::Error>> + Send + 'static,
+    body: impl Stream<Item=Result<impl Buf, warp::Error>> + Send + 'static,
     sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply, Rejection> {
     let (tx, rx) = oneshot::channel();

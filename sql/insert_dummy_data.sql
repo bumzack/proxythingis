@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS source2target
     source_id INT                NOT NULL,
     target_id INT                NOT NULL,
     created   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (source_id) REFERENCES source (id),
+    FOREIGN KEY (source_id
+        ) REFERENCES source (id),
     FOREIGN KEY (target_id) REFERENCES target (id)
 );
 
@@ -171,10 +172,6 @@ VALUES (11, 13);
 
 
 
-
-
-
-
 INSERT INTO source (description, path_starts_with, method)
 VALUES ('Article Search Rust MicroServices - Solr', '/rust/solr/search', 'POST');
 
@@ -196,9 +193,8 @@ VALUES ('Article Search Rust Meili / POST', 'http', 'localhost', 18600, '/api/v1
 -- UPDATE target SET   path =  '/api/v1/solr/article' WHERE id = 14;
 
 
-INSERT INTO source2target (source_id, target_id) VALUES (13, 15);
-
-
+INSERT INTO source2target (source_id, target_id)
+VALUES (13, 15);
 
 
 
@@ -208,5 +204,6 @@ VALUES ('User Login  Rust MicroServices', '/rust/login', 'POST');
 INSERT INTO target (description, schema, host, port, path, method, active)
 VALUES ('Rust login / POST', 'http', 'localhost', 18982, '/api/v1/authentication/login', 'POST', true);
 
-INSERT INTO source2target (source_id, target_id) VALUES (14, 16);
+INSERT INTO source2target (source_id, target_id)
+VALUES (14, 16);
 
