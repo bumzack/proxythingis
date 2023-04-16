@@ -3,23 +3,19 @@ sudo systemctl enable rust_proxy_warp_diesel.service
 sudo systemctl enable rust_proxy_warp_tokio_postgres.service
 sudo systemctl enable rust_proxythingi_v6.service
 
+sudo systemctl start rust_proxy_all_200.service
+sudo systemctl start rust_proxy_warp_diesel.service
+sudo systemctl start rust_proxy_warp_tokio_postgres.service
+sudo systemctl start rust_proxythingi_v6.service
 
-sudo systemctl start  rust_proxy_all_200.service
-sudo systemctl start  rust_proxy_warp_diesel.service
-sudo systemctl start  rust_proxy_warp_tokio_postgres.service
-sudo systemctl start  rust_proxythingi_v6.service
+sudo systemctl restart rust_proxy_all_200.service
+sudo systemctl restart rust_proxy_warp_diesel.service
+sudo systemctl restart rust_proxy_warp_tokio_postgres.service
+sudo systemctl restart rust_proxythingi_v6.service
 
-
-sudo systemctl restart  rust_proxy_all_200.service
-sudo systemctl restart  rust_proxy_warp_diesel.service
-sudo systemctl restart  rust_proxy_warp_tokio_postgres.service
-sudo systemctl restart  rust_proxythingi_v6.service
-
-
-
-sudo systemctl stop  rust_proxy_all_200.service
-sudo systemctl stop  rust_proxy_warp_diesel.service
-sudo systemctl stop  rust_proxy_warp_tokio_postgres.service
-sudo systemctl stop  rust_proxythingi_v6.service
+sudo systemctl stop rust_proxy_all_200.service
+sudo systemctl stop rust_proxy_warp_diesel.service
+sudo systemctl stop rust_proxy_warp_tokio_postgres.service
+sudo systemctl stop rust_proxythingi_v6.service
 
 
