@@ -2774,9 +2774,9 @@ ${frame.code}`;
             // Initialize a jQuery object
             // A central reference to the root jQuery(document)
             var rootjQuery, // A simple way to check for HTML strings
-                // Prioritize #id over <tag> to avoid XSS via location.hash (trac-9521)
-                // Strict HTML recognition (trac-11290: must start with <)
-                // Shortcut simple #id case for speed
+                            // Prioritize #id over <tag> to avoid XSS via location.hash (trac-9521)
+                            // Strict HTML recognition (trac-11290: must start with <)
+                            // Shortcut simple #id case for speed
                 rquickExpr = /^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]+))$/,
                 init = jQuery.fn.init = function (selector, context, root) {
                     var match, elem;
@@ -4823,7 +4823,7 @@ ${frame.code}`;
                             elem[dataPriv.expando] = undefined;
                         }
                         if (elem[dataUser.expando]) // Support: Chrome <=35 - 45+
-                            // Assign undefined instead of using delete, see Data#remove
+                                                    // Assign undefined instead of using delete, see Data#remove
                             elem[dataUser.expando] = undefined;
                     }
                 }
@@ -5134,7 +5134,7 @@ ${frame.code}`;
                     }
                 }
                 return ret !== undefined ? // Support: IE <=9 - 11 only
-                    // IE returns zIndex value as an integer.
+                                           // IE returns zIndex value as an integer.
                     ret + "" : ret;
             }
 
@@ -6344,9 +6344,9 @@ ${frame.code}`;
                         get: function (elem) {
                             var val = jQuery.find.attr(elem, "value");
                             return val != null ? val : // Support: IE <=10 - 11 only
-                                                       // option.text throws exceptions (trac-14686, trac-14858)
-                                                       // Strip and collapse whitespace
-                                                       // https://html.spec.whatwg.org/#strip-and-collapse-whitespace
+                                // option.text throws exceptions (trac-14686, trac-14858)
+                                // Strip and collapse whitespace
+                                // https://html.spec.whatwg.org/#strip-and-collapse-whitespace
                                 stripAndCollapse(jQuery.text(elem));
                         }
                     },
