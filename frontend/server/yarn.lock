@@ -87,25 +87,10 @@
   dependencies:
     "@types/koa" "*"
 
-"@types/koa-send@*":
-  version "4.1.3"
-  resolved "https://registry.npmjs.org/@types/koa-send/-/koa-send-4.1.3.tgz"
-  integrity sha512-daaTqPZlgjIJycSTNjKpHYuKhXYP30atFc1pBcy6HHqB9+vcymDgYTguPdx9tO4HMOqNyz6bz/zqpxt5eLR+VA==
-  dependencies:
-    "@types/koa" "*"
-
-"@types/koa-static@^4.0.2":
-  version "4.0.2"
-  resolved "https://registry.npmjs.org/@types/koa-static/-/koa-static-4.0.2.tgz"
-  integrity sha512-ns/zHg+K6XVPMuohjpOlpkR1WLa4VJ9czgUP9bxkCDn0JZBtUWbD/wKDZzPGDclkQK1bpAEScufCHOy8cbfL0w==
-  dependencies:
-    "@types/koa" "*"
-    "@types/koa-send" "*"
-
-"@types/koa@*", "@types/koa@^2.13.5":
-  version "2.13.5"
-  resolved "https://registry.npmjs.org/@types/koa/-/koa-2.13.5.tgz"
-  integrity sha512-HSUOdzKz3by4fnqagwthW/1w/yJspTgppyyalPVbgZf8jQWvdIXcVW5h2DGtw4zYntOaeRGx49r1hxoPWrD4aA==
+"@types/koa@*", "@types/koa@^2.13.6":
+  version "2.13.6"
+  resolved "https://registry.npmjs.org/@types/koa/-/koa-2.13.6.tgz"
+  integrity sha512-diYUfp/GqfWBAiwxHtYJ/FQYIXhlEhlyaU7lB/bWQrx4Il9lCET5UwpFy3StOAohfsxxvEQ11qIJgT1j2tfBvw==
   dependencies:
     "@types/accepts" "*"
     "@types/content-disposition" "*"
@@ -344,10 +329,10 @@ koa-static@^5.0.0:
     debug "^3.1.0"
     koa-send "^5.0.0"
 
-koa@^2.14.1:
-  version "2.14.1"
-  resolved "https://registry.npmjs.org/koa/-/koa-2.14.1.tgz"
-  integrity sha512-USJFyZgi2l0wDgqkfD27gL4YGno7TfUkcmOe6UOLFOVuN+J7FwnNu4Dydl4CUQzraM1lBAiGed0M9OVJoT0Kqw==
+koa@^2.14.2:
+  version "2.14.2"
+  resolved "https://registry.npmjs.org/koa/-/koa-2.14.2.tgz"
+  integrity sha512-VFI2bpJaodz6P7x2uyLiX6RLYpZmOJqNmoCst/Yyd7hQlszyPwG/I9CQJ63nOtKSxpt5M7NH67V6nJL2BwCl7g==
   dependencies:
     accepts "^1.3.5"
     cache-content-type "^1.0.0"
@@ -486,10 +471,10 @@ type-is@^1.6.16:
     media-typer "0.3.0"
     mime-types "~2.1.24"
 
-typescript@^5.0.2:
-  version "5.0.2"
-  resolved "https://registry.npmjs.org/typescript/-/typescript-5.0.2.tgz"
-  integrity sha512-wVORMBGO/FAs/++blGNeAVdbNKtIh1rbBL2EyQ1+J9lClJ93KiiKe8PmFIVdXhHcyv44SL9oglmfeSsndo0jRw==
+typescript@^5.0.4:
+  version "5.0.4"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-5.0.4.tgz"
+  integrity sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==
 
 util@^0.10.3:
   version "0.10.4"

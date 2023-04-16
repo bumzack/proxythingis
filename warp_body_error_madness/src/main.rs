@@ -10,7 +10,7 @@ fn main() {
 
 pub fn extract_request_data_filter_body_stream() -> impl Filter<
     Extract=(FullPath, impl Stream<Item=Result<impl Buf, warp::Error>>),
-    Error=warp::Rejection,
+    Error=Rejection,
 > + Clone {
     warp::path::full().and(warp::body::stream())
 }
