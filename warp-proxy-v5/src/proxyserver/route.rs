@@ -13,7 +13,7 @@ use crate::proxyserver::server::{
 pub fn server_routes(
     pool: Pool,
     manager_sender: &UnboundedSender<ManagerCommand>,
-) -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::Rejection> + Clone {
+) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
     let server_source = warp::path!("proxythingi" / "server" / "source");
     let server_source_create = server_source
         .and(warp::post())
