@@ -15,7 +15,9 @@ async fn main() {
     Builder::new().filter_level(LevelFilter::Info).init();
 
     // TODO WTF why why ...
-    let result = dotenvy::from_filename("/home/bumzack/proxythingis/too_many_servers/warp_tokio_postgres_person_server/.env");
+    let result = dotenvy::from_filename(
+        "/home/bumzack/proxythingis/too_many_servers/warp_tokio_postgres_person_server/.env",
+    );
     match &result {
         Ok(p) => info!("path to .env {:?}", &p),
         Err(e) => error!("error {:?}", e),
