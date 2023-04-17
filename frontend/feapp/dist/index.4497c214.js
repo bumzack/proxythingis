@@ -5439,11 +5439,11 @@
             super.dispose();
         }
 
+        // Private
         isShown() {
             return this._element.classList.contains(CLASS_NAME_SHOW);
         }
 
-        // Private
         _maybeScheduleHide() {
             if (!this._config.autohide) return;
             if (this._hasMouseInteraction || this._hasKeyboardInteraction) return;

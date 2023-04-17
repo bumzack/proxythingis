@@ -15,7 +15,7 @@ jquery(document).ready(() => {
 })
 
 const load_servers = (): void => {
-    const url = "http://proxy.ironspine.at/proxythingi/server";
+    const url = "http://proxy.proxythingi.at/proxythingi/server";
     jquery.ajax({url: url}).done(data => {
         const sources = data as Array<ServerSource>;
         //  console.log(`sources ${JSON.stringify(sources, null, 4)} `);
@@ -51,9 +51,6 @@ const source_server_content_template = (id, name, source): string => {
             <div>
                 ${source_table_stats(source.stats)}
             </div>
-            
-            
-            
         </div>
     `;
 }
@@ -210,7 +207,6 @@ const render_server = (sources: Array<ServerSource>) => {
     jquery("#serversources").empty();
     jquery("#targetservers").empty();
     sources.sort((a, b) => a.id - b.id)
-        .slice(0, 2)
         .forEach(source => {
             // left nav column
             const href_id = `serversources-${source.id}`;

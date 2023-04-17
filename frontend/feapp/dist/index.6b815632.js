@@ -589,7 +589,7 @@ ${frame.code}`;
             load_servers();
         });
         const load_servers = () => {
-            const url = "http://proxy.ironspine.at/proxythingi/server";
+            const url = "http://proxy.proxythingi.at/proxythingi/server";
             (0, _jqueryDefault.default).ajax({
                 url: url
             }).done((data) => {
@@ -623,9 +623,6 @@ ${frame.code}`;
             <div>
                 ${source_table_stats(source.stats)}
             </div>
-            
-            
-            
         </div>
     `;
         };
@@ -768,7 +765,7 @@ ${frame.code}`;
             console.log("render_server");
             (0, _jqueryDefault.default)("#serversources").empty();
             (0, _jqueryDefault.default)("#targetservers").empty();
-            sources.sort((a, b) => a.id - b.id).slice(0, 2).forEach((source) => {
+            sources.sort((a, b) => a.id - b.id).forEach((source) => {
                 // left nav column
                 const href_id = `serversources-${source.id}`;
                 const txt = `${source.description} // id: ${source.id}`;
@@ -6344,9 +6341,9 @@ ${frame.code}`;
                         get: function (elem) {
                             var val = jQuery.find.attr(elem, "value");
                             return val != null ? val : // Support: IE <=10 - 11 only
-                                // option.text throws exceptions (trac-14686, trac-14858)
-                                // Strip and collapse whitespace
-                                // https://html.spec.whatwg.org/#strip-and-collapse-whitespace
+                                                       // option.text throws exceptions (trac-14686, trac-14858)
+                                                       // Strip and collapse whitespace
+                                                       // https://html.spec.whatwg.org/#strip-and-collapse-whitespace
                                 stripAndCollapse(jQuery.text(elem));
                         }
                     },
