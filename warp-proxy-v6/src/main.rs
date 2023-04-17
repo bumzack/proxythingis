@@ -3,11 +3,11 @@ extern crate lazy_static;
 use log::LevelFilter;
 use pretty_env_logger::env_logger::Builder;
 use tokio::sync::mpsc;
-use warp::Filter;
-use warp::hyper::Client;
 use warp::hyper::client::HttpConnector;
+use warp::hyper::Client;
+use warp::Filter;
 
-use crate::config_manager::manager::{ProxyConfig, start_config_manager};
+use crate::config_manager::manager::{start_config_manager, ProxyConfig};
 use crate::db::db::create_pool;
 use crate::proxy::route::proxy_routes;
 use crate::proxyserver::db::list_server;
@@ -53,6 +53,10 @@ async fn main() {
 
     let _handle_config_manager = start_config_manager(proxy_config, manager_receiver);
 
+    let stats_routes = stats_routes(&pool, &manager_sender);
+    let server_routes = server_routes(pool, &manager_sender);
+    let proxy_routes = proxy_routes(manager_sender);
+
     let cors = warp::cors()
         .allow_any_origin()
         .allow_headers(vec![
@@ -63,11 +67,7 @@ async fn main() {
             "Access-Control-Request-Method",
             "Access-Control-Request-Headers",
         ])
-        .allow_methods(vec!["POST", "GET"]);
-
-    let stats_routes = stats_routes(&pool, &manager_sender);
-    let server_routes = server_routes(pool, &manager_sender);
-    let proxy_routes = proxy_routes(manager_sender);
+        .allow_methods(vec!["POST", "GET", "OPTIONS", "PUT", "DELETE", "HEAD"]);
 
     let routes = stats_routes.or(server_routes).or(proxy_routes).with(cors);
 
