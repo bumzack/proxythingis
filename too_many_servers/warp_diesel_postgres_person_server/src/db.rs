@@ -1,13 +1,13 @@
 use std::convert::Infallible;
 use std::env;
 
-use diesel::{PgConnection, RunQueryDsl};
 use diesel::r2d2::ConnectionManager;
+use diesel::{PgConnection, RunQueryDsl};
 use log::error;
 use log::info;
 use r2d2::Pool;
-use warp::Filter;
 use warp::http::StatusCode;
+use warp::Filter;
 
 use crate::models::{ErrorMessage, NewPerson, Person};
 
@@ -74,7 +74,9 @@ pub fn create_person(
 fn database_url_for_env() -> String {
     // TODO
     // WTF why why ...
-    let result = dotenvy::from_filename("/home/bumzack/proxythingis/too_many_servers/warp_diesel_postgres_person_server/.env");
+    let result = dotenvy::from_filename(
+        "/home/bumzack/proxythingis/too_many_servers/warp_diesel_postgres_person_server/.env",
+    );
     match &result {
         Ok(p) => info!("path to .env {:?}", &p),
         Err(e) => error!("error {:?}", e),
@@ -98,7 +100,7 @@ pub fn get_connection_pool() -> Pool<ConnectionManager<PgConnection>> {
 
 pub fn with_db(
     db: Pool<ConnectionManager<PgConnection>>,
-) -> impl Filter<Extract=(Pool<ConnectionManager<PgConnection>>, ), Error=std::convert::Infallible>
-+ Clone {
+) -> impl Filter<Extract = (Pool<ConnectionManager<PgConnection>>,), Error = std::convert::Infallible>
+       + Clone {
     warp::any().map(move || db.clone())
 }

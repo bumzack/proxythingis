@@ -33,8 +33,7 @@ lazy_static::lazy_static! {
 // #[tokio::main(worker_threads = 2)]
 #[tokio::main]
 async fn main() {
-    let _result =
-        dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/warp-proxy-v6/.env");
+    let _result = dotenvy::from_filename("/home/bumzack/proxythingis/warp-proxy-v6/.env");
 
     Builder::new().filter_level(LevelFilter::Info).init();
 
