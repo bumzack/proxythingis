@@ -7,24 +7,24 @@ use log::{error, info};
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::{Buf, hyper, Rejection, Reply, Stream};
 use warp::http::{HeaderValue, Method, Request, Uri};
 use warp::hyper::Body;
+use warp::{hyper, Buf, Rejection, Reply, Stream};
 
 use common::warp_request_filter::{ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
 
-use crate::CLIENT;
 use crate::config_manager::manager::{
     GetConfigData, ManagerCommand, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
 };
 use crate::proxyserver::models::{ServerSource, ServerTarget};
+use crate::CLIENT;
 
 pub async fn execute_forward_request(
     uri: ProxyUri,
     params: ProxyQueryParameters,
     proxy_method: ProxyMethod,
     headers: ProxyHeaders,
-    body: impl Stream<Item=Result<impl Buf, warp::Error>> + Send + 'static,
+    body: impl Stream<Item = Result<impl Buf, warp::Error>> + Send + 'static,
     sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply, Rejection> {
     let (tx, rx) = oneshot::channel();
@@ -167,7 +167,7 @@ async fn handler(
     full_path: String,
     target_schema: &String,
     target_description: &String,
-) -> Result<impl warp::Reply, Infallible> {
+) -> Result<impl Reply, Infallible> {
     // info!("full_path                         {:?}", &full_path);
     // info!("target_host                       {:?}", &target_host);
     // info!("target_port                       {:?}", &target_port);
@@ -213,6 +213,7 @@ async fn handler(
     response
         .headers_mut()
         .insert("x-duration", HeaderValue::from_str(&d).unwrap());
+
     response.headers_mut().insert(
         "access-control-allow-origin",
         HeaderValue::from_str(&"http://localhost:4011").unwrap(),
@@ -220,6 +221,11 @@ async fn handler(
     response.headers_mut().insert(
         "x-provided-by",
         HeaderValue::from_str(target_description).unwrap(),
+    );
+
+    response.headers_mut().insert(
+        "Access-Control-Expose-Headers",
+        HeaderValue::from_str("x-duration, x-provided-by").unwrap(),
     );
 
     let update_target_stats_data = UpdateTargetStatsData {
