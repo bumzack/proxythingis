@@ -104,13 +104,19 @@ pub async fn execute_forward_request(
     let target_path = &target.path;
     let target_host = &target.host;
     let target_port = &target.port;
-    let target_method = &target.method;
-    let target_schema = &target.schema;
 
+    let target_method = match &target.method.eq("*") {
+        true => proxy_method.as_str(),
+        false => &target.method,
+    };
+
+    let target_schema = &target.schema;
     let full_path = match &params {
         Some(p) => format!("{}{}?{}", target_path, path_to_pass_on, p),
         None => format!("{}{}", target_path, path_to_pass_on),
     };
+
+    info!("final request params taking into consideration a wildcard for the method. uri: {}, method  {} //  target server: host: {} // port {} // method {} // path {} // fullpath {}", &uri.as_str(), &proxy_method.as_str() ,target_host, target_port, target_method, &target_path, &full_path);
 
     let m = Method::from_str(target_method).expect("cant determine method from str");
 
@@ -119,7 +125,7 @@ pub async fn execute_forward_request(
     let mut hyper_request = hyper::http::Request::builder()
         .method(m)
         .uri(full_path.clone())
-        .body(hyper::body::Body::wrap_stream(body))
+        .body(Body::wrap_stream(body))
         .expect("Request::builder() failed");
     {
         *hyper_request.headers_mut() = headers.clone();
@@ -167,33 +173,39 @@ async fn handler(
     full_path: String,
     target_schema: &String,
     target_description: &String,
-) -> Result<impl warp::Reply, Infallible> {
-    // info!("full_path                         {:?}", &full_path);
-    // info!("target_host                       {:?}", &target_host);
-    // info!("target_port                       {:?}", &target_port);
-    // info!("target_method                     {:?}", &target_method);
-    // info!("target_schema                     {:?}", &target_schema);
-    // info!("request.uri().to_string()         {:?}", &request.uri().to_string());
+) -> Result<impl Reply, Infallible> {
+    info!("handler full_path                         {:?}", &full_path);
+    info!(
+        "handler target_host                       {:?}",
+        &target_host
+    );
+    info!(
+        "handler target_port                       {:?}",
+        &target_port
+    );
+    info!(
+        "handler target_schema                     {:?}",
+        &target_schema
+    );
+    info!(
+        "handler request.uri().to_string()         {:?}",
+        &request.uri().to_string()
+    );
 
     let proxy_url = format!(
         "{}://{}:{}{}",
         target_schema, target_host, target_port, full_path
     );
-    // info!("proxy_url         {:?}", &proxy_url);
 
-    // let proxyUriForLogging = proxyUrl.clone();
     let proxy_url = proxy_url.parse::<Uri>().unwrap();
     *request.uri_mut() = proxy_url.clone();
 
     let headers = request.headers_mut();
-    headers.insert(
-        hyper::header::HOST,
-        hyper::header::HeaderValue::from_str("bla").unwrap(),
-    );
+    headers.insert(hyper::header::HOST, HeaderValue::from_str("bla").unwrap());
     let origin = format!("{}://{}::{}", target_schema, target_host, target_port);
     headers.insert(
         hyper::header::ORIGIN,
-        hyper::header::HeaderValue::from_str(origin.as_str()).unwrap(),
+        HeaderValue::from_str(origin.as_str()).unwrap(),
     );
     //
     // let http_connector = hyper::client::HttpConnector::new();
@@ -250,7 +262,10 @@ fn find_match<'a>(
     //     }
     // }
     proxy_config.server_sources.iter().find(|&s| {
-        uri.as_str().starts_with(&s.path_starts_with)
-            && method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase()
+        uri.as_str().starts_with(&s.path_starts_with) && method_matches_or_wildcard(method, s)
     })
+}
+
+fn method_matches_or_wildcard(method: &Method, s: &ServerSource) -> bool {
+    s.method.eq("*") || method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase()
 }

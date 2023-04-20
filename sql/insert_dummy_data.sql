@@ -1,6 +1,5 @@
 DROP TABLE source_stats;
 DROP TABLE target_stats;
-
 DROP TABLE source2target;
 DROP TABLE source;
 DROP TABLE target;
@@ -66,26 +65,26 @@ CREATE TABLE IF NOT EXISTS target_stats
 );
 
 INSERT INTO source (description, path_starts_with, method)
-VALUES ('return a list of persons', '/api', 'GET');
+VALUES ('return a list of persons', '/api', '*');
 
 
 INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('simplest server. always returns 200 and no persons at all', 'http', 'localhost', 3040, '/api', 'GET',
+VALUES ('simplest server. always returns 200 and no persons at all', 'http', 'localhost', 3040, '/api', '*',
         true);
 
 INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Warp & Diesel (blocking)', 'http', 'localhost', 3050, '/api', 'GET', true);
+VALUES ('Warp & Diesel (blocking)', 'http', 'localhost', 3050, '/api', '*', true);
 
 INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Warp & Tokio-PostgreSQL (async)', 'http', 'localhost', 3060, '/api', 'GET', true);
+VALUES ('Warp & Tokio-PostgreSQL (async)', 'http', 'localhost', 3060, '/api', '*', true);
 
 
 
 INSERT INTO source (description, path_starts_with, method)
-VALUES ('return  500 MB of data', '/data', 'GET');
+VALUES ('return  500 MB of data', '/data', '*');
 
 INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Big data server', 'http', 'localhost', 3070, '/data', 'GET', true);
+VALUES ('Big data server', 'http', 'localhost', 3070, '/data', '*', true);
 
 INSERT INTO source2target (source_id, target_id)
 VALUES (1, 1);
@@ -99,12 +98,10 @@ VALUES (2, 4);
 
 
 INSERT INTO source (description, path_starts_with, method)
-VALUES ('post a new  person', '/api', 'POST');
-
-
+VALUES ('person API', '/api', '*');
 
 INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('simplest server. always returns 200 and no persons at all', 'http', 'localhost', 3040, '/api', 'POST',
+VALUES ('simplest server. always returns 200 and no persons at all', 'http', 'localhost', 3040, '/api', '*',
         true);
 
 INSERT INTO source2target (source_id, target_id)
@@ -113,97 +110,55 @@ VALUES (3, 5);
 
 
 INSERT INTO source (description, path_starts_with, method)
-VALUES ('Solr 10.0 / GET', '/solr', 'GET');
-INSERT INTO source (description, path_starts_with, method)
-VALUES ('Solr 10.0 / POST', '/solr', 'POST');
-INSERT INTO source (description, path_starts_with, method)
-VALUES ('Solr 10.0 / PUT', '/solr', 'PUT');
-INSERT INTO source (description, path_starts_with, method)
-VALUES ('Solr 10.0 / PATCH', '/solr', 'PATCH');
+VALUES ('Solr 10.0', '/solr', '*');
 
 INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Solr 10.0 / GET', 'http', 'localhost', 8984, '/', 'GET', true);
-INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Solr 10.0 / POST', 'http', 'localhost', 8984, '/', 'POST', true);
-INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Solr 10.0 / PUT', 'http', 'localhost', 8984, '/', 'PUT', true);
-INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Solr 10.0 / PATCH', 'http', 'localhost', 8984, '/', 'PATCH', true);
-
+VALUES ('Solr 10.0', 'http', 'localhost', 8984, '/', '*', true);
 
 INSERT INTO source2target (source_id, target_id)
 VALUES (4, 6);
+
+
+
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Meilisearch 1.1.0', '/meili', '*');
+
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Meilisearch 1.1.0', 'http', 'localhost', 18984, '/', '*', true);
+
 INSERT INTO source2target (source_id, target_id)
 VALUES (5, 7);
+
+
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Article Search Rust MicroServices - Solr', '/rust/solr/search', '*');
+
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Article Search Rust Solr', 'http', 'localhost', 18600, '/api/v1/solr/article', '*', true);
+
 INSERT INTO source2target (source_id, target_id)
 VALUES (6, 8);
+
+
+
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Article Search Rust MicroServices - Meili', '/rust/meili/search', '*');
+
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Article Search Rust Meili / POST', 'http', 'localhost', 18600, '/api/v1/meili/article', '*', true);
+
+
 INSERT INTO source2target (source_id, target_id)
 VALUES (7, 9);
 
 
 
 INSERT INTO source (description, path_starts_with, method)
-VALUES ('Meilisearch 1.1.0 / GET', '/meili', 'GET');
-INSERT INTO source (description, path_starts_with, method)
-VALUES ('Meilisearch 1.1.0 / POST', '/meili', 'POST');
-INSERT INTO source (description, path_starts_with, method)
-VALUES ('Meilisearch 1.1.0 / PUT', '/meili', 'PUT');
-INSERT INTO source (description, path_starts_with, method)
-VALUES ('Meilisearch 1.1.0 / PATCH', '/meili', 'PATCH');
+VALUES ('Rust Authentication API login', '/rust/login', '*');
 
 INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Meilisearch 1.1.0 / GET', 'http', 'localhost', 18984, '/', 'GET', true);
-INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Meilisearch 1.1.0 / POST', 'http', 'localhost', 18984, '/', 'POST', true);
-INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Meilisearch 1.1.0 / PUT', 'http', 'localhost', 18984, '/', 'PUT', true);
-INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Meilisearch 1.1.0 / PATCH', 'http', 'localhost', 18984, '/', 'PATCH', true);
-
+VALUES ('Rust Authentication API', 'http', 'localhost', 18982, '/api/v1/authentication/login', '*', true);
 
 INSERT INTO source2target (source_id, target_id)
 VALUES (8, 10);
-INSERT INTO source2target (source_id, target_id)
-VALUES (9, 11);
-INSERT INTO source2target (source_id, target_id)
-VALUES (10, 12);
-INSERT INTO source2target (source_id, target_id)
-VALUES (11, 13);
-
-
-
-INSERT INTO source (description, path_starts_with, method)
-VALUES ('Article Search Rust MicroServices - Solr', '/rust/solr/search', 'POST');
-
-INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Article Search Rust Solr / POST', 'http', 'localhost', 18600, '/api/v1/solr/article', 'POST', true);
-
-INSERT INTO source2target (source_id, target_id)
-VALUES (12, 14);
-
-
-
-INSERT INTO source (description, path_starts_with, method)
-VALUES ('Article Search Rust MicroServices - Meili', '/rust/meili/search', 'POST');
-
-INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Article Search Rust Meili / POST', 'http', 'localhost', 18600, '/api/v1/meili/article', 'POST', true);
-
--- UPDATE target SET description= 'Article Search Rust Meili / POST', path =  '/api/v1/meili/article' WHERE id = 15;
--- UPDATE target SET   path =  '/api/v1/solr/article' WHERE id = 14;
-
-
-INSERT INTO source2target (source_id, target_id)
-VALUES (13, 15);
-
-
-
-INSERT INTO source (description, path_starts_with, method)
-VALUES ('User Login  Rust MicroServices', '/rust/login', 'POST');
-
-INSERT INTO target (description, schema, host, port, path, method, active)
-VALUES ('Rust login / POST', 'http', 'localhost', 18982, '/api/v1/authentication/login', 'POST', true);
-
-INSERT INTO source2target (source_id, target_id)
-VALUES (14, 16);
 
