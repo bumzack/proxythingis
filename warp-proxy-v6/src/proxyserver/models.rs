@@ -4,7 +4,7 @@ use serde_derive::Serialize;
 
 use crate::stats::models::{ServerSourceStats, ServerTargetStats};
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct ServerSource {
     pub id: i32,
     pub description: String,
@@ -15,7 +15,7 @@ pub struct ServerSource {
     pub stats: ServerSourceStats,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct ServerTarget {
     pub id: i32,
     pub description: String,
@@ -29,28 +29,28 @@ pub struct ServerTarget {
     pub created: DateTime<Utc>,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct Server2Target {
     pub id: i32,
     pub source_id: i32,
     pub target_id: i32,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct NewServerSourcePost {
     pub description: String,
     pub path_starts_with: String,
     pub method: String,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct NewServerSource<'a> {
     pub description: &'a str,
     pub path_starts_with: &'a str,
     pub method: &'a str,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct NewServerTargetPost {
     pub description: String,
     pub schema: String,
@@ -62,7 +62,7 @@ pub struct NewServerTargetPost {
     pub active: bool,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Default)]
 pub struct NewServerTarget<'a> {
     pub description: &'a str,
     pub schema: &'a str,

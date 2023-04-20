@@ -43,6 +43,7 @@ async fn main() {
     let servers = list_server(pool.clone(), true)
         .await
         .expect("loading the servers config should work");
+
     let proxy_config = ProxyConfig {
         server_sources: servers,
         start: chrono::Utc::now(),
@@ -67,6 +68,17 @@ async fn main() {
             "content-type",
             "Access-Control-Request-Method",
             "Access-Control-Request-Headers",
+            "Access-Control-Allow-Headers",
+            "Access-Control-Allow-Methods",
+            "Access-Control-Allow-Origin",
+            "Access-Control-Expose-Headers",
+            "Access-Control-Request-Headers",
+            "Access-Control-Request-Methods",
+            "Accept-Encoding",
+            "Accept-Language",
+            "Accept-Post",
+            "Access-Control-Allow-Credentials",
+            "keep-alive",
         ])
         .allow_methods(vec!["POST", "GET", "OPTIONS", "PUT", "DELETE", "HEAD"]);
 

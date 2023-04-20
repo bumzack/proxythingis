@@ -7,11 +7,15 @@ use log::{error, info};
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::http::{HeaderValue, Method, Request, Uri};
+use uuid::Uuid;
+use warp::http::{HeaderValue, Method, Request, Response, Uri};
 use warp::hyper::Body;
 use warp::{hyper, Buf, Rejection, Reply, Stream};
 
-use common::warp_request_filter::{ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
+use common::warp_request_filter::{
+    ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri, HEADER_X_INITIATED_BY,
+    HEADER_X_PROCESSED_BY, HEADER_X_UUID,
+};
 
 use crate::config_manager::manager::{
     GetConfigData, ManagerCommand, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
@@ -27,6 +31,9 @@ pub async fn execute_forward_request(
     body: impl Stream<Item = Result<impl Buf, warp::Error>> + Send + 'static,
     sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply, Rejection> {
+    let start_total = Instant::now();
+    let mut x_inititated_by = false;
+
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
@@ -129,6 +136,11 @@ pub async fn execute_forward_request(
         .expect("Request::builder() failed");
     {
         *hyper_request.headers_mut() = headers.clone();
+        // start_total
+        if !headers.contains_key(HEADER_X_INITIATED_BY) {
+            // hyper_request.headers_mut().insert(HEADER_X_INITIATED_BY, "proxythingi".parse().unwrap());
+            x_inititated_by = true;
+        }
     }
 
     let update_source_stats_data = UpdateSourceStatsData { id: 1 };
@@ -146,6 +158,8 @@ pub async fn execute_forward_request(
         full_path,
         target_schema,
         &target.description,
+        x_inititated_by,
+        start_total,
     );
 
     match result.await {
@@ -173,6 +187,8 @@ async fn handler(
     full_path: String,
     target_schema: &String,
     target_description: &String,
+    x_inititated_by: bool,
+    start_total: Instant,
 ) -> Result<impl Reply, Infallible> {
     info!("handler full_path                         {:?}", &full_path);
     info!(
@@ -191,6 +207,13 @@ async fn handler(
         "handler request.uri().to_string()         {:?}",
         &request.uri().to_string()
     );
+
+    // info!("full_path                         {:?}", &full_path);
+    // info!("target_host                       {:?}", &target_host);
+    // info!("target_port                       {:?}", &target_port);
+    // info!("target_method                     {:?}", &target_method);
+    // info!("target_schema                     {:?}", &target_schema);
+    // info!("request.uri().to_string()         {:?}", &request.uri().to_string());
 
     let proxy_url = format!(
         "{}://{}:{}{}",
@@ -225,14 +248,18 @@ async fn handler(
     response
         .headers_mut()
         .insert("x-duration", HeaderValue::from_str(&d).unwrap());
-    response.headers_mut().insert(
-        "access-control-allow-origin",
-        HeaderValue::from_str(&"http://localhost:4011").unwrap(),
-    );
+
+    // response.headers_mut().insert(
+    //     "access-control-allow-origin",
+    //     HeaderValue::from_str(&"http://localhost:4011").unwrap(),
+    // );
+
     response.headers_mut().insert(
         "x-provided-by",
         HeaderValue::from_str(target_description).unwrap(),
     );
+
+    add_tracing_headers(x_inititated_by, start_total, &mut response);
 
     let update_target_stats_data = UpdateTargetStatsData {
         id: server_target_idx,
@@ -244,6 +271,47 @@ async fn handler(
         .expect("expect the send with command UpdateTargetStats to work");
 
     Ok(response)
+}
+
+fn add_tracing_headers(x_inititated_by: bool, start_total: Instant, response: &mut Response<Body>) {
+    let duration_total = start_total.elapsed();
+
+    if x_inititated_by {
+        println!("adding new X-initiated-by header");
+        response.headers_mut().insert(
+            HEADER_X_INITIATED_BY,
+            HeaderValue::from_str("proxythingi").unwrap(),
+        );
+        let id = Uuid::new_v4();
+
+        response.headers_mut().insert(
+            HEADER_X_UUID,
+            HeaderValue::from_str(&id.to_string()).unwrap(),
+        );
+    }
+    let x_processed_by = response.headers().get(HEADER_X_PROCESSED_BY);
+    let new_x_processed_by = match x_processed_by {
+        Some(h) => {
+            format!(
+                "{} || proxythingi: dur {:?} μs",
+                h.to_str().unwrap(),
+                duration_total.as_micros()
+            )
+        }
+        None => {
+            format!(" proxythingi: dur {:?}", duration_total.as_micros())
+        }
+    };
+
+    println!(
+        "adding proxythingi to  X-processed-by header.     new header '{}'",
+        &new_x_processed_by
+    );
+
+    response.headers_mut().insert(
+        HEADER_X_PROCESSED_BY,
+        HeaderValue::from_str(&new_x_processed_by).unwrap(),
+    );
 }
 
 fn find_match<'a>(

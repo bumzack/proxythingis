@@ -15,7 +15,7 @@ pub type Result<T> = std::result::Result<T, Rejection>;
 //     Ok(StatusCode::OK)
 // }
 
-impl warp::reject::Reject for MyError {}
+impl reject::Reject for MyError {}
 
 impl reject::Reject for DivideByZero {}
 
