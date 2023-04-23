@@ -75,7 +75,7 @@ fn database_url_for_env() -> String {
     // TODO
     // WTF why why ...
     let result = dotenvy::from_filename(
-        "/Users/bumzack/stoff/rust/proxythingis/too_many_servers/warp_diesel_postgres_person_server/.env",
+        "/home/bumzack/proxythingis//too_many_servers/warp_diesel_postgres_person_server/.env",
     );
     match &result {
         Ok(p) => info!("path to .env {:?}", &p),
