@@ -3,11 +3,11 @@ extern crate lazy_static;
 use log::LevelFilter;
 use pretty_env_logger::env_logger::Builder;
 use tokio::sync::mpsc;
-use warp::Filter;
-use warp::hyper::Client;
 use warp::hyper::client::HttpConnector;
+use warp::hyper::Client;
+use warp::Filter;
 
-use crate::config_manager::manager::{ProxyConfig, start_config_manager};
+use crate::config_manager::manager::{start_config_manager, ProxyConfig};
 use crate::db::db::create_pool;
 use crate::proxy::route::proxy_routes;
 use crate::proxyserver::db::list_server;
@@ -42,6 +42,7 @@ async fn main() {
     let servers = list_server(pool.clone(), true)
         .await
         .expect("loading the servers config should work");
+
     let proxy_config = ProxyConfig {
         server_sources: servers,
         start: chrono::Utc::now(),
@@ -76,6 +77,7 @@ async fn main() {
             "Accept-Language",
             "Accept-Post",
             "Access-Control-Allow-Credentials",
+            "keep-alive",
         ])
         .allow_methods(vec!["POST", "GET", "OPTIONS", "PUT", "DELETE", "HEAD"]);
 

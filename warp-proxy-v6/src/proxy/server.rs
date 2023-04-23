@@ -7,11 +7,15 @@ use log::{error, info};
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
-use warp::http::{HeaderValue, Method, Request, Uri};
+use uuid::Uuid;
+use warp::http::{HeaderValue, Method, Request, Response, Uri};
 use warp::hyper::Body;
 use warp::{hyper, Buf, Rejection, Reply, Stream};
 
-use common::warp_request_filter::{ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri};
+use common::warp_request_filter::{
+    ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri, HEADER_X_INITIATED_BY,
+    HEADER_X_PROCESSED_BY, HEADER_X_UUID,
+};
 
 use crate::config_manager::manager::{
     GetConfigData, ManagerCommand, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
@@ -27,6 +31,9 @@ pub async fn execute_forward_request(
     body: impl Stream<Item = Result<impl Buf, warp::Error>> + Send + 'static,
     sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply, Rejection> {
+    let start_total = Instant::now();
+    let mut x_inititated_by = false;
+
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
@@ -104,13 +111,19 @@ pub async fn execute_forward_request(
     let target_path = &target.path;
     let target_host = &target.host;
     let target_port = &target.port;
-    let target_method = &target.method;
-    let target_schema = &target.schema;
 
+    let target_method = match &target.method.eq("*") {
+        true => proxy_method.as_str(),
+        false => &target.method,
+    };
+
+    let target_schema = &target.schema;
     let full_path = match &params {
         Some(p) => format!("{}{}?{}", target_path, path_to_pass_on, p),
         None => format!("{}{}", target_path, path_to_pass_on),
     };
+
+    info!("final request params taking into consideration a wildcard for the method. uri: {}, method  {} //  target server: host: {} // port {} // method {} // path {} // fullpath {}", &uri.as_str(), &proxy_method.as_str() ,target_host, target_port, target_method, &target_path, &full_path);
 
     let m = Method::from_str(target_method).expect("cant determine method from str");
 
@@ -119,10 +132,15 @@ pub async fn execute_forward_request(
     let mut hyper_request = hyper::http::Request::builder()
         .method(m)
         .uri(full_path.clone())
-        .body(hyper::body::Body::wrap_stream(body))
+        .body(Body::wrap_stream(body))
         .expect("Request::builder() failed");
     {
         *hyper_request.headers_mut() = headers.clone();
+        // start_total
+        if !headers.contains_key(HEADER_X_INITIATED_BY) {
+            // hyper_request.headers_mut().insert(HEADER_X_INITIATED_BY, "proxythingi".parse().unwrap());
+            x_inititated_by = true;
+        }
     }
 
     let update_source_stats_data = UpdateSourceStatsData { id: 1 };
@@ -140,6 +158,8 @@ pub async fn execute_forward_request(
         full_path,
         target_schema,
         &target.description,
+        x_inititated_by,
+        start_total,
     );
 
     match result.await {
@@ -167,7 +187,27 @@ async fn handler(
     full_path: String,
     target_schema: &String,
     target_description: &String,
+    x_inititated_by: bool,
+    start_total: Instant,
 ) -> Result<impl Reply, Infallible> {
+    info!("handler full_path                         {:?}", &full_path);
+    info!(
+        "handler target_host                       {:?}",
+        &target_host
+    );
+    info!(
+        "handler target_port                       {:?}",
+        &target_port
+    );
+    info!(
+        "handler target_schema                     {:?}",
+        &target_schema
+    );
+    info!(
+        "handler request.uri().to_string()         {:?}",
+        &request.uri().to_string()
+    );
+
     // info!("full_path                         {:?}", &full_path);
     // info!("target_host                       {:?}", &target_host);
     // info!("target_port                       {:?}", &target_port);
@@ -179,21 +219,16 @@ async fn handler(
         "{}://{}:{}{}",
         target_schema, target_host, target_port, full_path
     );
-    // info!("proxy_url         {:?}", &proxy_url);
 
-    // let proxyUriForLogging = proxyUrl.clone();
     let proxy_url = proxy_url.parse::<Uri>().unwrap();
     *request.uri_mut() = proxy_url.clone();
 
     let headers = request.headers_mut();
-    headers.insert(
-        hyper::header::HOST,
-        hyper::header::HeaderValue::from_str("bla").unwrap(),
-    );
+    headers.insert(hyper::header::HOST, HeaderValue::from_str("bla").unwrap());
     let origin = format!("{}://{}::{}", target_schema, target_host, target_port);
     headers.insert(
         hyper::header::ORIGIN,
-        hyper::header::HeaderValue::from_str(origin.as_str()).unwrap(),
+        HeaderValue::from_str(origin.as_str()).unwrap(),
     );
     //
     // let http_connector = hyper::client::HttpConnector::new();
@@ -214,19 +249,17 @@ async fn handler(
         .headers_mut()
         .insert("x-duration", HeaderValue::from_str(&d).unwrap());
 
-    response.headers_mut().insert(
-        "access-control-allow-origin",
-        HeaderValue::from_str(&"http://localhost:4011").unwrap(),
-    );
+    // response.headers_mut().insert(
+    //     "access-control-allow-origin",
+    //     HeaderValue::from_str(&"http://localhost:4011").unwrap(),
+    // );
+
     response.headers_mut().insert(
         "x-provided-by",
         HeaderValue::from_str(target_description).unwrap(),
     );
 
-    response.headers_mut().insert(
-        "Access-Control-Expose-Headers",
-        HeaderValue::from_str("x-duration, x-provided-by").unwrap(),
-    );
+    add_tracing_headers(x_inititated_by, start_total, &mut response);
 
     let update_target_stats_data = UpdateTargetStatsData {
         id: server_target_idx,
@@ -238,6 +271,47 @@ async fn handler(
         .expect("expect the send with command UpdateTargetStats to work");
 
     Ok(response)
+}
+
+fn add_tracing_headers(x_inititated_by: bool, start_total: Instant, response: &mut Response<Body>) {
+    let duration_total = start_total.elapsed();
+
+    if x_inititated_by {
+        println!("adding new X-initiated-by header");
+        response.headers_mut().insert(
+            HEADER_X_INITIATED_BY,
+            HeaderValue::from_str("proxythingi").unwrap(),
+        );
+        let id = Uuid::new_v4();
+
+        response.headers_mut().insert(
+            HEADER_X_UUID,
+            HeaderValue::from_str(&id.to_string()).unwrap(),
+        );
+    }
+    let x_processed_by = response.headers().get(HEADER_X_PROCESSED_BY);
+    let new_x_processed_by = match x_processed_by {
+        Some(h) => {
+            format!(
+                "{} || proxythingi: dur {:?} μs",
+                h.to_str().unwrap(),
+                duration_total.as_micros()
+            )
+        }
+        None => {
+            format!(" proxythingi: dur {:?}", duration_total.as_micros())
+        }
+    };
+
+    println!(
+        "adding proxythingi to  X-processed-by header.     new header '{}'",
+        &new_x_processed_by
+    );
+
+    response.headers_mut().insert(
+        HEADER_X_PROCESSED_BY,
+        HeaderValue::from_str(&new_x_processed_by).unwrap(),
+    );
 }
 
 fn find_match<'a>(
@@ -256,7 +330,10 @@ fn find_match<'a>(
     //     }
     // }
     proxy_config.server_sources.iter().find(|&s| {
-        uri.as_str().starts_with(&s.path_starts_with)
-            && method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase()
+        uri.as_str().starts_with(&s.path_starts_with) && method_matches_or_wildcard(method, s)
     })
+}
+
+fn method_matches_or_wildcard(method: &Method, s: &ServerSource) -> bool {
+    s.method.eq("*") || method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase()
 }
