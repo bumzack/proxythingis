@@ -169,6 +169,7 @@ pub async fn execute_forward_request(
                 &uri.as_str(),
                 &proxy_method.as_str()
             );
+
             Ok(response)
         }
         Err(e) => {
@@ -236,7 +237,12 @@ async fn handler(
 
     let start = Instant::now();
     info!("request uri {}", request.uri().to_string());
+    let u = request.uri().to_string();
     let mut response = CLIENT.request(request).await.expect("Request failed");
+
+    info!("response status {}       for request uri {}   ",&response.status(), &u);
+    info!("response headers {:?}    for request uri {} ",&response.headers(), &u);
+
     let duration = start.elapsed();
     let d = format!(
         "duration {} ms, {} µs, {} ns ",
