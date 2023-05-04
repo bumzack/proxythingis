@@ -1,14 +1,7 @@
 [workspace]
 
 members = [
-    "axum-proxy",
-    "warp-proxy-v1",
-    "warp-proxy-v2",
-    "warp-proxy-v3",
-    "warp-proxy-v4",
-    "warp-proxy-v5",
     "warp-proxy-v6",
-    "warp_body_error_madness",
     "too_many_servers/response_ok_to_everything",
     "too_many_servers/warp_tokio_postgres_person_server",
     "too_many_servers/warp_diesel_postgres_person_server",
