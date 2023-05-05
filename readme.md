@@ -65,13 +65,19 @@ curl http://localhost:3036/proxythingi/server/activate/2 | jq
 curl http://localhost:3036/proxythingi/server/activate/3 | jq
 ```
 
-### Activate target server
+### Dectivate target server
 
 ```
 curl http://localhost:3036/proxythingi/server/deactivate/2 | jq
 
 curl http://localhost:3036/proxythingi/server/deactivate/3 | jq
 ```
+
+### prod 
+```
+curl http://proxy.proxythingi.at/proxythingi/server/deactivate/8 | jq
+```
+
 
 ## Stats
 
