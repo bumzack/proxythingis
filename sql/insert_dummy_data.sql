@@ -176,7 +176,6 @@ VALUES (8, 12);
 
 
 
-
 INSERT INTO source (description, path_starts_with, method)
 VALUES ('WebFlux Search Article', '/webflux/solr/search', '*');
 
@@ -199,7 +198,6 @@ VALUES (10, 12);
 
 
 
-
 INSERT INTO source (description, path_starts_with, method)
 VALUES ('KoaJS Search Article', '/koa/solr/search', '*');
 
@@ -219,8 +217,6 @@ VALUES ('C# Search Article', 'http', 'localhost', 38600, '/api/v1/solr/article',
 
 INSERT INTO source2target (source_id, target_id)
 VALUES (12, 14);
-
-
 
 
 

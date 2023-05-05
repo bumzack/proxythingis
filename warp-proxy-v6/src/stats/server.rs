@@ -6,7 +6,9 @@ use tokio::sync::oneshot;
 use warp::Reply;
 use warp::reply::json;
 
-use crate::config_manager::manager::{GetConfigData, ManagerCommand};
+use common::config_manager_models::GetConfigData;
+
+use crate::config_manager::manager::ManagerCommand;
 use crate::server::server::Result;
 use crate::stats::db::{create_source_stats, create_target_stats};
 

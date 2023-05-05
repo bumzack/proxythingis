@@ -11,7 +11,7 @@ tokio = { version = "1.28.0", features = ["fs", "sync", "time"] }
 lazy_static = "1.4.0"
 futures = { version = "0.3.27" }
 futures-util = { version = "0.3.27" }
-common = { path = "../common" }
+common = { path = "../common", features = ["warp_server", "db_tokio_postgres"] }
 chrono = { version = "0.4.24", features = ["serde"] }
 deadpool-postgres = "0.10.5"
 tokio-postgres = { version = "0.7.8", features = ["with-serde_json-1", "with-chrono-0_4"] }

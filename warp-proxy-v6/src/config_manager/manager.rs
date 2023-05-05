@@ -1,12 +1,15 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use deadpool_postgres::Pool;
 use log::info;
-use serde::Serialize;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::task::JoinHandle;
 
+use common::config_manager_models::{
+    GetConfigData, ProxyConfig, UpdateServerConfigData, UpdateSourceStatsData,
+    UpdateTargetStatsData,
+};
+
 use crate::proxyserver::db::list_server;
-use crate::proxyserver::models::ServerSource;
 
 #[derive(Debug)]
 pub enum ManagerCommand {
@@ -21,35 +24,6 @@ pub enum ManagerCommand {
 // pub struct ResetStatsData {
 //     pub(crate) sender: tokio::sync::oneshot::Sender<ProxyConfig>,
 // }
-
-#[derive(Debug)]
-pub struct GetConfigData {
-    pub(crate) sender: tokio::sync::oneshot::Sender<ProxyConfig>,
-    //    pub(crate) reset_start: bool,
-}
-
-#[derive(Debug, Clone)]
-pub struct UpdateSourceStatsData {
-    pub(crate) id: i32,
-}
-
-#[derive(Debug, Clone)]
-pub struct UpdateTargetStatsData {
-    pub(crate) id: i32,
-    pub(crate) duration_nanos: i64,
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub struct ProxyConfig {
-    pub(crate) server_sources: Vec<ServerSource>,
-    pub(crate) start: DateTime<Utc>,
-    pub(crate) stop: DateTime<Utc>,
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub struct UpdateServerConfigData {
-    pub(crate) server_sources: Vec<ServerSource>,
-}
 
 pub fn start_config_manager(
     mut proxy_config: ProxyConfig,

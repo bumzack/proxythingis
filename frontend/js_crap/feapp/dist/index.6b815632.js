@@ -6341,9 +6341,9 @@ ${frame.code}`;
                         get: function (elem) {
                             var val = jQuery.find.attr(elem, "value");
                             return val != null ? val : // Support: IE <=10 - 11 only
-                                                       // option.text throws exceptions (trac-14686, trac-14858)
-                                                       // Strip and collapse whitespace
-                                                       // https://html.spec.whatwg.org/#strip-and-collapse-whitespace
+                                // option.text throws exceptions (trac-14686, trac-14858)
+                                // Strip and collapse whitespace
+                                // https://html.spec.whatwg.org/#strip-and-collapse-whitespace
                                 stripAndCollapse(jQuery.text(elem));
                         }
                     },

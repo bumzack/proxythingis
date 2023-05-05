@@ -1,14 +1,21 @@
-<!DOCTYPE html><html><head>
+<!DOCTYPE html>
+<html>
+<head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
     <title>HTTP Request | Sycamore</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-<link rel="preload" href="/proxythingi-sycamore-fe-1df11b10e90b4011_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
-<link rel="modulepreload" href="/proxythingi-sycamore-fe-1df11b10e90b4011.js"></head>
-  <body>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
 
-<script type="module">import init from '/proxythingi-sycamore-fe-1df11b10e90b4011.js';init('/proxythingi-sycamore-fe-1df11b10e90b4011_bg.wasm');</script><script>(function () {
+    <link as="fetch" crossorigin="" href="/proxythingi-sycamore-fe-6447a1c3bfabcebe_bg.wasm" rel="preload"
+          type="application/wasm">
+    <link href="/proxythingi-sycamore-fe-6447a1c3bfabcebe.js" rel="modulepreload">
+</head>
+<body>
+
+<script type="module">import init from '/proxythingi-sycamore-fe-6447a1c3bfabcebe.js';
+
+init('/proxythingi-sycamore-fe-6447a1c3bfabcebe_bg.wasm');</script>
+<script>(function () {
     var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     var url = protocol + '//' + window.location.host + '/_trunk/ws';
     var poll_interval = 5000;
@@ -35,4 +42,6 @@
     };
     ws.onclose = reload_upon_connect;
 })()
-</script></body></html>
+</script>
+</body>
+</html>

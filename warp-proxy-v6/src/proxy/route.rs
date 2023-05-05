@@ -2,7 +2,7 @@ use log::info;
 use tokio::sync::mpsc::UnboundedSender;
 use warp::Filter;
 
-use common::warp_request_filter::{
+use common::warp_server::warp_request_filter::{
     extract_request_data_filter_body_stream, ProxyHeaders, ProxyMethod, ProxyQueryParameters,
     ProxyUri,
 };

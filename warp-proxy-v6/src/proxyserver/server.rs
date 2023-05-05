@@ -4,11 +4,12 @@ use tokio::sync::mpsc::UnboundedSender;
 use warp::{reject, Reply};
 use warp::reply::json;
 
+use common::models::{NewServerSourcePost, NewServerTargetPost};
+
 use crate::config_manager::manager::{ManagerCommand, send_config};
 use crate::proxyserver::db::{
     activate_server, create_source, create_target, deactivate_server, list_server,
 };
-use crate::proxyserver::models::{NewServerSourcePost, NewServerTargetPost};
 use crate::server::models::DivideByZero;
 use crate::server::server::Result;
 
