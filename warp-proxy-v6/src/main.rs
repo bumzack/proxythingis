@@ -1,5 +1,3 @@
-extern crate lazy_static;
-
 use log::LevelFilter;
 use pretty_env_logger::env_logger::Builder;
 use tokio::sync::mpsc;

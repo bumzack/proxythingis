@@ -288,10 +288,10 @@ async fn handler(
     Ok(response)
 }
 
-fn add_tracing_headers(x_inititated_by: bool, start_total: Instant, response: &mut Response<Body>) {
+fn add_tracing_headers(x_initiated_by: bool, start_total: Instant, response: &mut Response<Body>) {
     let duration_total = start_total.elapsed();
 
-    if x_inititated_by {
+    if x_initiated_by {
         println!("adding new X-initiated-by header");
         response.headers_mut().insert(
             HEADER_X_INITIATED_BY,
