@@ -211,3 +211,24 @@ VALUES (12, 14);
 
 
 
+
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Article Search Rust MicroServices - Solr', '/rust/v2/solr/search', '*');
+
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Article Search Rust Solr', 'http', 'localhost', 18600, '/api/v2/solr/article', '*', true);
+
+INSERT INTO source2target (source_id, target_id)
+VALUES (13, 15);
+
+
+
+INSERT INTO source (description, path_starts_with, method)
+VALUES ('Article Search Rust MicroServices - Meili - v2', '/rust/v2/meili/search', '*');
+
+INSERT INTO target (description, schema, host, port, path, method, active)
+VALUES ('Article Search Rust Meili - v2', 'http', 'localhost', 18600, '/api/v2/meili/article', '*', true);
+
+
+INSERT INTO source2target (source_id, target_id)
+VALUES (14, 16);
