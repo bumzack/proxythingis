@@ -1,36 +1,12 @@
-use chrono::{DateTime, Utc};
 use reqwasm::http::Request;
 use serde::{Deserialize, Serialize};
 use sycamore::prelude::*;
 use sycamore::suspense::Suspense;
 
+use common::models::ServerSource;
+
 // API that counts visits to the web-page
 const API_BASE_URL: &str = "http://localhost:3036/proxythingi/server";
-
-#[derive(Deserialize, Serialize, Clone, Debug, Default)]
-pub struct ServerSource {
-    pub id: i32,
-    pub description: String,
-    pub path_starts_with: String,
-    pub method: String,
-    pub created: DateTime<Utc>,
-    pub targets: Vec<ServerTarget>,
-    //      pub stats: ServerSourceStats,
-}
-
-#[derive(Deserialize, Serialize, Clone, Debug, Default)]
-pub struct ServerTarget {
-    pub id: i32,
-    pub description: String,
-    pub schema: String,
-    pub host: String,
-    pub port: i32,
-    pub path: String,
-    pub method: String,
-    //      pub stats: ServerTargetStats,
-    pub active: bool,
-    pub created: DateTime<Utc>,
-}
 
 #[derive(Serialize, Deserialize, Default, Debug)]
 struct Visits {
@@ -38,7 +14,7 @@ struct Visits {
 }
 
 async fn fetch_visits(_id: &str) -> Result<Vec<ServerSource>, reqwasm::Error> {
-    let url = format!("{}", API_BASE_URL);
+    let url = API_BASE_URL.to_string();
     let resp = Request::get(&url).send().await?;
 
     let body = resp.json::<Vec<ServerSource>>().await?;

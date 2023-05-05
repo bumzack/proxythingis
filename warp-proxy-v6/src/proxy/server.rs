@@ -12,16 +12,17 @@ use warp::{Buf, hyper, Rejection, Reply, Stream};
 use warp::http::{HeaderValue, Method, Request, Response, Uri};
 use warp::hyper::Body;
 
-use common::warp_request_filter::{
+use common::config_manager_models::{
+    GetConfigData, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
+};
+use common::models::{ServerSource, ServerTarget};
+use common::warp_server::warp_request_filter::{
     HEADER_X_INITIATED_BY, HEADER_X_PROCESSED_BY, HEADER_X_UUID, ProxyHeaders, ProxyMethod,
     ProxyQueryParameters, ProxyUri,
 };
 
 use crate::CLIENT;
-use crate::config_manager::manager::{
-    GetConfigData, ManagerCommand, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
-};
-use crate::proxyserver::models::{ServerSource, ServerTarget};
+use crate::config_manager::manager::ManagerCommand;
 
 pub async fn execute_forward_request(
     uri: ProxyUri,
@@ -240,8 +241,16 @@ async fn handler(
     let u = request.uri().to_string();
     let mut response = CLIENT.request(request).await.expect("Request failed");
 
-    info!("response status {}       for request uri {}   ",&response.status(), &u);
-    info!("response headers {:?}    for request uri {} ",&response.headers(), &u);
+    info!(
+        "response status {}       for request uri {}   ",
+        &response.status(),
+        &u
+    );
+    info!(
+        "response headers {:?}    for request uri {} ",
+        &response.headers(),
+        &u
+    );
 
     let duration = start.elapsed();
     let d = format!(

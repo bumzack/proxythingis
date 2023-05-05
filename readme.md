@@ -73,11 +73,11 @@ curl http://localhost:3036/proxythingi/server/deactivate/2 | jq
 curl http://localhost:3036/proxythingi/server/deactivate/3 | jq
 ```
 
-### prod 
+### prod
+
 ```
 curl http://proxy.proxythingi.at/proxythingi/server/deactivate/8 | jq
 ```
-
 
 ## Stats
 
