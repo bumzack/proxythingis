@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "jsxImportSource": "preact",
-    "isolatedModules": true,
-    "target": "es2015",
-    "moduleResolution": "node"
-  }
-}
