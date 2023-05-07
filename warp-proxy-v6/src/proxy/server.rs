@@ -144,7 +144,7 @@ pub async fn execute_forward_request(
         }
     }
 
-    let update_source_stats_data = UpdateSourceStatsData { id: 1 };
+    let update_source_stats_data = UpdateSourceStatsData { id: source.id };
     let cmd = ManagerCommand::UpdateSourceStats(update_source_stats_data);
     sender
         .send(cmd)

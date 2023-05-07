@@ -6,6 +6,7 @@ use std::env;
 use chrono::{DateTime, Utc};
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use dotenvy::dotenv;
+use log::info;
 use tokio_postgres::{NoTls, Row};
 use warp::Filter;
 use warp::Rejection;
@@ -78,6 +79,7 @@ pub async fn list_person(pool: Pool, limit: u32) -> Result<Vec<Person>> {
         };
         persons.push(p);
     }
+    info!("found {} persons", persons.len());
     Ok(persons)
 }
 

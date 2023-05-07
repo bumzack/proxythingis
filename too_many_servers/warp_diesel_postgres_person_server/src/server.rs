@@ -2,8 +2,10 @@ use std::convert::Infallible;
 
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
+use log::info;
 use r2d2::Pool;
 use serde::Serialize;
+use tokio::sync::broadcast::error::RecvError::Lagged;
 use warp::{Rejection, Reply};
 use warp::http::StatusCode;
 use warp::reply::json;
@@ -21,7 +23,9 @@ pub async fn create_person_handler(
 pub async fn list_person_handler(
     pool: Pool<ConnectionManager<PgConnection>>,
 ) -> Result<impl Reply, Infallible> {
-    Ok(json(&read_persons(pool)))
+    let persons = read_persons(pool);
+    info!("found {} persons", persons.len());
+    Ok(json(&persons))
 }
 
 pub async fn health_handler(
