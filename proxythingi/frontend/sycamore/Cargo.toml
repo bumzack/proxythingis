@@ -13,4 +13,4 @@ log = "0.4.17"
 reqwasm = "0.5.0"
 serde = "1.0.160"
 chrono = { version = "0.4.24", features = ["serde"] }
-common = { path = "../../common", features = ["sycamore_support"] }
+common = { path = "../../common"  }

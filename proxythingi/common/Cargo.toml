@@ -9,7 +9,7 @@ edition = "2021"
 warp_server = ["dep:warp", "dep:futures", "dep:futures-util", "dep:tokio"]
 db_tokio_postgres = ["dep:tokio-postgres"]
 default = []
-sycamore_support = ["dep:sycamore"]
+# sycamore_support = ["dep:sycamore"]
 
 [dependencies]
 warp = { version = "0.3.5", optional = true }
@@ -22,4 +22,4 @@ serde_urlencoded = "0.7.1"
 serde_derive = "1.0.160"
 chrono = { version = "0.4.24", features = ["serde"] }
 tokio-postgres = { version = "0.7.8", features = ["with-serde_json-1", "with-chrono-0_4"], optional = true }
-sycamore= { version = "0.9.0-beta.1", optional = true }
+# sycamore= { version = "0.9.0-beta.1", optional = true }
