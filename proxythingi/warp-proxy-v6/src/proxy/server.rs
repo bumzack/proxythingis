@@ -12,10 +12,8 @@ use warp::{Buf, hyper, Rejection, Reply, Stream};
 use warp::http::{HeaderValue, Method, Request, Response, Uri};
 use warp::hyper::Body;
 
-use common::config_manager_models::{
-    GetConfigData, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
-};
-use common::models::{ServerSource, ServerTarget};
+use common::config_manager_models::{GetConfigData, UpdateSourceStatsData, UpdateTargetStatsData};
+use common::models::{ProxyConfig, ServerSource, ServerTarget};
 use common::warp_server::warp_request_filter::{
     HEADER_X_INITIATED_BY, HEADER_X_PROCESSED_BY, HEADER_X_UUID, ProxyHeaders, ProxyMethod,
     ProxyQueryParameters, ProxyUri,
@@ -39,6 +37,7 @@ pub async fn execute_forward_request(
     let get_config_data = GetConfigData {
         sender: tx,
         //   reset_start: false,
+        whoami: "".to_string(),
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     match sender.send(cmd) {
@@ -260,9 +259,10 @@ async fn handler(
         duration.as_nanos()
     );
     // info!("{} ", &d);
-    response
-        .headers_mut()
-        .insert("x-duration", HeaderValue::from_str(&d).expect("add headerr shgoukd work"),
+    response.headers_mut().insert(
+        "x-duration",
+        HeaderValue::from_str(&d).expect("add headerr shgoukd work"),
+    );
 
     // response.headers_mut().insert(
     //     "access-control-allow-origin",
@@ -278,7 +278,7 @@ async fn handler(
 
     let update_target_stats_data = UpdateTargetStatsData {
         id: server_target_idx,
-        duration_nanos: duration.as_nanos() ,
+        duration_nanos: duration.as_nanos() as i128,
     };
     let cmd = ManagerCommand::UpdateTargetStats(update_target_stats_data);
     sender
