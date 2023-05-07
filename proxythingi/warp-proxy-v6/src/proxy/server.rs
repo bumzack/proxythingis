@@ -260,32 +260,32 @@ async fn handler(
         duration.as_nanos()
     );
     // info!("{} ", &d);
-    // response.headers_mut().insert(
-    //     "x-duration",
-    //     HeaderValue::from_str(&d).expect("add headerr shgoukd work"),
-    // );
+    response
+        .headers_mut()
+        .insert("x-duration", HeaderValue::from_str(&d).expect("add headerr shgoukd work"),
 
     // response.headers_mut().insert(
     //     "access-control-allow-origin",
     //     HeaderValue::from_str(&"http://localhost:4011").unwrap(),
     // );
 
-    // response.headers_mut().insert(
-    //     "x-provided-by",
-    //     HeaderValue::from_str(target_description).expect("providedby should exist"),
-    // );
+                response.headers_mut().insert(
+                    "x-provided-by",
+                    HeaderValue::from_str(target_description).unwrap(),
+                );
 
     //  add_tracing_headers(x_inititated_by, start_total, &mut response);
 
-    // let update_target_stats_data = UpdateTargetStatsData {
-    //     id: server_target_idx,
-    //     duration_nanos: duration.as_nanos() as i128,
-    // };
-    // let cmd = ManagerCommand::UpdateTargetStats(update_target_stats_data);
-    // info!("update stats for target  {:?}", &cmd);
-    // sender
-    //     .send(cmd)
-    //     .expect("expect the send with command UpdateTargetStats to work");
+    add_tracing_headers(x_inititated_by, start_total, &mut response);
+
+    let update_target_stats_data = UpdateTargetStatsData {
+        id: server_target_idx,
+        duration_nanos: duration.as_nanos() as i128,
+    };
+    let cmd = ManagerCommand::UpdateTargetStats(update_target_stats_data);
+    sender
+        .send(cmd)
+        .expect("expect the send with command UpdateTargetStats to work");
 
     Ok(response)
 }

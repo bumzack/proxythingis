@@ -1,10 +1,11 @@
-use common::models::ProxyConfig;
 use log::LevelFilter;
 use pretty_env_logger::env_logger::Builder;
 use tokio::sync::mpsc;
-use warp::hyper::client::HttpConnector;
-use warp::hyper::Client;
 use warp::Filter;
+use warp::hyper::Client;
+use warp::hyper::client::HttpConnector;
+
+use common::models::ProxyConfig;
 
 use crate::config_manager::manager::start_config_manager;
 use crate::db::db::create_pool;
@@ -32,8 +33,9 @@ lazy_static::lazy_static! {
 // #[tokio::main(worker_threads = 2)]
 #[tokio::main]
 async fn main() {
-    let _result =
-        dotenvy::from_filename("/Users/bumzack/stoff/rust/proxythingis/warp-proxy-v6/.env");
+    let _result = dotenvy::from_filename(
+        "/Users/bumzack/stoff/rust/proxythingis/proxythingi/warp-proxy-v6/.env",
+    );
 
     Builder::new().filter_level(LevelFilter::Info).init();
 
