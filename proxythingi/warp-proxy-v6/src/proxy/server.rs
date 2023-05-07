@@ -8,35 +8,36 @@ use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
 use uuid::Uuid;
+use warp::{Buf, hyper, Rejection, Reply, Stream};
 use warp::http::{HeaderValue, Method, Request, Response, Uri};
 use warp::hyper::Body;
-use warp::{hyper, Buf, Rejection, Reply, Stream};
 
-use common::config_manager_models::{GetConfigData, UpdateTargetStatsData};
-use common::models::{ProxyConfig, ServerSource, ServerTarget};
+use common::config_manager_models::{
+    GetConfigData, ProxyConfig, UpdateSourceStatsData, UpdateTargetStatsData,
+};
+use common::models::{ServerSource, ServerTarget};
 use common::warp_server::warp_request_filter::{
-    ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri, HEADER_X_INITIATED_BY,
-    HEADER_X_PROCESSED_BY, HEADER_X_UUID,
+    HEADER_X_INITIATED_BY, HEADER_X_PROCESSED_BY, HEADER_X_UUID, ProxyHeaders, ProxyMethod,
+    ProxyQueryParameters, ProxyUri,
 };
 
-use crate::config_manager::manager::ManagerCommand;
 use crate::CLIENT;
+use crate::config_manager::manager::ManagerCommand;
 
 pub async fn execute_forward_request(
     uri: ProxyUri,
     params: ProxyQueryParameters,
     proxy_method: ProxyMethod,
     headers: ProxyHeaders,
-    body: impl Stream<Item = Result<impl Buf, warp::Error>> + Send + 'static,
+    body: impl Stream<Item=Result<impl Buf, warp::Error>> + Send + 'static,
     sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply, Rejection> {
-    // let start_total = Instant::now();
-    // let mut x_initiated_by = false;
+    let start_total = Instant::now();
+    let mut x_inititated_by = false;
 
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
         sender: tx,
-        whoami: "execute_forward_request".to_string(),
         //   reset_start: false,
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
@@ -137,18 +138,17 @@ pub async fn execute_forward_request(
     {
         *hyper_request.headers_mut() = headers.clone();
         // start_total
-        // if !headers.contains_key(HEADER_X_INITIATED_BY) {
-        //     // hyper_request.headers_mut().insert(HEADER_X_INITIATED_BY, "proxythingi".parse().unwrap());
-        //     x_initiated_by = true;
-        // }
+        if !headers.contains_key(HEADER_X_INITIATED_BY) {
+            // hyper_request.headers_mut().insert(HEADER_X_INITIATED_BY, "proxythingi".parse().unwrap());
+            x_inititated_by = true;
+        }
     }
 
-    // let update_source_stats_data = UpdateSourceStatsData { id: source.id };
-    // info!("update stats for source  {:?}", update_source_stats_data);
-    // let cmd = ManagerCommand::UpdateSourceStats(update_source_stats_data);
-    // sender
-    //     .send(cmd)
-    //     .expect("expect the send with command UpdateSourceStats to work");
+    let update_source_stats_data = UpdateSourceStatsData { id: 1 };
+    let cmd = ManagerCommand::UpdateSourceStats(update_source_stats_data);
+    sender
+        .send(cmd)
+        .expect("expect the send with command UpdateSourceStats to work");
 
     let result = handler(
         hyper_request,
@@ -159,8 +159,8 @@ pub async fn execute_forward_request(
         full_path,
         target_schema,
         &target.description,
-        // x_initiated_by,
-        // start_total,
+        x_inititated_by,
+        start_total,
     );
 
     match result.await {
@@ -189,26 +189,26 @@ async fn handler(
     full_path: String,
     target_schema: &String,
     target_description: &String,
-    // x_inititated_by: bool,
-    // start_total: Instant,
+    x_inititated_by: bool,
+    start_total: Instant,
 ) -> Result<impl Reply, Infallible> {
-    // info!("handler full_path                         {:?}", &full_path);
-    // info!(
-    //     "handler target_host                       {:?}",
-    //     &target_host
-    // );
-    // info!(
-    //     "handler target_port                       {:?}",
-    //     &target_port
-    // );
-    // info!(
-    //     "handler target_schema                     {:?}",
-    //     &target_schema
-    // );
-    // info!(
-    //     "handler request.uri().to_string()         {:?}",
-    //     &request.uri().to_string()
-    // );
+    info!("handler full_path                         {:?}", &full_path);
+    info!(
+        "handler target_host                       {:?}",
+        &target_host
+    );
+    info!(
+        "handler target_port                       {:?}",
+        &target_port
+    );
+    info!(
+        "handler target_schema                     {:?}",
+        &target_schema
+    );
+    info!(
+        "handler request.uri().to_string()         {:?}",
+        &request.uri().to_string()
+    );
 
     // info!("full_path                         {:?}", &full_path);
     // info!("target_host                       {:?}", &target_host);
@@ -226,7 +226,7 @@ async fn handler(
     *request.uri_mut() = proxy_url.clone();
 
     let headers = request.headers_mut();
-    // headers.insert(hyper::header::HOST, HeaderValue::from_str("bla").unwrap());
+    headers.insert(hyper::header::HOST, HeaderValue::from_str("bla").unwrap());
     let origin = format!("{}://{}::{}", target_schema, target_host, target_port);
     headers.insert(
         hyper::header::ORIGIN,
@@ -237,20 +237,20 @@ async fn handler(
     // let client = hyper::Client::builder().build(http_connector);
 
     let start = Instant::now();
-    //  info!("request uri {}", request.uri().to_string());
+    info!("request uri {}", request.uri().to_string());
     let u = request.uri().to_string();
     let mut response = CLIENT.request(request).await.expect("Request failed");
 
-    // info!(
-    //     "response status {}       for request uri {}   ",
-    //     &response.status(),
-    //     &u
-    // );
-    // info!(
-    //     "response headers {:?}    for request uri {} ",
-    //     &response.headers(),
-    //     &u
-    // );
+    info!(
+        "response status {}       for request uri {}   ",
+        &response.status(),
+        &u
+    );
+    info!(
+        "response headers {:?}    for request uri {} ",
+        &response.headers(),
+        &u
+    );
 
     let duration = start.elapsed();
     let d = format!(
@@ -260,32 +260,30 @@ async fn handler(
         duration.as_nanos()
     );
     // info!("{} ", &d);
-    // response.headers_mut().insert(
-    //     "x-duration",
-    //     HeaderValue::from_str(&d).expect("add headerr shgoukd work"),
-    // );
+    response
+        .headers_mut()
+        .insert("x-duration", HeaderValue::from_str(&d).expect("add headerr shgoukd work"),
 
     // response.headers_mut().insert(
     //     "access-control-allow-origin",
     //     HeaderValue::from_str(&"http://localhost:4011").unwrap(),
     // );
 
-    // response.headers_mut().insert(
-    //     "x-provided-by",
-    //     HeaderValue::from_str(target_description).expect("providedby should exist"),
-    // );
+    response.headers_mut().insert(
+        "x-provided-by",
+        HeaderValue::from_str(target_description).unwrap(),
+    );
 
-    //  add_tracing_headers(x_inititated_by, start_total, &mut response);
+    add_tracing_headers(x_inititated_by, start_total, &mut response);
 
-    // let update_target_stats_data = UpdateTargetStatsData {
-    //     id: server_target_idx,
-    //     duration_nanos: duration.as_nanos() as i128,
-    // };
-    // let cmd = ManagerCommand::UpdateTargetStats(update_target_stats_data);
-    // info!("update stats for target  {:?}", &cmd);
-    // sender
-    //     .send(cmd)
-    //     .expect("expect the send with command UpdateTargetStats to work");
+    let update_target_stats_data = UpdateTargetStatsData {
+        id: server_target_idx,
+        duration_nanos: duration.as_nanos() ,
+    };
+    let cmd = ManagerCommand::UpdateTargetStats(update_target_stats_data);
+    sender
+        .send(cmd)
+        .expect("expect the send with command UpdateTargetStats to work");
 
     Ok(response)
 }
