@@ -57,3 +57,11 @@ impl warp::reject::Reject for MyError {}
 pub struct DivideByZero;
 
 impl reject::Reject for DivideByZero {}
+
+
+
+// TODO: hihihii
+#[derive(Debug)]
+pub struct InternalError;
+
+impl reject::Reject for InternalError {}

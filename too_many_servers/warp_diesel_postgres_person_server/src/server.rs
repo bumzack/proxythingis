@@ -6,9 +6,9 @@ use log::info;
 use r2d2::Pool;
 use serde::Serialize;
 use tokio::sync::broadcast::error::RecvError::Lagged;
-use warp::{Rejection, Reply};
 use warp::http::StatusCode;
 use warp::reply::json;
+use warp::{Rejection, Reply};
 
 use crate::db::{create_person, read_persons};
 use crate::models::NewPersonPost;
@@ -24,7 +24,7 @@ pub async fn list_person_handler(
     pool: Pool<ConnectionManager<PgConnection>>,
 ) -> Result<impl Reply, Infallible> {
     let persons = read_persons(pool);
-    info!("found {} persons", persons.len());
+    // info!("found {} persons", persons.len());
     Ok(json(&persons))
 }
 
@@ -33,7 +33,7 @@ pub async fn health_handler(
 ) -> Result<impl Reply, Rejection> {
     let _client = pool.get().unwrap();
 
-    // info!("hello from healthhandler");
+    // // info!("hello from healthhandler");
 
     // TODO
     // client
