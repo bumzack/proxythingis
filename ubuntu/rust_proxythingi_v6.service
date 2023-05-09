@@ -1,6 +1,6 @@
 [Unit]
 Description=Rust Proxy Thingi Service
-ConditionPathExists=/home/bumzack/proxythingis/warp-proxy-v6
+ConditionPathExists=/home/bumzack/proxythingis/proxythingi/warp-proxy-v6
 
 After=network.target
 
@@ -13,7 +13,7 @@ LimitNOFILE=1024
 Restart=on-failure
 RestartSec=10
 startLimitIntervalSec=60
-WorkingDirectory=/home/bumzack/proxythingis/warp-proxy-v6
+WorkingDirectory=/home/bumzack/proxythingis/proxythingi/warp-proxy-v6
 ExecStart=/home/bumzack/proxythingis/target/release/proxythingi
 
 # make sure log directory exists and owned by syslog
