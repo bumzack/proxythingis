@@ -1,5 +1,19 @@
 # ProxyThingis
 
+```
+ulimit -a
+```
+
+### add to your bashrc oder zshrc
+
+```
+ulimit -n 100000
+```
+
+```
+sudo lsof -n | cut -f1 -d' ' | uniq -c | sort | tail
+```
+
 ## ubuntu postgresql install
 
 sudo -u postgres psql

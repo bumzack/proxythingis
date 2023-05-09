@@ -40,7 +40,7 @@ pub async fn list_person_handler(pool: Pool, limit: u32) -> Result<impl Reply> {
 pub async fn health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejection> {
     let client = pool.get().await.unwrap();
 
-    info!("hello from healthhandler");
+    // info!("hello from healthhandler");
     client
         .execute("SELECT 1", &[])
         .await
@@ -67,7 +67,7 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
                 message = "Could not Execute request";
             }
             // _ => {
-            //     einfo!("unhandled application error: {:?}", err);
+            //     e// info!("unhandled application error: {:?}", err);
             //     code = StatusCode::INTERNAL_SERVER_ERROR;
             //     message = "Internal Server Error";
             // }
@@ -77,7 +77,7 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
         code = StatusCode::METHOD_NOT_ALLOWED;
         message = "Method Not Allowed";
     } else {
-        info!("unhandled error: {:?}", err);
+        // info!("unhandled error: {:?}", err);
         code = StatusCode::INTERNAL_SERVER_ERROR;
         message = "Internal Server Error";
     }
