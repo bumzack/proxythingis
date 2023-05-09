@@ -21,7 +21,9 @@ pub async fn create_person_handler(
 pub async fn list_person_handler(
     pool: Pool<ConnectionManager<PgConnection>>,
 ) -> Result<impl Reply, Infallible> {
-    Ok(json(&read_persons(pool)))
+    let persons = read_persons(pool);
+    // info!("found {} persons", persons.len());
+    Ok(json(&persons))
 }
 
 pub async fn health_handler(
@@ -29,7 +31,7 @@ pub async fn health_handler(
 ) -> Result<impl Reply, Rejection> {
     let _client = pool.get().unwrap();
 
-    // info!("hello from healthhandler");
+    // // info!("hello from healthhandler");
 
     // TODO
     // client

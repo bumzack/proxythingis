@@ -10,6 +10,7 @@ use warp::Filter;
 use warp::http::StatusCode;
 
 use crate::models::{ErrorMessage, NewPerson, Person};
+use crate::schema::person::dsl::person;
 
 pub fn read_persons(pool: Pool<ConnectionManager<PgConnection>>) -> Vec<Person> {
     use crate::schema::person::dsl::*;
