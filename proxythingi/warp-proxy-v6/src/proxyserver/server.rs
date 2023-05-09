@@ -1,5 +1,4 @@
 use deadpool_postgres::Pool;
-use log::info;
 use tokio::sync::mpsc::UnboundedSender;
 use warp::{reject, Reply};
 use warp::reply::json;
@@ -22,8 +21,8 @@ pub async fn create_source_handler(
         &create_source(pool.clone(), body)
             .await
             // TODO fix CustomError
-            .map_err(|e| {
-                info!("error rejection {:?}", e);
+            .map_err(|_e| {
+                // info!("error rejection {:?}", e);
                 reject::custom(DivideByZero)
             })?,
     );
@@ -41,8 +40,8 @@ pub async fn create_target_handler(
         &create_target(pool.clone(), body)
             .await
             // TODO fix CustomError
-            .map_err(|e| {
-                info!("error rejection {:?}", e);
+            .map_err(|_e| {
+                // info!("error rejection {:?}", e);
                 reject::custom(DivideByZero)
             })?,
     );
@@ -54,8 +53,8 @@ pub async fn list_servers_handler(pool: Pool) -> Result<impl Reply> {
     let data = list_server(pool, false)
         .await
         // TODO fix CustomError
-        .map_err(|e| {
-            info!("error rejection {:?}", e);
+        .map_err(|_e| {
+            // info!("error rejection {:?}", e);
             reject::custom(DivideByZero)
         })?;
     Ok(json(&data))
@@ -69,8 +68,8 @@ pub async fn activate_server_handler(
     activate_server(pool.clone(), id)
         .await
         // TODO fix CustomError
-        .map_err(|e| {
-            info!("error rejection {:?}", e);
+        .map_err(|_e| {
+            // info!("error rejection {:?}", e);
             reject::custom(DivideByZero)
         })?;
     send_config(pool, manager_sender).await;
@@ -86,8 +85,8 @@ pub async fn deactivate_server_handler(
     deactivate_server(pool.clone(), id)
         .await
         // TODO fix CustomError
-        .map_err(|e| {
-            info!("error rejection {:?}", e);
+        .map_err(|_e| {
+            // info!("error rejection {:?}", e);
             reject::custom(DivideByZero)
         })?;
     send_config(pool, manager_sender).await;

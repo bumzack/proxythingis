@@ -4,13 +4,13 @@ use std::convert::Infallible;
 
 use deadpool_postgres::Pool;
 use log::{error, info};
+use warp::{reject, Rejection, Reply};
 use warp::http::StatusCode;
 use warp::reply::json;
-use warp::{reject, Rejection, Reply};
 
 use crate::db::{create_person, list_person};
-use crate::models::MyError::DBQueryError;
 use crate::models::{DivideByZero, ErrorResponse, MyError, PersonRequest, PersonResponse};
+use crate::models::MyError::DBQueryError;
 
 pub async fn create_person_handler(body: PersonRequest, pool: Pool) -> Result<impl Reply> {
     Ok(json(&PersonResponse::of(

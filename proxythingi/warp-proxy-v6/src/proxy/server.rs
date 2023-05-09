@@ -12,7 +12,7 @@ use warp::http::{HeaderValue, Method, Request, Response, Uri};
 use warp::hyper::Body;
 use warp::{hyper, Buf, Rejection, Reply, Stream};
 
-use common::config_manager_models::{GetConfigData, UpdateTargetStatsData};
+use common::config_manager_models::{GetConfigData, UpdateSourceStatsData, UpdateTargetStatsData};
 use common::models::{ProxyConfig, ServerSource, ServerTarget};
 use common::warp_server::warp_request_filter::{
     ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri, HEADER_X_INITIATED_BY,
@@ -41,34 +41,42 @@ pub async fn execute_forward_request(
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
     match sender.send(cmd) {
-        Ok(_) => info!("send ok"),
+        Ok(_) => {} // info!("send ok"),
         Err(e) => error!("error sending cmd::GetConfig to manager {}", e),
     };
 
-    let proxy_config = rx
-        .await
-        .expect("execute_forward_request expected a valid proxy config");
+    let proxy_config = rx.await;
+
+    if proxy_config.is_err() {
+        let e = proxy_config.as_ref().err();
+        error!(
+            "error retrieving config while handling url {}. error {:?}",
+            uri.as_str(),
+            e.unwrap()
+        )
+    }
+    let proxy_config = proxy_config.unwrap();
 
     // is there a match for the uri in the config
     let source = find_match(&uri, &proxy_config, &proxy_method);
     let target: Option<&ServerTarget> = match source {
         Some(server) => {
-            info!(
-                "found a matching source server for uri: {}, method  {} ",
-                &uri.as_str(),
-                &proxy_method.as_str()
-            );
+            // info!(
+            //     "found a matching source server for uri: {}, method  {} ",
+            //     &uri.as_str(),
+            //     &proxy_method.as_str()
+            // );
             let targets = &server.targets;
             if !targets.is_empty() {
                 let mut rng = rand::thread_rng();
                 let i = rng.gen_range(0..targets.len());
                 if i > targets.len() {
-                    info!(
-                        "random number WRONG between {} and {}: {}",
-                        0,
-                        targets.len(),
-                        i
-                    );
+                    // info!(
+                    //     "random number WRONG between {} and {}: {}",
+                    //     0,
+                    //     targets.len(),
+                    //     i
+                    // );
                 }
                 let t = targets.get(i as usize).expect("cant unwrap target server");
                 info!("found a matching target server for uri: {}, method  {} //  target server: host: {} // port {} // method {} // path {}", &uri.as_str(), &proxy_method.as_str() ,t.host, t.port, t.method, t.path);
@@ -107,7 +115,7 @@ pub async fn execute_forward_request(
     let x = uri.as_str();
     let string = x.to_ascii_lowercase();
     let (_, path_to_pass_on) = string.split_at(source.path_starts_with.len());
-    let target = target.expect("target should be a thing");
+    let target = target.unwrap();
     let target_path = &target.path;
     let target_host = &target.host;
     let target_port = &target.port;
@@ -125,15 +133,34 @@ pub async fn execute_forward_request(
 
     info!("final request params taking into consideration a wildcard for the method. uri: {}, method  {} //  target server: host: {} // port {} // method {} // path {} // fullpath {}", &uri.as_str(), &proxy_method.as_str() ,target_host, target_port, target_method, &target_path, &full_path);
 
-    let m = Method::from_str(target_method).expect("cant determine method from str");
+    let m = Method::from_str(target_method);
+    if m.is_err() {
+        let e = m.as_ref().err();
+        error!(
+            "error getting method from string {}. error {:?}",
+            uri.as_str(),
+            e.unwrap()
+        )
+    }
+    let m = m.unwrap();
 
     let body = body.map_ok(|mut buf| buf.copy_to_bytes(buf.remaining()));
 
-    let mut hyper_request = hyper::http::Request::builder()
+    let hyper_request = hyper::http::Request::builder()
         .method(m)
         .uri(full_path.clone())
-        .body(Body::wrap_stream(body))
-        .expect("Request::builder() failed");
+        .body(Body::wrap_stream(body));
+
+    if hyper_request.is_err() {
+        let e = hyper_request.as_ref().err();
+        error!(
+            "error building request {}. error {:?}",
+            uri.as_str(),
+            e.unwrap()
+        )
+    }
+    let mut hyper_request = hyper_request.unwrap();
+
     {
         *hyper_request.headers_mut() = headers.clone();
         // start_total
@@ -143,12 +170,12 @@ pub async fn execute_forward_request(
         // }
     }
 
-    // let update_source_stats_data = UpdateSourceStatsData { id: source.id };
-    // info!("update stats for source  {:?}", update_source_stats_data);
-    // let cmd = ManagerCommand::UpdateSourceStats(update_source_stats_data);
-    // sender
-    //     .send(cmd)
-    //     .expect("expect the send with command UpdateSourceStats to work");
+    let update_source_stats_data = UpdateSourceStatsData { id: 1 };
+    let cmd = ManagerCommand::UpdateSourceStats(update_source_stats_data);
+    match sender.send(cmd) {
+        Ok(_) => {}
+        Err(e) => error!("error sending update stats {:?}", e),
+    }
 
     let result = handler(
         hyper_request,
@@ -193,64 +220,101 @@ async fn handler(
     // start_total: Instant,
 ) -> Result<impl Reply, Infallible> {
     // info!("handler full_path                         {:?}", &full_path);
-    // info!(
+    // // info!(
     //     "handler target_host                       {:?}",
     //     &target_host
     // );
-    // info!(
+    // // info!(
     //     "handler target_port                       {:?}",
     //     &target_port
     // );
-    // info!(
+    // // info!(
     //     "handler target_schema                     {:?}",
     //     &target_schema
     // );
-    // info!(
+    // // info!(
     //     "handler request.uri().to_string()         {:?}",
     //     &request.uri().to_string()
     // );
 
-    // info!("full_path                         {:?}", &full_path);
-    // info!("target_host                       {:?}", &target_host);
-    // info!("target_port                       {:?}", &target_port);
-    // info!("target_method                     {:?}", &target_method);
-    // info!("target_schema                     {:?}", &target_schema);
-    // info!("request.uri().to_string()         {:?}", &request.uri().to_string());
+    info!("full_path                         {:?}", &full_path);
+    info!("target_host                       {:?}", &target_host);
+    info!("target_port                       {:?}", &target_port);
+    info!("target_method                     {:?}", &target_method);
+    info!("target_schema                     {:?}", &target_schema);
+    info!(
+        "request.uri().to_string()         {:?}",
+        &request.uri().to_string()
+    );
 
     let proxy_url = format!(
         "{}://{}:{}{}",
         target_schema, target_host, target_port, full_path
     );
 
-    let proxy_url = proxy_url.parse::<Uri>().expect("valid URL found");
+    let proxy_url = proxy_url.parse::<Uri>();
+    if proxy_url.is_err() {
+        let e = proxy_url.as_ref().err();
+        error!(
+            "error parsing URI from string {:?}. error {:?}",
+            &proxy_url,
+            e.unwrap()
+        )
+    }
+    let proxy_url = proxy_url.unwrap();
+
     *request.uri_mut() = proxy_url.clone();
 
     let headers = request.headers_mut();
     // headers.insert(hyper::header::HOST, HeaderValue::from_str("bla").unwrap());
     let origin = format!("{}://{}::{}", target_schema, target_host, target_port);
-    headers.insert(
-        hyper::header::ORIGIN,
-        HeaderValue::from_str(origin.as_str()).expect("should be a header"),
-    );
+
+    let header_value = HeaderValue::from_str(origin.as_str());
+
+    if header_value.is_err() {
+        let e = header_value.as_ref().err();
+        error!(
+            "error parsing header_value from string {:?}. error {:?}",
+            &origin,
+            e.unwrap()
+        )
+    }
+    let header_value = header_value.unwrap();
+
+    headers.insert(hyper::header::ORIGIN, header_value);
     //
     // let http_connector = hyper::client::HttpConnector::new();
     // let client = hyper::Client::builder().build(http_connector);
 
     let start = Instant::now();
-    //  info!("request uri {}", request.uri().to_string());
+    // info!("request uri {}", request.uri().to_string());
     let u = request.uri().to_string();
-    let mut response = CLIENT.request(request).await.expect("Request failed");
+    let response = CLIENT.request(request).await;
 
-    // info!(
-    //     "response status {}       for request uri {}   ",
-    //     &response.status(),
-    //     &u
-    // );
-    // info!(
-    //     "response headers {:?}    for request uri {} ",
-    //     &response.headers(),
-    //     &u
-    // );
+    if response.is_err() {
+        let e = response.as_ref().err();
+        let msg = format!(
+            "error response from request to url {} error {:?}",
+            &proxy_url,
+            e.unwrap()
+        );
+        error!("{}", &msg);
+        let r2 = warp::reply::with_status::<String>(msg.into(), StatusCode::INTERNAL_SERVER_ERROR);
+        let r2 = r2.into_response();
+        return Ok(r2);
+    }
+    let mut response = response.unwrap();
+
+    info!(
+        "response status {}       for request uri {}   ",
+        &response.status(),
+        &u
+    );
+    info!(
+        "response headers {:?}    for request uri {} ",
+        &response.headers(),
+        &u
+    );
 
     let duration = start.elapsed();
     let d = format!(
@@ -260,19 +324,20 @@ async fn handler(
         duration.as_nanos()
     );
     // info!("{} ", &d);
-    response
-        .headers_mut()
-        .insert("x-duration", HeaderValue::from_str(&d).expect("add headerr shgoukd work"),
+    response.headers_mut().insert(
+        "x-duration",
+        HeaderValue::from_str(&d).expect("add headerr shgoukd work"),
+    );
 
     // response.headers_mut().insert(
     //     "access-control-allow-origin",
     //     HeaderValue::from_str(&"http://localhost:4011").unwrap(),
     // );
 
-                response.headers_mut().insert(
-                    "x-provided-by",
-                    HeaderValue::from_str(target_description).unwrap(),
-                );
+    response.headers_mut().insert(
+        "x-provided-by",
+        HeaderValue::from_str(target_description).unwrap(),
+    );
 
     //  add_tracing_headers(x_inititated_by, start_total, &mut response);
 
@@ -283,9 +348,10 @@ async fn handler(
         duration_nanos: duration.as_nanos() as i128,
     };
     let cmd = ManagerCommand::UpdateTargetStats(update_target_stats_data);
-    sender
-        .send(cmd)
-        .expect("expect the send with command UpdateTargetStats to work");
+    match sender.send(cmd) {
+        Ok(_) => {}
+        Err(e) => error!("error sending update stats {}", e),
+    }
 
     Ok(response)
 }

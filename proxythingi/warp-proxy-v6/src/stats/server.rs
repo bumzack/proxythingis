@@ -1,6 +1,6 @@
 use chrono::Utc;
 use deadpool_postgres::Pool;
-use log::info;
+use log::{error, info};
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
 use warp::Reply;
@@ -23,13 +23,18 @@ pub async fn stats_read_handler(
         whoami: "stats_read_handler".to_string(),
     };
     let cmd = ManagerCommand::GetConfig(get_config_data);
-    manager_sender
-        .send(cmd)
-        .expect("stats_read_handler expected send successful");
-    let proxy_config = rx
-        .await
-        .expect("stats_read_handler expected a valid proxy config");
-    // info!("got proxyconfig = {:?}", proxy_config);
+    match manager_sender.send(cmd) {
+        Ok(_) => {}
+        Err(e) => error!("error getting config from manager   {:?}", e),
+    }
+    let proxy_config = rx.await;
+    if proxy_config.is_err() {
+        let e = proxy_config.as_ref().err();
+        error!("error retrieveing proxy_config {}", e.unwrap());
+    }
+    let proxy_config = proxy_config.unwrap();
+
+    info!("got proxyconfig = {:?}", proxy_config);
 
     let res = json(&proxy_config);
 
@@ -95,7 +100,7 @@ pub async fn stats_store_handler(
 pub async fn stats_reset_handler(
     manager_sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply> {
-    info!("reset stats");
+    // info!("reset stats");
     let cmd = ManagerCommand::ResetStats;
     manager_sender
         .send(cmd)

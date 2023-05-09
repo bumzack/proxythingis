@@ -7,7 +7,7 @@ pub type Result<T> = std::result::Result<T, Rejection>;
 // pub async fn health_handler(pool: Pool) -> std::result::Result<impl Reply, Rejection> {
 //     let client = pool.get().await.unwrap();
 //
-//     info!("hello from healthhandler");
+//     // info!("hello from healthhandler");
 //     client
 //         .execute("SELECT 1", &[])
 //         .await
@@ -36,7 +36,7 @@ impl reject::Reject for DivideByZero {}
 //                 message = "Could not Execute request";
 //             }
 //             // _ => {
-//             //     einfo!("unhandled application error: {:?}", err);
+//             //     e// info!("unhandled application error: {:?}", err);
 //             //     code = StatusCode::INTERNAL_SERVER_ERROR;
 //             //     message = "Internal Server Error";
 //             // }
@@ -45,7 +45,7 @@ impl reject::Reject for DivideByZero {}
 //         code = StatusCode::METHOD_NOT_ALLOWED;
 //         message = "Method Not Allowed";
 //     } else {
-//         einfo!("unhandled error: {:?}", err);
+//         e// info!("unhandled error: {:?}", err);
 //         code = StatusCode::INTERNAL_SERVER_ERROR;
 //         message = "Internal Server Error";
 //     }
