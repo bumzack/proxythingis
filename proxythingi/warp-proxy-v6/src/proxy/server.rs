@@ -8,7 +8,7 @@ use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
 use uuid::Uuid;
-use warp::http::{HeaderValue, Method, Request, Response, Uri};
+use warp::http::{HeaderValue, Method, Request, Response, StatusCode, Uri};
 use warp::hyper::Body;
 use warp::{hyper, Buf, Rejection, Reply, Stream};
 
@@ -30,8 +30,8 @@ pub async fn execute_forward_request(
     body: impl Stream<Item = Result<impl Buf, warp::Error>> + Send + 'static,
     sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply, Rejection> {
-    // let start_total = Instant::now();
-    // let mut x_initiated_by = false;
+    let start_total = Instant::now();
+    let mut x_inititated_by = false;
 
     let (tx, rx) = oneshot::channel();
     let get_config_data = GetConfigData {
@@ -61,11 +61,11 @@ pub async fn execute_forward_request(
     let source = find_match(&uri, &proxy_config, &proxy_method);
     let target: Option<&ServerTarget> = match source {
         Some(server) => {
-            // info!(
-            //     "found a matching source server for uri: {}, method  {} ",
-            //     &uri.as_str(),
-            //     &proxy_method.as_str()
-            // );
+            info!(
+                "found a matching source server for uri: {}, method  {} ",
+                &uri.as_str(),
+                &proxy_method.as_str()
+            );
             let targets = &server.targets;
             if !targets.is_empty() {
                 let mut rng = rand::thread_rng();
@@ -79,7 +79,7 @@ pub async fn execute_forward_request(
                     // );
                 }
                 let t = targets.get(i as usize).expect("cant unwrap target server");
-                info!("found a matching target server for uri: {}, method  {} //  target server: host: {} // port {} // method {} // path {}", &uri.as_str(), &proxy_method.as_str() ,t.host, t.port, t.method, t.path);
+                // info!("found a matching target server for uri: {}, method  {} //  target server: host: {} // port {} // method {} // path {}", &uri.as_str(), &proxy_method.as_str() ,t.host, t.port, t.method, t.path);
                 Some(t)
             } else {
                 error!(
@@ -164,10 +164,10 @@ pub async fn execute_forward_request(
     {
         *hyper_request.headers_mut() = headers.clone();
         // start_total
-        // if !headers.contains_key(HEADER_X_INITIATED_BY) {
-        //     // hyper_request.headers_mut().insert(HEADER_X_INITIATED_BY, "proxythingi".parse().unwrap());
-        //     x_initiated_by = true;
-        // }
+        if !headers.contains_key(HEADER_X_INITIATED_BY) {
+            // hyper_request.headers_mut().insert(HEADER_X_INITIATED_BY, "proxythingi".parse().unwrap());
+            x_inititated_by = true;
+        }
     }
 
     let update_source_stats_data = UpdateSourceStatsData { id: 1 };
@@ -186,8 +186,8 @@ pub async fn execute_forward_request(
         full_path,
         target_schema,
         &target.description,
-        // x_initiated_by,
-        // start_total,
+        x_inititated_by,
+        start_total,
     );
 
     match result.await {
@@ -216,8 +216,8 @@ async fn handler(
     full_path: String,
     target_schema: &String,
     target_description: &String,
-    // x_inititated_by: bool,
-    // start_total: Instant,
+    x_inititated_by: bool,
+    start_total: Instant,
 ) -> Result<impl Reply, Infallible> {
     // info!("handler full_path                         {:?}", &full_path);
     // // info!(
@@ -323,10 +323,10 @@ async fn handler(
         duration.as_micros(),
         duration.as_nanos()
     );
-    // info!("{} ", &d);
+    info!("{} ", &d);
     response.headers_mut().insert(
         "x-duration",
-        HeaderValue::from_str(&d).expect("add headerr shgoukd work"),
+        HeaderValue::from_str(&d).expect("add header should work"),
     );
 
     // response.headers_mut().insert(
@@ -338,8 +338,6 @@ async fn handler(
         "x-provided-by",
         HeaderValue::from_str(target_description).unwrap(),
     );
-
-    //  add_tracing_headers(x_inititated_by, start_total, &mut response);
 
     add_tracing_headers(x_inititated_by, start_total, &mut response);
 
@@ -360,7 +358,7 @@ fn add_tracing_headers(x_initiated_by: bool, start_total: Instant, response: &mu
     let duration_total = start_total.elapsed();
 
     if x_initiated_by {
-        println!("adding new X-initiated-by header");
+        //  println!("adding new X-initiated-by header");
         response.headers_mut().insert(
             HEADER_X_INITIATED_BY,
             HeaderValue::from_str("proxythingi").expect("initiated by should be a haeder value"),
@@ -386,7 +384,7 @@ fn add_tracing_headers(x_initiated_by: bool, start_total: Instant, response: &mu
         }
     };
 
-    println!(
+    info!(
         "adding proxythingi to  X-processed-by header.     new header '{}'",
         &new_x_processed_by
     );
@@ -405,7 +403,7 @@ fn find_match<'a>(
 ) -> Option<&'a ServerSource> {
     // nice, funny demo
     // for s in &proxy_config.server_sources {
-    //     // info!("searching for request uri {}, method {}    comparing with config  path_starts_with  {} and method {}",
+    //     // // info!("searching for request uri {}, method {}    comparing with config  path_starts_with  {} and method {}",
     //     //          &uri.as_str(), &method,&s.path_starts_with, &s.method);
     //     if uri.as_str().starts_with(&s.path_starts_with)
     //         && method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase()
