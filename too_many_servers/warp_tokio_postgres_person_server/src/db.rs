@@ -6,13 +6,14 @@ use std::env;
 use chrono::{DateTime, Utc};
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use dotenvy::dotenv;
-use log::info;
+use log::{error, info};
 use tokio_postgres::{NoTls, Row};
+use warp::http::StatusCode;
 use warp::Filter;
 use warp::Rejection;
 
-use crate::models::{Person, PersonRequest};
 use crate::models::MyError::DBQueryError;
+use crate::models::{DivideByZero, InternalError, Person, PersonRequest};
 
 type Result<T> = std::result::Result<T, Rejection>;
 
@@ -34,7 +35,7 @@ pub fn create_pool() -> Pool {
     pool
 }
 
-pub fn with_db(pool: Pool) -> impl Filter<Extract=(Pool, ), Error=Infallible> + Clone {
+pub fn with_db(pool: Pool) -> impl Filter<Extract = (Pool,), Error = Infallible> + Clone {
     warp::any().map(move || pool.clone())
 }
 
@@ -44,8 +45,8 @@ pub async fn create_person(pool: Pool, body: PersonRequest) -> Result<Person> {
         "INSERT INTO {} (firstname, lastname) VALUES ($1, $2) RETURNING *",
         TABLE
     );
-    // info!("person {:?}", &body);
-    // info!("query   {}", &query);
+    // // info!("person {:?}", &body);
+    // // info!("query   {}", &query);
     let row = client
         .query_one(query.as_str(), &[&body.firstname, &body.lastname])
         .await
@@ -57,20 +58,40 @@ pub async fn create_person(pool: Pool, body: PersonRequest) -> Result<Person> {
 
 pub async fn list_person(pool: Pool, limit: u32) -> Result<Vec<Person>> {
     let mut persons = vec![];
-    let client = pool.get().await.unwrap();
+    let client = pool.get().await;
+    if client.is_err() {
+        let e = client.as_ref().err();
+        let e = e.unwrap();
+        let msg = format!("error getting client {:?} ", e);
+        error!("err {}", &msg);
+        let res = warp::reject::custom(InternalError);
+        return Err(res);
+    }
+    let client = client.unwrap();
+
     let query = format!(
         "SELECT id, firstname, lastname, created FROM {} ORDER BY lastname DESC LIMIT {}",
         TABLE, limit
     );
-    // info!("query   {}", &query);
-    let data = client.query(&query, &[]).await.unwrap();
+    // // info!("query   {}", &query);
+    let data = client.query(&query, &[]).await;
+    if data.is_err() {
+        let e = data.as_ref().err();
+        let e = e.unwrap();
+        let msg = format!("error reading from DB  {:?} ", e);
+        error!("err {}", &msg);
+        let res = warp::reject::custom(InternalError);
+        return Err(res);
+    }
+    let data = data.unwrap();
+
     for row in data {
         let id: i32 = row.get(0);
         let firstname: &str = row.get(1);
         let lastname: &str = row.get(2);
         let created: DateTime<Utc> = row.get(3);
 
-        // info!("found person: {} {} {} {:?}", id, firstname, lastname, created);
+        // // info!("found person: {} {} {} {:?}", id, firstname, lastname, created);
         let p = Person {
             id,
             firstname: firstname.to_string(),
@@ -79,7 +100,7 @@ pub async fn list_person(pool: Pool, limit: u32) -> Result<Vec<Person>> {
         };
         persons.push(p);
     }
-    info!("found {} persons", persons.len());
+    // info!("found {} persons", persons.len());
     Ok(persons)
 }
 
@@ -88,7 +109,7 @@ impl From<Row> for Person {
         let id: i32 = row.get(0);
         let firstname: String = row.get(1);
         let lastname: String = row.get(2);
-        let created: chrono::DateTime<chrono::offset::Utc> = row.get(3);
+        let created: DateTime<Utc> = row.get(3);
         Self {
             id,
             firstname,

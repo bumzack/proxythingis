@@ -1,30 +1,40 @@
 use std::convert::Infallible;
 use std::env;
 
-use diesel::{PgConnection, RunQueryDsl};
 use diesel::r2d2::ConnectionManager;
+use diesel::{PgConnection, RunQueryDsl};
 use log::error;
-use log::info;
 use r2d2::Pool;
-use warp::Filter;
 use warp::http::StatusCode;
+use warp::Filter;
 
 use crate::models::{ErrorMessage, NewPerson, Person};
 
 pub fn read_persons(pool: Pool<ConnectionManager<PgConnection>>) -> Vec<Person> {
     use crate::schema::person::dsl::*;
 
-    let connection = &mut pool.get().unwrap();
+    let connection = pool.get();
 
-    let results = person
-        .load::<Person>(connection)
-        .expect("Error loading persons");
+    if connection.is_err() {
+        let e = connection.as_ref().err();
+        error!("error getting connection for DB.  err {}", e.unwrap());
+        return vec![];
+    }
+    let mut conn = connection.unwrap();
 
-    // info!("Displaying {} persons", results.len());
+    let results = person.load::<Person>(&mut conn);
+
+    if results.is_err() {
+        let e = results.as_ref().err();
+        error!("error reading persons from DB.  err {}", e.unwrap());
+        return vec![];
+    }
+    results.unwrap()
+
+    // // info!("Displaying {} persons", results.len());
     // for p in &results {
-    //     info!("id {}:  {} {}, created at {}", p.id, p.firstname, p.lastname, p.created);
+    //     // info!("id {}:  {} {}, created at {}", p.id, p.firstname, p.lastname, p.created);
     // }
-    results
 }
 
 pub fn create_person(
@@ -78,12 +88,12 @@ fn database_url_for_env() -> String {
         "/Users/bumzack/stoff/rust/proxythingis/too_many_servers/warp_diesel_postgres_person_server/.env",
     );
     match &result {
-        Ok(p) => info!("path to .env {:?}", &p),
+        Ok(p) => {} // info!("path to .env {:?}", &p),
         Err(e) => error!("error {:?}", e),
     }
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    info!("DATABASE URL {}", database_url);
+    // info!("DATABASE URL {}", database_url);
     database_url
 }
 
@@ -100,7 +110,6 @@ pub fn get_connection_pool() -> Pool<ConnectionManager<PgConnection>> {
 
 pub fn with_db(
     db: Pool<ConnectionManager<PgConnection>>,
-) -> impl Filter<Extract=(Pool<ConnectionManager<PgConnection>>, ), Error=std::convert::Infallible>
-+ Clone {
+) -> impl Filter<Extract = (Pool<ConnectionManager<PgConnection>>,), Error = Infallible> + Clone {
     warp::any().map(move || db.clone())
 }
