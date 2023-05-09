@@ -19,7 +19,7 @@ async fn main() {
         "/Users/bumzack/stoff/rust/proxythingis/too_many_servers/warp_tokio_postgres_person_server/.env",
     );
     match &result {
-        Ok(p) => info!("path to .env {:?}", &p),
+        Ok(p) => {} // info!("path to .env {:?}", &p),
         Err(e) => error!("error {:?}", e),
     }
 
