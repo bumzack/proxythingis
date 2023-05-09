@@ -1,9 +1,9 @@
 use log::LevelFilter;
 use pretty_env_logger::env_logger::Builder;
 use tokio::sync::mpsc;
-use warp::Filter;
-use warp::hyper::Client;
 use warp::hyper::client::HttpConnector;
+use warp::hyper::Client;
+use warp::Filter;
 
 use common::models::ProxyConfig;
 
