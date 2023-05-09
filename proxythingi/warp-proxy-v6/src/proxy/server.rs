@@ -3,7 +3,7 @@ use std::str::FromStr;
 use std::time::Instant;
 
 use futures_util::TryStreamExt;
-use log::error;
+use log::{error, info};
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
@@ -61,11 +61,11 @@ pub async fn execute_forward_request(
     let source = find_match(&uri, &proxy_config, &proxy_method);
     let target: Option<&ServerTarget> = match source {
         Some(server) => {
-            // info!(
-            //     "found a matching source server for uri: {}, method  {} ",
-            //     &uri.as_str(),
-            //     &proxy_method.as_str()
-            // );
+            info!(
+                "found a matching source server for uri: {}, method  {} ",
+                &uri.as_str(),
+                &proxy_method.as_str()
+            );
             let targets = &server.targets;
             if !targets.is_empty() {
                 let mut rng = rand::thread_rng();
@@ -107,8 +107,8 @@ pub async fn execute_forward_request(
     let tmp = headers.clone();
     tmp.into_iter().for_each(|h| {
         if h.0.is_some() {
-            let _name = h.0.expect("header .0 should exist");
-            // info!("header: {:?} -> {:?} ", name, &h.1);
+            let name = h.0.expect("header .0 should exist");
+            info!("header: {:?} -> {:?} ", name, &h.1);
         }
     });
 
@@ -131,7 +131,7 @@ pub async fn execute_forward_request(
         None => format!("{}{}", target_path, path_to_pass_on),
     };
 
-    // info!("final request params taking into consideration a wildcard for the method. uri: {}, method  {} //  target server: host: {} // port {} // method {} // path {} // fullpath {}", &uri.as_str(), &proxy_method.as_str() ,target_host, target_port, target_method, &target_path, &full_path);
+    info!("final request params taking into consideration a wildcard for the method. uri: {}, method  {} //  target server: host: {} // port {} // method {} // path {} // fullpath {}", &uri.as_str(), &proxy_method.as_str() ,target_host, target_port, target_method, &target_path, &full_path);
 
     let m = Method::from_str(target_method);
     if m.is_err() {
@@ -192,11 +192,11 @@ pub async fn execute_forward_request(
 
     match result.await {
         Ok(response) => {
-            // // info!(
-            //     "forwarded request successfully handled for  source uri: {}, method  {}    ",
-            //     &uri.as_str(),
-            //     &proxy_method.as_str()
-            // );
+            info!(
+                "forwarded request successfully handled for  source uri: {}, method  {}    ",
+                &uri.as_str(),
+                &proxy_method.as_str()
+            );
 
             Ok(response)
         }
@@ -285,7 +285,7 @@ async fn handler(
 
     let start = Instant::now();
     // info!("request uri {}", request.uri().to_string());
-    let _u = request.uri().to_string();
+    let u = request.uri().to_string();
     let response = CLIENT.request(request).await;
 
     if response.is_err() {
@@ -302,16 +302,16 @@ async fn handler(
     }
     let mut response = response.unwrap();
 
-    // // info!(
-    //     "response status {}       for request uri {}   ",
-    //     &response.status(),
-    //     &u
-    // );
-    // // info!(
-    //     "response headers {:?}    for request uri {} ",
-    //     &response.headers(),
-    //     &u
-    // );
+    info!(
+        "response status {}       for request uri {}   ",
+        &response.status(),
+        &u
+    );
+    info!(
+        "response headers {:?}    for request uri {} ",
+        &response.headers(),
+        &u
+    );
 
     let duration = start.elapsed();
     let d = format!(
@@ -320,7 +320,7 @@ async fn handler(
         duration.as_micros(),
         duration.as_nanos()
     );
-    // // info!("{} ", &d);
+    info!("{} ", &d);
     response.headers_mut().insert(
         "x-duration",
         HeaderValue::from_str(&d).expect("add header should work"),
