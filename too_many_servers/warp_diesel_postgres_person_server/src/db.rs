@@ -1,15 +1,16 @@
 use std::convert::Infallible;
 use std::env;
 
-use diesel::r2d2::ConnectionManager;
 use diesel::{PgConnection, RunQueryDsl};
+use diesel::r2d2::ConnectionManager;
 use log::error;
 use log::info;
 use r2d2::Pool;
-use warp::http::StatusCode;
 use warp::Filter;
+use warp::http::StatusCode;
 
 use crate::models::{ErrorMessage, NewPerson, Person};
+use crate::schema::person::dsl::person;
 
 pub fn read_persons(pool: Pool<ConnectionManager<PgConnection>>) -> Vec<Person> {
     use crate::schema::person::dsl::*;
@@ -100,28 +101,7 @@ pub fn get_connection_pool() -> Pool<ConnectionManager<PgConnection>> {
 
 pub fn with_db(
     db: Pool<ConnectionManager<PgConnection>>,
-) -> impl Filter<Extract = (Pool<ConnectionManager<PgConnection>>,), Error = std::convert::Infallible>
-       + Clone {
-    let connection = pool.get();
-
-    if connection.is_err() {
-        let e = connection.as_ref().err();
-        error!("error getting connection for DB.  err {}", e.unwrap());
-        return vec![];
-    }
-    let mut conn = connection.unwrap();
-    let results = person.load::<Person>(&mut conn);
-    if results.is_err() {
-        let e = results.as_ref().err();
-        error!("error reading persons from DB.  err {}", e.unwrap());
-        return vec![];
-    }
-    results.unwrap()
-
-    // // info!("Displaying {} persons", results.len());
-    //     // info!("id {}:  {} {}, created at {}", p.id, p.firstname, p.lastname, p.created);
-        Ok(p) => {} // info!("path to .env {:?}", &p),
-    // info!("DATABASE URL {}", database_url);
-) -> impl Filter<Extract=(Pool<ConnectionManager<PgConnection>>, ), Error=Infallible> + Clone {
+) -> impl Filter<Extract=(Pool<ConnectionManager<PgConnection>>, ), Error=std::convert::Infallible>
++ Clone {
     warp::any().map(move || db.clone())
 }

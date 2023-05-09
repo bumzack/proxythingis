@@ -1,4 +1,4 @@
-# Readme Tokio PostGres Server                            
+# Readme Tokio PostGres Server
 
 ## Install PostGres on Mac M1
 

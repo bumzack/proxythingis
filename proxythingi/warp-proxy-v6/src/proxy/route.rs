@@ -12,7 +12,7 @@ use crate::proxy::server::execute_forward_request;
 
 pub fn proxy_routes(
     manager_sender: UnboundedSender<ManagerCommand>,
-) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
+) -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::Rejection> + Clone {
     warp::any()
         .and(with_sender(manager_sender.clone()))
         .and(extract_request_data_filter_body_stream())

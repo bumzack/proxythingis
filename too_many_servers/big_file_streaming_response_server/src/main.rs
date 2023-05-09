@@ -2,10 +2,10 @@ use std::convert::Infallible;
 
 use log::LevelFilter;
 use pretty_env_logger::env_logger::Builder;
+use warp::{Filter, hyper};
 use warp::hyper::StatusCode;
-use warp::{hyper, Filter};
 
-pub fn proxy() -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
+pub fn proxy() -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::Rejection> + Clone {
     warp::path!("data").and(warp::get()).and_then(stream_data)
 }
 
