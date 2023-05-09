@@ -1,5 +1,16 @@
 # ProxyThingis
 
+```
+ ulimit -a
+ 
+ ```
+
+### add to your bashrc oder zshrc
+```
+ulimit -n 100000
+```
+
+
 ## ubuntu postgresql install
 
 sudo -u postgres psql
