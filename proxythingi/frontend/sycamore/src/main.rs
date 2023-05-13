@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use chrono::{Datelike, DateTime, Timelike, Utc};
+use chrono::{DateTime, Datelike, Timelike, Utc};
 use log::{error, info};
 use reqwasm::http::Request;
 use sycamore::flow::Keyed;
@@ -363,8 +363,6 @@ async fn ServerTargetComp<'a, G: Html>(
                                 }
                             }
                         }
-
-
                     }
                 }
             }

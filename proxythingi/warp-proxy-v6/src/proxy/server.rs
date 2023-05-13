@@ -8,26 +8,26 @@ use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
 use uuid::Uuid;
-use warp::{Buf, hyper, Rejection, Reply, Stream};
 use warp::http::{HeaderValue, Method, Request, Response, StatusCode, Uri};
 use warp::hyper::Body;
+use warp::{hyper, Buf, Rejection, Reply, Stream};
 
 use common::config_manager_models::{GetConfigData, UpdateSourceStatsData, UpdateTargetStatsData};
 use common::models::{ProxyConfig, ServerSource, ServerTarget};
 use common::warp_server::warp_request_filter::{
-    HEADER_X_INITIATED_BY, HEADER_X_PROCESSED_BY, HEADER_X_UUID, ProxyHeaders, ProxyMethod,
-    ProxyQueryParameters, ProxyUri,
+    ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri, HEADER_X_INITIATED_BY,
+    HEADER_X_PROCESSED_BY, HEADER_X_UUID,
 };
 
-use crate::CLIENT;
 use crate::config_manager::manager::ManagerCommand;
+use crate::CLIENT;
 
 pub async fn execute_forward_request(
     uri: ProxyUri,
     params: ProxyQueryParameters,
     proxy_method: ProxyMethod,
     headers: ProxyHeaders,
-    body: impl Stream<Item=Result<impl Buf, warp::Error>> + Send + 'static,
+    body: impl Stream<Item = Result<impl Buf, warp::Error>> + Send + 'static,
     sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply, Rejection> {
     let start_total = Instant::now();
