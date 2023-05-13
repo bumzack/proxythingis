@@ -1,5 +1,5 @@
-use log::LevelFilter;
-use pretty_env_logger::env_logger::Builder;
+use log::{info, LevelFilter};
+use pretty_env_logger::env_logger::{Builder, Target};
 use tokio::sync::mpsc;
 use warp::Filter;
 use warp::hyper::Client;
@@ -37,11 +37,15 @@ async fn main() {
         "/Users/bumzack/stoff/rust/proxythingis/proxythingi/warp-proxy-v6/.env",
     );
 
-    Builder::new().filter_level(LevelFilter::Info).init();
+    let mut builder = Builder::new();
+    builder.target(Target::Stdout);
+    builder.filter_level(LevelFilter::Info);
+    builder.init();
+    info!("builder={:?}", builder);
 
     let pool = create_pool();
 
-    let servers = list_server(pool.clone(), true)
+    let servers = list_server(pool.clone())
         .await
         .expect("loading the servers config should work");
 

@@ -50,7 +50,7 @@ pub async fn create_target_handler(
 }
 
 pub async fn list_servers_handler(pool: Pool) -> Result<impl Reply> {
-    let data = list_server(pool, false)
+    let data = list_server(pool)
         .await
         // TODO fix CustomError
         .map_err(|_e| {

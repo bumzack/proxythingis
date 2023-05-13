@@ -8,26 +8,26 @@ use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
 use uuid::Uuid;
-use warp::{Buf, hyper, Rejection, Reply, Stream};
 use warp::http::{HeaderValue, Method, Request, Response, StatusCode, Uri};
 use warp::hyper::Body;
+use warp::{hyper, Buf, Rejection, Reply, Stream};
 
 use common::config_manager_models::{GetConfigData, UpdateSourceStatsData, UpdateTargetStatsData};
 use common::models::{ProxyConfig, ServerSource, ServerTarget};
 use common::warp_server::warp_request_filter::{
-    HEADER_X_INITIATED_BY, HEADER_X_PROCESSED_BY, HEADER_X_UUID, ProxyHeaders, ProxyMethod,
-    ProxyQueryParameters, ProxyUri,
+    ProxyHeaders, ProxyMethod, ProxyQueryParameters, ProxyUri, HEADER_X_INITIATED_BY,
+    HEADER_X_PROCESSED_BY, HEADER_X_UUID,
 };
 
-use crate::CLIENT;
 use crate::config_manager::manager::ManagerCommand;
+use crate::CLIENT;
 
 pub async fn execute_forward_request(
     uri: ProxyUri,
     params: ProxyQueryParameters,
     proxy_method: ProxyMethod,
     headers: ProxyHeaders,
-    body: impl Stream<Item=Result<impl Buf, warp::Error>> + Send + 'static,
+    body: impl Stream<Item = Result<impl Buf, warp::Error>> + Send + 'static,
     sender: UnboundedSender<ManagerCommand>,
 ) -> Result<impl Reply, Rejection> {
     let start_total = Instant::now();
@@ -61,12 +61,12 @@ pub async fn execute_forward_request(
     let source = find_match(&uri, &proxy_config, &proxy_method);
     let target: Option<&ServerTarget> = match source {
         Some(server) => {
-            info!(
-                "found a matching source server for uri: {}, method  {} ",
-                &uri.as_str(),
-                &proxy_method.as_str()
-            );
-            let targets = &server.targets;
+            // info!(
+            //     "found a matching source server for uri: {}, method  {} ",
+            //     &uri.as_str(),
+            //     &proxy_method.as_str()
+            // );
+            let targets: Vec<&ServerTarget> = server.targets.iter().filter(|t| t.active).collect();
             if !targets.is_empty() {
                 let mut rng = rand::thread_rng();
                 let i = rng.gen_range(0..targets.len());
@@ -108,7 +108,7 @@ pub async fn execute_forward_request(
     tmp.into_iter().for_each(|h| {
         if h.0.is_some() {
             let name = h.0.expect("header .0 should exist");
-            info!("header: {:?} -> {:?} ", name, &h.1);
+            // info!("header: {:?} -> {:?} ", name, &h.1);
         }
     });
 
@@ -131,7 +131,7 @@ pub async fn execute_forward_request(
         None => format!("{}{}", target_path, path_to_pass_on),
     };
 
-    info!("final request params taking into consideration a wildcard for the method. uri: {}, method  {} //  target server: host: {} // port {} // method {} // path {} // fullpath {}", &uri.as_str(), &proxy_method.as_str() ,target_host, target_port, target_method, &target_path, &full_path);
+    // info!("final request params taking into consideration a wildcard for the method. uri: {}, method  {} //  target server: host: {} // port {} // method {} // path {} // fullpath {}", &uri.as_str(), &proxy_method.as_str() ,target_host, target_port, target_method, &target_path, &full_path);
 
     let m = Method::from_str(target_method);
     if m.is_err() {
@@ -192,11 +192,11 @@ pub async fn execute_forward_request(
 
     match result.await {
         Ok(response) => {
-            info!(
-                "forwarded request successfully handled for  source uri: {}, method  {}    ",
-                &uri.as_str(),
-                &proxy_method.as_str()
-            );
+            // info!(
+            //     "forwarded request successfully handled for  source uri: {}, method  {}    ",
+            //     &uri.as_str(),
+            //     &proxy_method.as_str()
+            // );
 
             Ok(response)
         }
@@ -237,14 +237,14 @@ async fn handler(
     //     &request.uri().to_string()
     // );
 
-    info!("full_path                         {:?}", &full_path);
-    info!("target_host                       {:?}", &target_host);
-    info!("target_port                       {:?}", &target_port);
-    info!("target_schema                     {:?}", &target_schema);
-    info!(
-        "request.uri().to_string()         {:?}",
-        &request.uri().to_string()
-    );
+    // info!("full_path                         {:?}", &full_path);
+    // info!("target_host                       {:?}", &target_host);
+    // info!("target_port                       {:?}", &target_port);
+    // info!("target_schema                     {:?}", &target_schema);
+    // info!(
+    //     "request.uri().to_string()         {:?}",
+    //     &request.uri().to_string()
+    // );
 
     let proxy_url = format!(
         "{}://{}:{}{}",
@@ -304,16 +304,16 @@ async fn handler(
     }
     let mut response = response.unwrap();
 
-    info!(
-        "response status {}       for request uri {}   ",
-        &response.status(),
-        &u
-    );
-    info!(
-        "response headers {:?}    for request uri {} ",
-        &response.headers(),
-        &u
-    );
+    // info!(
+    //     "response status {}       for request uri {}   ",
+    //     &response.status(),
+    //     &u
+    // );
+    // info!(
+    //     "response headers {:?}    for request uri {} ",
+    //     &response.headers(),
+    //     &u
+    // );
 
     let duration = start.elapsed();
     let d = format!(
@@ -322,7 +322,7 @@ async fn handler(
         duration.as_micros(),
         duration.as_nanos()
     );
-    info!("{} ", &d);
+    // info!("{} ", &d);
     response.headers_mut().insert(
         "x-duration",
         HeaderValue::from_str(&d).expect("add header should work"),
@@ -382,11 +382,11 @@ fn add_tracing_headers(x_initiated_by: bool, start_total: Instant, response: &mu
             format!(" proxythingi: dur {:?}", duration_total.as_micros())
         }
     };
-
-    info!(
-        "adding proxythingi to  X-processed-by header.     new header '{}'",
-        &new_x_processed_by
-    );
+    //
+    // info!(
+    //     "adding proxythingi to  X-processed-by header.     new header '{}'",
+    //     &new_x_processed_by
+    // );
 
     response.headers_mut().insert(
         HEADER_X_PROCESSED_BY,
