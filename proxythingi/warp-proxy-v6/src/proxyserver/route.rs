@@ -1,4 +1,5 @@
 use deadpool_postgres::Pool;
+use log::info;
 use tokio::sync::mpsc::UnboundedSender;
 use warp::Filter;
 
@@ -41,7 +42,7 @@ pub fn server_routes(
         .and(warp::get())
         .and(with_db(pool.clone()))
         .and_then(|pool| {
-            // info!("GET proxythingi/server");
+            info!("GET proxythingi/server");
             list_servers_handler(pool)
         });
 
@@ -51,7 +52,7 @@ pub fn server_routes(
         .and(with_db(pool.clone()))
         .and(with_sender(manager_sender.clone()))
         .and_then(|id, pool, sender| {
-            // info!("GET proxythingi/server/activate/{}", id);
+            info!("GET proxythingi/server/activate/{}", id);
             activate_server_handler(pool, id, sender)
         });
 
@@ -61,7 +62,7 @@ pub fn server_routes(
         .and(with_db(pool.clone()))
         .and(with_sender(manager_sender.clone()))
         .and_then(|id, pool, sender| {
-            // info!("GET proxythingi/server/deactivate/{}", id);
+            info!("GET proxythingi/server/deactivate/{}", id);
             deactivate_server_handler(pool, id, sender)
         });
 

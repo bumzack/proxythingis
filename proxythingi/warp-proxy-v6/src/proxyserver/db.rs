@@ -75,7 +75,7 @@ pub async fn create_source2target(
     Ok(server_source)
 }
 
-pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSource>> {
+pub async fn list_server(pool: Pool) -> Result<Vec<ServerSource>> {
     let client = pool.get().await.unwrap();
     // source server
 
@@ -112,7 +112,7 @@ pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSour
         let target_active: bool = row.get("target_active");
         let target_created: DateTime<Utc> = row.get("target_created");
 
-        let mut server_source = ServerSource {
+        let server_source = ServerSource {
             id: source_id,
             description: source_description.to_string(),
             path_starts_with: source_path_starts_with.to_string(),
@@ -135,13 +135,7 @@ pub async fn list_server(pool: Pool, active_only: bool) -> Result<Vec<ServerSour
             created: target_created,
         };
 
-        if active_only {
-            if server_target.active {
-                add_to_map(&mut map, &mut server_source, server_target);
-            }
-        } else {
-            add_to_map(&mut map, &mut server_source, server_target);
-        }
+        add_to_map(&mut map, &server_source, server_target);
     }
 
     let sources: Vec<ServerSource> = map.values().cloned().collect();

@@ -45,7 +45,7 @@ async fn main() {
 
     let pool = create_pool();
 
-    let servers = list_server(pool.clone(), true)
+    let servers = list_server(pool.clone())
         .await
         .expect("loading the servers config should work");
 

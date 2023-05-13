@@ -66,7 +66,7 @@ pub async fn execute_forward_request(
             //     &uri.as_str(),
             //     &proxy_method.as_str()
             // );
-            let targets = &server.targets;
+            let targets: Vec<&ServerTarget> = server.targets.iter().filter(|t| t.active).collect();
             if !targets.is_empty() {
                 let mut rng = rand::thread_rng();
                 let i = rng.gen_range(0..targets.len());
