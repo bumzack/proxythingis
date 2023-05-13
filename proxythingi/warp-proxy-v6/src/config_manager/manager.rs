@@ -108,7 +108,7 @@ pub fn start_config_manager(
 }
 
 pub async fn send_config(pool: Pool, manager_sender: UnboundedSender<ManagerCommand>) {
-    let server = list_server(pool, true).await.unwrap();
+    let server = list_server(pool).await.unwrap();
 
     let config = UpdateServerConfigData {
         server_sources: server,
