@@ -60,11 +60,6 @@ pub fn start_config_manager(
                     for s in proxy_config.server_sources.iter_mut() {
                         for t in s.targets.iter_mut() {
                             if t.id == target_stats.id {
-                                // info!(
-                                //     "updating target stats hit for id {}, added duration {}",
-                                //     t.id, target_stats.duration_nanos
-                                // );
-
                                 if t.stats.min_ns > target_stats.duration_nanos {
                                     t.stats.min_ns = target_stats.duration_nanos;
                                 }
