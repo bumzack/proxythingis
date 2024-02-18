@@ -1,4 +1,5 @@
 use deadpool_postgres::Pool;
+use log::info;
 use tokio::sync::mpsc::UnboundedSender;
 use warp::Filter;
 
@@ -13,7 +14,7 @@ use crate::proxyserver::server::{
 pub fn server_routes(
     pool: Pool,
     manager_sender: &UnboundedSender<ManagerCommand>,
-) -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::Rejection> + Clone {
+) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
     let server_source = warp::path!("proxythingi" / "server" / "source");
     let server_source_create = server_source
         .and(warp::post())
@@ -21,7 +22,7 @@ pub fn server_routes(
         .and(with_db(pool.clone()))
         .and(with_sender(manager_sender.clone()))
         .and_then(|body, pool, sender| {
-            // info!("POST proxythingi/server/source");
+            info!("POST proxythingi/server/source");
             create_source_handler(pool, body, sender)
         });
 
@@ -32,7 +33,7 @@ pub fn server_routes(
         .and(with_db(pool.clone()))
         .and(with_sender(manager_sender.clone()))
         .and_then(|body, pool, sender| {
-            // info!("POST proxythingi/server/target");
+            info!("POST proxythingi/server/target");
             create_target_handler(pool, body, sender)
         });
 
@@ -41,7 +42,7 @@ pub fn server_routes(
         .and(warp::get())
         .and(with_db(pool.clone()))
         .and_then(|pool| {
-            // info!("GET proxythingi/server");
+            info!("GET proxythingi/server");
             list_servers_handler(pool)
         });
 
@@ -51,7 +52,7 @@ pub fn server_routes(
         .and(with_db(pool.clone()))
         .and(with_sender(manager_sender.clone()))
         .and_then(|id, pool, sender| {
-            // info!("GET proxythingi/server/activate/{}", id);
+            info!("GET proxythingi/server/activate/{}", id);
             activate_server_handler(pool, id, sender)
         });
 
@@ -61,7 +62,7 @@ pub fn server_routes(
         .and(with_db(pool.clone()))
         .and(with_sender(manager_sender.clone()))
         .and_then(|id, pool, sender| {
-            // info!("GET proxythingi/server/deactivate/{}", id);
+            info!("GET proxythingi/server/deactivate/{}", id);
             deactivate_server_handler(pool, id, sender)
         });
 

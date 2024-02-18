@@ -1,4 +1,5 @@
 [workspace]
+resolver = "2"
 
 members = [
     "proxythingi/warp-proxy-v6",
@@ -7,5 +8,5 @@ members = [
     "too_many_servers/warp_diesel_postgres_person_server",
     "too_many_servers/big_file_streaming_response_server",
     "proxythingi/common",
-    "proxythingi/frontend/sycamore"
+    "proxythingi/frontend/sycamore",
 ]

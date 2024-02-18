@@ -3,7 +3,8 @@ use std::str::FromStr;
 use std::time::Instant;
 
 use futures_util::TryStreamExt;
-use log::{error, info};
+
+use log::error;
 use rand::Rng;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::oneshot;
@@ -107,7 +108,7 @@ pub async fn execute_forward_request(
     let tmp = headers.clone();
     tmp.into_iter().for_each(|h| {
         if h.0.is_some() {
-            let name = h.0.expect("header .0 should exist");
+            //  let name = h.0.expect("header .0 should exist");
             // info!("header: {:?} -> {:?} ", name, &h.1);
         }
     });
@@ -287,7 +288,7 @@ async fn handler(
 
     let start = Instant::now();
     // info!("request uri {}", request.uri().to_string());
-    let u = request.uri().to_string();
+    // let u = request.uri().to_string();
     let response = CLIENT.request(request).await;
 
     if response.is_err() {

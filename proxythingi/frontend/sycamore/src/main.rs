@@ -3,8 +3,7 @@ use std::rc::Rc;
 use chrono::{DateTime, Datelike, Timelike, Utc};
 use log::{error, info};
 use reqwasm::http::Request;
-use sycamore::flow::Keyed;
-use sycamore::futures::{spawn_local, spawn_local_scoped};
+use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
 
 use common::models::{ProxyConfig, ServerSource, ServerTarget, ServerTargetStats};
@@ -341,7 +340,7 @@ async fn ServerTargetComp<'a, G: Html>(
                                                     ""
                                                 }
                                                 td  {
-                                                    button(class="btn btn-success", type="button", on:click=handle_start, disabled=(active)) {
+                                                    button(class="btn btn-success", type="button", on:click=handle_start, disabled=active) {
                                                         svg(class="bi bi-file-play", fill="currentColor" , height="16", viewBox="0 0 16 16",width="16", xmlns="http://www.w3.org/2000/svg") {
                                                             path(d="M6 10.117V5.883a.5.5 0 0 1 .757-.429l3.528 2.117a.5.5 0 0 1 0 .858l-3.528 2.117a.5.5 0 0 1-.757-.43z")
                                                             path(d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z")
@@ -349,7 +348,7 @@ async fn ServerTargetComp<'a, G: Html>(
                                                     }
                                                 }
                                                 td  {
-                                                    button(class="btn btn-danger", type="button",on:click=handle_stop, disabled=(!active)) {
+                                                    button(class="btn btn-danger", type="button",on:click=handle_stop, disabled=!active) {
                                                         svg(class="bi bi-pause-btn", fill="currentColor" , height="16", viewBox="0 0 16 16",width="16", xmlns="http://www.w3.org/2000/svg") {
                                                             path(d="M6.25 5C5.56 5 5 5.56 5 6.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C7.5 5.56 6.94 5 6.25 5zm3.5 0c-.69 0-1.25.56-1.25 1.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C11 5.56 10.44 5 9.75 5z")
                                                             path(d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm15 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z")
@@ -572,7 +571,7 @@ async fn MainContent<G: Html>(cx: Scope<'_>) -> View<G> {
     let app_state = use_context::<Signal<AppState>>(cx);
     let server = app_state.get().server.clone();
 
-    let iter = create_signal(cx, server);
+    let _iter = create_signal(cx, server);
 
     // let sources = create_memo(cx, || app_state.server.iter().cloned().collect::<Vec<_>>());
 
@@ -667,7 +666,7 @@ async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
 
     provide_context_ref(cx, app_state);
 
-    let server_stats_vec = create_memo(cx, || {
+    let _server_stats_vec = create_memo(cx, || {
         // TODO load stuff ?!
         println!("hi from create_memo server_stats_vec");
     });

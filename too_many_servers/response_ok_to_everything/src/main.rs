@@ -1,4 +1,4 @@
-use log::{error, info, LevelFilter};
+use log::{error, LevelFilter};
 use pretty_env_logger::env_logger::Builder;
 use serde::Deserialize;
 use serde::Serialize;
@@ -30,20 +30,20 @@ async fn main() {
              proxy_method: ProxyMethod,
              headers: ProxyHeaders,
              body_string: String| {
-                info!("uri              {:?}", &uri);
-                info!("params           {:?}", &params);
-                info!("proxy_method     {:?}", &proxy_method);
-                info!("headers          {:?}", &headers);
-                info!("body as string   {:?}", &body_string);
+                // info!("uri              {:?}", &uri);
+                // info!("params           {:?}", &params);
+                // info!("proxy_method     {:?}", &proxy_method);
+                // info!("headers          {:?}", &headers);
+                // info!("body as string   {:?}", &body_string);
 
                 let headers: Vec<String> = headers
                     .into_iter()
-                    .map(|h| {
-                        let key = match h.0 {
+                    .map(|header| {
+                        let key = match header.0 {
                             Some(n) => n.to_string(),
                             None => "n/a".to_string(),
                         };
-                        let value = match h.1.to_str() {
+                        let value = match header.1.to_str() {
                             Ok(n) => n.to_string(),
                             Err(e) => {
                                 error!("error2 {}", e);

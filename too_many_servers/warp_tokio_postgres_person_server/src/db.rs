@@ -6,14 +6,13 @@ use std::env;
 use chrono::{DateTime, Utc};
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use dotenvy::dotenv;
-use log::{error, info};
+use log::error;
 use tokio_postgres::{NoTls, Row};
 use warp::Filter;
-use warp::http::StatusCode;
 use warp::Rejection;
 
-use crate::models::{InternalError, Person, PersonRequest};
 use crate::models::MyError::DBQueryError;
+use crate::models::{InternalError, Person, PersonRequest};
 
 type Result<T> = std::result::Result<T, Rejection>;
 
@@ -35,8 +34,7 @@ pub fn create_pool() -> Pool {
     pool
 }
 
-pub fn with_db(pool: Pool) -> impl Filter<Extract=(Pool, ), Error=Infallible> + Clone {
-    use crate::models::{DivideByZero, InternalError, Person, PersonRequest};
+pub fn with_db(pool: Pool) -> impl Filter<Extract = (Pool,), Error = Infallible> + Clone {
     warp::any().map(move || pool.clone())
 }
 

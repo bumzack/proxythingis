@@ -7,6 +7,7 @@ use deadpool_postgres::Pool;
 use common::models::{
     NewServerSourcePost, NewServerTargetPost, Server2Target, ServerSource, ServerTarget,
 };
+use log::info;
 
 use crate::db::db::{TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_TARGET};
 use crate::server::models::MyError::DBQueryError;
@@ -14,6 +15,7 @@ use crate::server::server::Result;
 
 pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<ServerSource> {
     let client = pool.get().await.unwrap();
+    info!("create_source");
     let query = format!(
         "INSERT INTO {} (description, path_starts_with, method) VALUES ($1, $2, $3) RETURNING *",
         TABLE_SOURCE
@@ -31,6 +33,7 @@ pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<Serv
 
 pub async fn create_target(pool: Pool, body: NewServerTargetPost) -> Result<ServerTarget> {
     let client = pool.get().await.unwrap();
+    info!("create_target");
     let query = format!("INSERT INTO {} (description, schema, host, port, path, method, active) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", TABLE_TARGET);
     let row = client
         .query_one(
@@ -78,7 +81,7 @@ pub async fn create_source2target(
 pub async fn list_server(pool: Pool) -> Result<Vec<ServerSource>> {
     let client = pool.get().await.unwrap();
     // source server
-
+    info!("list_server");
     let query1 = format!("SELECT {}.id AS source_id, {}.description AS source_description, {}.path_starts_with AS source_path_starts_with , {}.method AS source_method , {}.created AS source_created, ", TABLE_SOURCE, TABLE_SOURCE, TABLE_SOURCE, TABLE_SOURCE, TABLE_SOURCE);
     let query2 = format!("{}.id AS target_id, {}.description AS target_description,   {}.schema AS target_schema,  {}.host AS target_host,  {}.port AS target_port ,  {}.path AS target_path ,  {}.method AS target_method ,  {}.active AS target_active ,{}.created AS target_created      FROM {} ", TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_TARGET, TABLE_SOURCE2TARGET);
     let query3 = format!(

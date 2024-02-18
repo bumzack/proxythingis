@@ -1,11 +1,11 @@
 use std::convert::Infallible;
 
-use log::LevelFilter;
+use log::{info, LevelFilter};
 use pretty_env_logger::env_logger::Builder;
-use warp::{Filter, hyper};
 use warp::hyper::StatusCode;
+use warp::{hyper, Filter};
 
-pub fn proxy() -> impl Filter<Extract=(impl warp::Reply, ), Error=warp::Rejection> + Clone {
+pub fn proxy() -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
     warp::path!("data").and(warp::get()).and_then(stream_data)
 }
 
@@ -20,12 +20,12 @@ pub async fn stream_data() -> Result<impl warp::Reply, Infallible> {
         .status(StatusCode::OK)
         .body(body)
         .unwrap();
+    info!("request handled");
     Ok(res)
 }
 
 #[tokio::main]
 async fn main() {
     Builder::new().filter_level(LevelFilter::Info).init();
-
     warp::serve(proxy()).run(([127, 0, 0, 1], 3070)).await;
 }

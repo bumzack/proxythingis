@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use deadpool_postgres::Pool;
 
 use common::models::{ServerSourceStats, ServerTargetStats};
+use log::info;
 
 use crate::db::db::{TABLE_SOURCE_STATS, TABLE_TARGET_STATS};
 use crate::server::models::MyError::DBQueryError;
@@ -14,7 +15,7 @@ pub async fn create_source_stats(
     start: DateTime<Utc>,
     stop: DateTime<Utc>,
 ) -> Result<ServerSourceStats> {
-    // info!("inserting stats into DB 'create_source_stats'");
+    info!("inserting stats into DB 'create_source_stats'");
     let client = pool.get().await.unwrap();
     let query = format!(
         "INSERT INTO {} (hits, source_id, start, stop) VALUES ($1, $2, $3, $4) RETURNING *",
@@ -39,7 +40,7 @@ pub async fn create_target_stats(
     start: DateTime<Utc>,
     stop: DateTime<Utc>,
 ) -> Result<ServerTargetStats> {
-    // info!("inserting stats into DB 'create_target_stats'");
+    info!("inserting stats into DB 'create_target_stats'");
     let client = pool.get().await.unwrap();
     let query = format!("INSERT INTO {} (hits, target_id, start, stop, min_ns, max_ns, avg_ns) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", TABLE_TARGET_STATS);
     let row = client
