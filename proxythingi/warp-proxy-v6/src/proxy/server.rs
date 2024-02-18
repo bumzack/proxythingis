@@ -103,7 +103,7 @@ pub async fn execute_forward_request(
     if target.is_none() {
         return Err(warp::reject::not_found());
     }
-    let source = source.expect("source ser ver should exist");
+    let source = source.expect("source server should exist");
 
     let tmp = headers.clone();
     tmp.into_iter().for_each(|h| {
@@ -299,7 +299,7 @@ async fn handler(
             e.unwrap()
         );
         error!("{}", &msg);
-        let r2 = warp::reply::with_status::<String>(msg.into(), StatusCode::INTERNAL_SERVER_ERROR);
+        let r2 = warp::reply::with_status::<String>(msg, StatusCode::INTERNAL_SERVER_ERROR);
         let r2 = r2.into_response();
         return Ok(r2);
     }

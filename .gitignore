@@ -13,3 +13,5 @@ Cargo.lock
 .DS_Store
 node_modules
 .parcel-cache
+
+/proxythingi/frontend/sycamore/dist/*

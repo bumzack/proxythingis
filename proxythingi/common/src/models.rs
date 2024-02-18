@@ -79,7 +79,7 @@ pub struct ErrorResponse {
     pub message: String,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug, Default, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone, Debug, PartialEq)]
 // #[cfg_attr(feature = "sycamore_support", derive(Props))]
 pub struct ServerSourceStats {
     pub id: i32,
@@ -90,7 +90,7 @@ pub struct ServerSourceStats {
     pub created: DateTime<Utc>,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug, Default, PartialEq)]
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
 // #[cfg_attr(feature = "sycamore_support", derive(Props))]
 pub struct ServerTargetStats {
     pub id: i32,
@@ -102,6 +102,22 @@ pub struct ServerTargetStats {
     pub start: DateTime<Utc>,
     pub stop: DateTime<Utc>,
     pub created: DateTime<Utc>,
+}
+
+impl Default for ServerTargetStats {
+    fn default() -> Self {
+        ServerTargetStats {
+            id: 0,
+            target_id: 0,
+            hits: 0,
+            avg_ns: 0,
+            max_ns: 0,
+            min_ns: 99999999999,
+            start: chrono::Utc::now(),
+            stop: chrono::Utc::now(),
+            created: chrono::Utc::now(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
