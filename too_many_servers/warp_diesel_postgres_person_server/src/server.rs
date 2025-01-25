@@ -4,9 +4,9 @@ use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use r2d2::Pool;
 use serde::Serialize;
-use warp::{Rejection, Reply};
 use warp::http::StatusCode;
 use warp::reply::json;
+use warp::{Rejection, Reply};
 
 use crate::db::{create_person, read_persons};
 use crate::models::NewPersonPost;

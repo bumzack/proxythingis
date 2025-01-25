@@ -10,22 +10,20 @@ use warp::http::StatusCode;
 use warp::Filter;
 
 use crate::models::{ErrorMessage, NewPerson, Person};
-use crate::schema::person::dsl::person;
 
 pub fn read_persons(pool: Pool<ConnectionManager<PgConnection>>) -> Vec<Person> {
     use crate::schema::person::dsl::*;
 
     let connection = &mut pool.get().unwrap();
 
-    let results = person
+    person
         .load::<Person>(connection)
-        .expect("Error loading persons");
+        .expect("Error loading persons")
 
     // info!("Displaying {} persons", results.len());
     // for p in &results {
     //     info!("id {}:  {} {}, created at {}", p.id, p.firstname, p.lastname, p.created);
     // }
-    results
 }
 
 pub fn create_person(
@@ -51,7 +49,7 @@ pub fn create_person(
             let code = StatusCode::CREATED;
             let json = warp::reply::json(&ErrorMessage {
                 code: code.as_u16(),
-                message: message.into(),
+                message,
             });
             Ok(warp::reply::with_status(json, code))
         }
@@ -64,7 +62,7 @@ pub fn create_person(
 
             let json = warp::reply::json(&ErrorMessage {
                 code: code.as_u16(),
-                message: message.into(),
+                message,
             });
 
             Ok(warp::reply::with_status(json, code))

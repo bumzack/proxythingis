@@ -30,8 +30,7 @@ pub fn create_pool() -> Pool {
         recycling_method: RecyclingMethod::Fast,
     };
     let mgr = Manager::from_config(pg_config, NoTls, mgr_config);
-    let pool = Pool::builder(mgr).max_size(16).build().unwrap();
-    pool
+    Pool::builder(mgr).max_size(16).build().unwrap()
 }
 
 pub fn with_db(pool: Pool) -> impl Filter<Extract = (Pool,), Error = Infallible> + Clone {

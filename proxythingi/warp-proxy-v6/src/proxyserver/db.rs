@@ -9,9 +9,9 @@ use common::models::{
 };
 use log::info;
 
-use crate::db::db::{TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_TARGET};
+use crate::db::db_impl::{TABLE_SOURCE, TABLE_SOURCE2TARGET, TABLE_TARGET};
 use crate::server::models::MyError::DBQueryError;
-use crate::server::server::Result;
+use crate::server::server_impl::Result;
 
 pub async fn create_source(pool: Pool, body: NewServerSourcePost) -> Result<ServerSource> {
     let client = pool.get().await.unwrap();

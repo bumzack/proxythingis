@@ -58,8 +58,6 @@ pub struct DivideByZero;
 
 impl reject::Reject for DivideByZero {}
 
-
-// TODO: hihihii
 #[derive(Debug)]
 pub struct InternalError;
 
