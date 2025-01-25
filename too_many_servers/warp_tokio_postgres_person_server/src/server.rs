@@ -3,7 +3,7 @@
 use std::convert::Infallible;
 
 use deadpool_postgres::Pool;
-use log::{error, info};
+use log::error;
 use warp::http::StatusCode;
 use warp::reply::json;
 use warp::{reject, Rejection, Reply};

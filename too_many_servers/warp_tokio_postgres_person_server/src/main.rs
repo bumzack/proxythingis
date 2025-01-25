@@ -1,5 +1,5 @@
 use deadpool_postgres::Pool;
-use log::{error, info, LevelFilter};
+use log::{error, LevelFilter};
 use pretty_env_logger::env_logger::Builder;
 use warp::Filter;
 
@@ -19,7 +19,7 @@ async fn main() {
         "/Users/bumzack/stoff/rust/proxythingis/too_many_servers/warp_tokio_postgres_person_server/.env",
     );
     match &result {
-        Ok(p) => {} // info!("path to .env {:?}", &p),
+        Ok(_) => {} // info!("path to .env {:?}", &p),
         Err(e) => error!("error {:?}", e),
     }
 

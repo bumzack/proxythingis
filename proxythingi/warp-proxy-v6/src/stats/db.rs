@@ -4,9 +4,9 @@ use deadpool_postgres::Pool;
 use common::models::{ServerSourceStats, ServerTargetStats};
 use log::info;
 
-use crate::db::db::{TABLE_SOURCE_STATS, TABLE_TARGET_STATS};
+use crate::db::db_impl::{TABLE_SOURCE_STATS, TABLE_TARGET_STATS};
 use crate::server::models::MyError::DBQueryError;
-use crate::server::server::Result;
+use crate::server::server_impl::Result;
 
 pub async fn create_source_stats(
     pool: Pool,
@@ -30,6 +30,7 @@ pub async fn create_source_stats(
     Ok(server_source_stats)
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn create_target_stats(
     pool: Pool,
     target_id: i32,

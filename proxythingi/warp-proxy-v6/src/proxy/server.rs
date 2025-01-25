@@ -69,8 +69,8 @@ pub async fn execute_forward_request(
             // );
             let targets: Vec<&ServerTarget> = server.targets.iter().filter(|t| t.active).collect();
             if !targets.is_empty() {
-                let mut rng = rand::thread_rng();
-                let i = rng.gen_range(0..targets.len());
+                let mut rng = rand::rng();
+                let i = rng.random_range(0..targets.len());
                 if i > targets.len() {
                     // info!(
                     //     "random number WRONG between {} and {}: {}",
@@ -208,6 +208,7 @@ pub async fn execute_forward_request(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn handler(
     mut request: Request<Body>,
     sender: UnboundedSender<ManagerCommand>,
@@ -216,7 +217,7 @@ async fn handler(
     target_host: &String,
     full_path: String,
     target_schema: &String,
-    target_description: &String,
+    target_description: &str,
     x_inititated_by: bool,
     start_total: Instant,
 ) -> Result<impl Reply, Infallible> {
@@ -417,5 +418,5 @@ fn find_match<'a>(
 }
 
 fn method_matches_or_wildcard(method: &Method, s: &ServerSource) -> bool {
-    s.method.eq("*") || method.as_str().to_ascii_lowercase() == s.method.to_ascii_lowercase()
+    s.method.eq("*") || method.as_str().eq_ignore_ascii_case(&s.method)
 }
